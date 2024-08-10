@@ -21,12 +21,12 @@ export default function HomeScreen() {
       <CustomButton 
         title="Button 1"
         color="blue"
-        onPress={() => ('Proteinas')}
+        onPress={() => ('Proteina')}
       />
       <CustomButton
         title="Button 2"
         color="red"
-        onPress={() => ('Verduras')}
+        onPress={() => ('Verdura')}
       />
       <CustomButton
         title="Button 3"
