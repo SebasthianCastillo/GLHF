@@ -2,8 +2,9 @@
   "name": "api",
   "version": "1.0.0",
   "description": "backend",
-  "main": "server.tsx",
+  "main": "server.cjs",
   "scripts": {
+    "start": "nodemon server.cjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
