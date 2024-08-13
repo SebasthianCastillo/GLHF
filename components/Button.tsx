@@ -2,24 +2,22 @@ import { TouchableOpacity, Text, StyleSheet, ViewStyle } from "react-native";
 
 interface CustomButtonProps {
   text: string;
-
-  onPress: () => void; // Function to handle button press
+  HandlePress: () => void; // Function to handle button press
   containerStyles: string;
 }
 
 const CustomButton: React.FC<CustomButtonProps> = ({
   text,
-
-  onPress,
+  HandlePress,
   containerStyles,
 }) => {
   return (
     <TouchableOpacity
       activeOpacity={0.7}
-      onPress={onPress}
-      className={`bg-secondary-200 rounded-xl min-h-[62px] flex flex-row justify-center items-center ${containerStyles}`}
+      onPress={HandlePress}
+      className={`bg-yellow-600 rounded-xl min-h-[62px] flex flex-row justify-center items-center ${containerStyles}`}
     >
-      <Text className={`text-primary font-mono text-lg`}>{text}</Text>
+      <Text className={`text-primary font-sans text-lg`}>{text}</Text>
     </TouchableOpacity>
   );
 };

@@ -25,3 +25,31 @@ mongoose
 app.listen(port, () => {
   console.log("Server is running on port 8000");
 });
+
+const Category = require("./model/Category");
+
+app.post("/addCategory", async (req, res) => {
+  try {
+    const { CategoryId, Name } = req.body;
+    const newCategory = new Category({
+      CategoryId,
+      Name,
+    });
+    await newCategory.save();
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error al agregar una categoría" });
+  }
+});
+
+app.get("/categories", async (req, res) => {
+  try {
+    const categories = await Category.find();
+    res.status(200).json(categories);
+
+    await newCategory.save();
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error al cargar las categorías" });
+  }
+});

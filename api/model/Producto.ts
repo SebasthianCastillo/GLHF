@@ -25,6 +25,10 @@ const ProductoSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  CategoryID: {
+    type: String,
+    required: true,
+  },
 });
 
 const Producto = mongoose.model("Producto", ProductoSchema);
