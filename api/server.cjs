@@ -30,9 +30,8 @@ const Category = require("./model/Category");
 
 app.post("/addCategory", async (req, res) => {
   try {
-    const { CategoryId, Name } = req.body;
+    const { Name } = req.body;
     const newCategory = new Category({
-      CategoryId,
       Name,
     });
     await newCategory.save();

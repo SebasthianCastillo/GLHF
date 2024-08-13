@@ -7,24 +7,31 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 
 const AddCategory = () => {
-  const [categories, setCategories] = useState([]);
   const [input, setInput] = useState("");
+  const [name, setName] = useState("");
   const router = useRouter();
-  useEffect(() => {
-    const fetchcategoriesData = async () => {
-      try {
-        const response = await axios.get("http://localhost:8000/categories");
-        setCategories(response.data);
-      } catch (error) {
-        console.log("error fetching employee data", error);
-      }
-    };
-    fetchcategoriesData();
-  }, []);
-  console.log(categories);
+
   const [Form, setForm] = useState({
     name: "",
   });
+
+  const HandleRegister = () => {
+    const categoriesData = {
+      CategoryName: name,
+    };
+
+    axios
+      .post("http://localhost:8000/addCategory", categoriesData)
+      .then((response) => {
+        Alert.alert("Categoria añadida");
+        setName("");
+      })
+      .catch((error) => {
+        Alert.alert("Categoria añadida");
+        console.log(error);
+      });
+  };
+
   return (
     <SafeAreaView className="bg-primary h-full">
       <ScrollView>
@@ -45,7 +52,7 @@ const AddCategory = () => {
             <CustomButton
               containerStyles="w-full"
               text="Agregar"
-              HandlePress={() => "Proteina"}
+              HandlePress={HandleRegister}
             />
           </View>
         </View>
