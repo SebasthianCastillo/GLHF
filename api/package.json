@@ -2,9 +2,9 @@
   "name": "api",
   "version": "1.0.0",
   "description": "backend",
-  "main": "server.cjs",
+  "main": "server.mjs",
   "scripts": {
-    "start": "nodemon server.cjs",
+    "start": "nodemon server.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

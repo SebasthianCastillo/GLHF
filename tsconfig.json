@@ -11,6 +11,9 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts",
-    "api/server.cjs"
+    "api/server.mjs",
+    "api/model/Producto.js",
+    "api/model/ProductDetail.js",
+    "api/model/Category.js"
   ]
 }

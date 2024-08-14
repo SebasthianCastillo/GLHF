@@ -21,13 +21,14 @@ const AddCategory = () => {
     };
 
     axios
-      .post("http://localhost:8000/addCategory", categoriesData)
+      .post("http://localhost:5000/addCategory", categoriesData)
       .then((response) => {
         Alert.alert("Categoria añadida");
         setName("");
+        router.push("/");
       })
       .catch((error) => {
-        Alert.alert("Categoria añadida");
+        Alert.alert("Error");
         console.log(error);
       });
   };

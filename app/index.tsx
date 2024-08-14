@@ -5,30 +5,38 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import React, { useEffect, useState } from "react";
 import { router, Redirect } from "expo-router";
 import axios from "axios";
+import { useRouter } from "expo-router";
 
 export default function HomeScreen() {
-  const [categories, setCategories] = useState([]);
-  useEffect(() => {
-    const fetchcategoriesData = async () => {
-      try {
-        const response = await axios.get("http://localhost:8000/categories");
-        setCategories(response.data);
-      } catch (error) {
-        console.log("error al traer las categorias", error);
-      }
-    };
-    fetchcategoriesData();
-  }, []);
+  const categories = () => {
+    const [categories, setcategories] = useState([]);
+    //   const [input, setInput] = useState("");
+    //   const router = useRouter();
+    useEffect(() => {
+      const fetchcategoriesData = async () => {
+        try {
+          const response = await axios.get("http://localhost:5000/categories");
+          setcategories(response.data);
+        } catch (error) {
+          console.log("error fetching categories data", error);
+        }
+      };
+      fetchcategoriesData();
+    }, []);
+  };
   console.log(categories);
   return (
     <SafeAreaView className="bg-primary h-full">
       <ScrollView contentContainerStyle={{ height: "100%" }}>
         <View className="w-full flex justify-center items-center h-full px-5">
-          <CustomButton
-            containerStyles="w-full"
-            text="Proteina"
-            HandlePress={() => "Proteina"}
-          />
+          {/* {categories.map((name, index) => (
+              <CustomButton
+                containerStyles="w-full"
+                text={name}
+                HandlePress={() => "Proteina"}
+              />
+            ))} */}
+
           <TouchableOpacity
             activeOpacity={0.7}
             className="p-10"

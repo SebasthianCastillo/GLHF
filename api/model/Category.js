@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const CategorySchema = new mongoose.Schema({
   CategoryId: {
     type: String,
@@ -10,5 +11,4 @@ const CategorySchema = new mongoose.Schema({
 });
 
 const Category = mongoose.model("Category", CategorySchema);
-
 module.exports = Category;

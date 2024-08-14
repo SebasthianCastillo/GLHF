@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const ProductDetailSchema = new mongoose.Schema({
   ProductDetailId: {
     type: String,
