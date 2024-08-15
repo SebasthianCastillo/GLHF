@@ -1,5 +1,5 @@
 import { SafeAreaView } from "react-native-safe-area-context";
-import { View, Text, ScrollView, Dimensions, Alert, Image } from "react-native";
+import { View, ScrollView, Dimensions, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import CustomField from "@/components/Field";
 import CustomButton from "@/components/Button";
@@ -21,9 +21,9 @@ const AddCategory = () => {
     };
 
     axios
-      .post("http://192.168.1.102:5000/addCategory", categoriesData)
+      .post("http://192.168.1.120:5000/addCategory", categoriesData)
       .then((response) => {
-        Alert.alert("Categoria añadida 💾");
+        Alert.alert("Categoría Agregada 💾");
         setName("");
         // router.push("/");
       })

@@ -3,6 +3,8 @@ import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import cors from "cors";
 import Category from "./model/Category.js";
+import Category from "./model/Producto.js";
+import Producto from "./model/Producto.js";
 // const Category = require("./model/Category.js");
 
 const app = express();
@@ -27,17 +29,33 @@ app.listen(port, () => {
 
 app.post("/addCategory", async (req, res) => {
   try {
-    console.log(req);
-    console.log(res);
     const { Name } = req.body;
     const newCategory = new Category({
       Name,
     });
     await newCategory.save();
-    res.status(201).json({ message: "Employee saved successfully" });
+    res.status(201).json({ message: "Category saved successfully" });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Error al agregar una categoría" });
+  }
+});
+app.post("/addProduct", async (req, res) => {
+  try {
+    const { Name, date, type, format, weight, CategoryID } = req.body;
+    const newProducto = new Producto({
+      Name,
+      date,
+      type,
+      format,
+      weight,
+      CategoryID,
+    });
+    await newProducto.save();
+    res.status(201).json({ message: "Product saved successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error al agregar un producto" });
   }
 });
 

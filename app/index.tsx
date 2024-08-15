@@ -3,9 +3,8 @@ import CustomButton from "@/components/Button";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { SafeAreaView } from "react-native-safe-area-context";
 import React, { useState } from "react";
-import { router, Redirect } from "expo-router";
+import { router } from "expo-router";
 import axios from "axios";
-import { useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
 
@@ -20,7 +19,7 @@ export default function HomeScreen() {
       const categories = async () => {
         try {
           const response = await axios.get(
-            "http://192.168.1.102:5000/categories"
+            "http://192.168.1.120:5000/categories"
           );
           setcategories(response.data);
         } catch (error) {
@@ -30,6 +29,12 @@ export default function HomeScreen() {
       categories();
     }, [])
   );
+  const navigateToProductos = (productName: any) => {
+    router.push({
+      pathname: "/Products",
+      params: { name: productName },
+    });
+  };
 
   return (
     <SafeAreaView className="bg-primary h-full">
@@ -39,7 +44,7 @@ export default function HomeScreen() {
             <CustomButton
               containerStyles="w-full m-2"
               text={item.Name}
-              HandlePress={() => "Proteina"}
+              HandlePress={() => navigateToProductos(item.Name)}
             />
           ))}
 
