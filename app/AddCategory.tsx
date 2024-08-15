@@ -17,19 +17,21 @@ const AddCategory = () => {
 
   const HandleRegister = () => {
     const categoriesData = {
-      CategoryName: name,
+      Name: name,
     };
 
     axios
-      .post("http://localhost:5000/addCategory", categoriesData)
+      .post("http://192.168.1.102:5000/addCategory", categoriesData)
       .then((response) => {
-        Alert.alert("Categoria añadida");
+        Alert.alert("Categoria añadida 💾");
         setName("");
-        router.push("/");
+        // router.push("/");
       })
       .catch((error) => {
+        console.log(categoriesData);
         Alert.alert("Error");
         console.log(error);
+        router.push("/");
       });
   };
 
@@ -44,8 +46,8 @@ const AddCategory = () => {
         >
           <CustomField
             title="Categoría"
-            value={Form.name}
-            handleChangeText={(e: any) => setForm({ ...Form, name: e })}
+            value={name}
+            onChangeText={(text: any) => setName(text)}
             otherStyles="mt-10"
             placeholder="Nombre Categoría"
           />

@@ -7,7 +7,9 @@ import Category from "./model/Category.js";
 
 const app = express();
 const port = 5000;
-
+app.use(cors());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 // Connect to MongoDB
 const MONGO_URI = "mongodb+srv://scastillohgo:1234@GLHF.8qefkqx.mongodb.net/";
 mongoose
@@ -25,12 +27,14 @@ app.listen(port, () => {
 
 app.post("/addCategory", async (req, res) => {
   try {
+    console.log(req);
+    console.log(res);
     const { Name } = req.body;
     const newCategory = new Category({
       Name,
     });
     await newCategory.save();
-    console.log("sada");
+    res.status(201).json({ message: "Employee saved successfully" });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Error al agregar una categoría" });
@@ -41,10 +45,17 @@ app.get("/categories", async (req, res) => {
   try {
     const categories = await Category.find();
     res.status(200).json(categories);
-
-    await newCategory.save();
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Error al cargar las categorías" });
+  }
+});
+
+app.get("/", async (req, res) => {
+  try {
+    res.send("hello");
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error" });
   }
 });

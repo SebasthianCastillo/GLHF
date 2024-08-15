@@ -3,7 +3,7 @@ interface FieldProps {
   title: string;
   value: string;
   placeholder: string;
-  handleChangeText: any;
+  onChangeText: any;
   otherStyles: string;
 }
 
@@ -11,7 +11,7 @@ const CustomField: React.FC<FieldProps> = ({
   title,
   value,
   placeholder,
-  handleChangeText,
+  onChangeText,
   otherStyles,
 }) => {
   return (
@@ -23,7 +23,7 @@ const CustomField: React.FC<FieldProps> = ({
           value={value}
           placeholder={placeholder}
           placeholderTextColor="#7B7B8B"
-          onChangeText={handleChangeText}
+          onChangeText={onChangeText}
         />
       </View>
     </View>

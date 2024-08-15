@@ -17,7 +17,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
       onPress={HandlePress}
       className={`bg-yellow-600 rounded-xl min-h-[62px] flex flex-row justify-center items-center ${containerStyles}`}
     >
-      <Text className={`text-primary font-sans text-lg`}>{text}</Text>
+      <Text className={`text-primary text-lg`}>{text}</Text>
     </TouchableOpacity>
   );
 };
