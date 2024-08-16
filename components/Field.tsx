@@ -5,6 +5,7 @@ interface FieldProps {
   placeholder: string;
   onChangeText: any;
   otherStyles: string;
+  keyboardType?: "default" | "numeric" | "email-address" | "phone-pad";
 }
 
 const CustomField: React.FC<FieldProps> = ({
@@ -13,6 +14,7 @@ const CustomField: React.FC<FieldProps> = ({
   placeholder,
   onChangeText,
   otherStyles,
+  keyboardType,
 }) => {
   return (
     <View className={`space-y-2 ${otherStyles}`}>
@@ -24,6 +26,7 @@ const CustomField: React.FC<FieldProps> = ({
           placeholder={placeholder}
           placeholderTextColor="#7B7B8B"
           onChangeText={onChangeText}
+          keyboardType={keyboardType}
         />
       </View>
     </View>

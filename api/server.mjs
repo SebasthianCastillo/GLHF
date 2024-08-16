@@ -3,7 +3,7 @@ import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import cors from "cors";
 import Category from "./model/Category.js";
-import Category from "./model/Producto.js";
+
 import Producto from "./model/Producto.js";
 // const Category = require("./model/Category.js");
 
@@ -42,13 +42,10 @@ app.post("/addCategory", async (req, res) => {
 });
 app.post("/addProduct", async (req, res) => {
   try {
-    const { Name, date, type, format, weight, CategoryID } = req.body;
+    const { Name, CategoryID } = req.body;
     const newProducto = new Producto({
       Name,
-      date,
-      type,
-      format,
-      weight,
+
       CategoryID,
     });
     await newProducto.save();
@@ -66,6 +63,15 @@ app.get("/categories", async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Error al cargar las categorías" });
+  }
+});
+app.get("/productsByIDCategory", async (req, res) => {
+  try {
+    const products = await Producto.find(req.CategoryID);
+    res.status(200).json(products);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error al cargar los productos" });
   }
 });
 

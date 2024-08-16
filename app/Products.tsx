@@ -2,54 +2,38 @@ import React, { useState, useCallback } from "react";
 import { useLocalSearchParams } from "expo-router";
 import axios from "axios";
 import { useFocusEffect } from "@react-navigation/native";
-import { View, ScrollView, TouchableOpacity, Alert } from "react-native";
+import {
+  View,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+  Pressable,
+  Text,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { DataTable } from "react-native-paper";
+import { Picker } from "@react-native-picker/picker";
+import CustomField from "@/components/Field";
+import CustomButton from "@/components/Button";
+import { router } from "expo-router";
 
 const Products = () => {
-  const [ProductName, setProductName] = useState("");
-  const [date, setDate] = useState("");
-  const [type, setType] = useState("");
-  const [format, setFormat] = useState("");
-  const [weight, setWeight] = useState("");
-  const [CategoryID, setCategoryID] = useState("");
-
-  const HandleRegister = () => {
-    const ProductData = {
-      Name: ProductName,
-      date: date,
-      type: type,
-      format: format,
-      weight: weight,
-      CategoryID: CategoryID,
-    };
-    axios
-      .post("http://192.168.1.120:5000/addProduct", ProductData)
-      .then((response) => {
-        Alert.alert("Producto Agregado 💾");
-        setProductName("");
-        setDate("");
-        setType("");
-        setFormat("");
-        setWeight("");
-        setCategoryID("");
-        // router.push("/");
-      })
-      .catch((error) => {
-        console.log(ProductData);
-        Alert.alert("Error");
-        console.log(error);
-      });
-  };
-  const { name } = useLocalSearchParams();
+  const { category } = useLocalSearchParams();
+  const categoryObject = Array.isArray(category)
+    ? JSON.parse(category[0])
+    : JSON.parse(category || "{}");
   const [products, setProducts] = useState([]);
+  const [CantidadProducto, setCantidadProducto] = useState("");
+  const [selectedValue, setSelectedValue] = useState("P");
+  const [cantidad, setCantidad] = useState("");
+
   useFocusEffect(
     useCallback(() => {
       const products = async () => {
         try {
           const response = await axios.get(
-            "http://192.168.1.120:5000/products"
+            "http://192.168.1.120:5000/productsByIDCategory"
           );
           setProducts(response.data);
         } catch (error) {
@@ -59,22 +43,103 @@ const Products = () => {
       products();
     }, [])
   );
+  // const handlePressAdd = () => {
+  //     const categoriesData = {
+  //       Name: name,
+  //     };
 
+  //     axios
+  //       .post("http://192.168.1.120:5000/addCategory", categoriesData)
+  //       .then((response) => {
+  //         Alert.alert("Categoría Agregada 💾");
+  //         setName("");
+  //         // router.push("/");
+  //       })
+  //       .catch((error) => {
+  //         console.log(categoriesData);
+  //         Alert.alert("Error");
+  //         console.log(error);
+  //         router.push("/");
+  //       });
+  //   };
+  // const handlePressDecrease = () => {
+  //   const categoriesData = {
+  //     Name: name,
+  //   };
+
+  //   axios
+  //     .post("http://192.168.1.120:5000/addCategory", categoriesData)
+  //     .then((response) => {
+  //       Alert.alert("Categoría Agregada 💾");
+  //       setName("");
+  //       // router.push("/");
+  //     })
+  //     .catch((error) => {
+  //       console.log(categoriesData);
+  //       Alert.alert("Error");
+  //       console.log(error);
+  //       router.push("/");
+  //     });
+  // };
   return (
     <SafeAreaView className="bg-primary h-full">
       <ScrollView contentContainerStyle={{ height: "100%" }}>
         <View className="w-full flex justify-center items-center h-full px-5">
           {products.map((item: any) => (
-            <View
-              style={{
-                marginTop: 15,
-                margin: 5,
-                padding: 5,
-                backgroundColor: "#A1FFCE",
-                borderRadius: 5,
-              }}
-            >
-              <DataTable>
+            <View className=" bg-white-300 rounded-md flex-row">
+              <Text className="p-2 text-base text-gray-100 font-pmedium">
+                {item.Name}
+              </Text>
+              {/* Combo Box */}
+              <View className="w-10">
+                <View className="border border-gray-300 rounded-lg overflow-hidden">
+                  <Picker
+                    selectedValue={selectedValue}
+                    onValueChange={(itemValue, itemIndex) =>
+                      setSelectedValue(itemValue)
+                    }
+                  >
+                    <Picker.Item label="P" value="P" />
+                    <Picker.Item label="KG" value="KG" />
+                    <Picker.Item label="GR" value="GR" />
+                  </Picker>
+                </View>
+              </View>
+              {/* Botón con signo mas */}
+              <Pressable className="p-10">
+                {/* // onPress={handlePressAdd}> */}
+
+                <View className="p-4 bg-white-500 rounded-full shadow-lg">
+                  <FontAwesome6 name="minus" size={20} color="white" />
+                </View>
+              </Pressable>
+
+              <CustomField
+                title={item.name}
+                value={CantidadProducto}
+                onChangeText={(text: any) => setCantidadProducto(text)}
+                otherStyles="mt-10"
+                placeholder="Nombre Categoría"
+                keyboardType="numeric"
+              />
+              {/* Segundo botón con signo menos */}
+              <Pressable className="p-10">
+                {/* onPress={handlePressDecrease}> */}
+
+                <View className="p-4 bg-white-500 rounded-full shadow-lg">
+                  <FontAwesome6 name="add" size={20} color="white" />
+                </View>
+              </Pressable>
+
+              {/* Botón Historial */}
+              <CustomButton
+                containerStyles=""
+                text="Historial"
+                HandlePress={() => ""}
+                // {() => navigateToProductos(item.Name)}
+              />
+
+              {/* <DataTable>
                 <DataTable.Header>
                   <DataTable.Title>P</DataTable.Title>
                   <DataTable.Title>A</DataTable.Title>
@@ -89,13 +154,18 @@ const Products = () => {
                   <DataTable.Cell>1</DataTable.Cell>
                   <DataTable.Cell>8</DataTable.Cell>
                 </DataTable.Row>
-              </DataTable>
+              </DataTable> */}
             </View>
           ))}
           <TouchableOpacity
             activeOpacity={0.7}
             className="p-10"
-            onPress={HandleRegister}
+            onPress={() =>
+              router.push({
+                pathname: "/AddProduct",
+                params: { CategoryKey: categoryObject._id },
+              })
+            }
           >
             <View className="p-4 bg-green-500 rounded-full shadow-lg">
               <FontAwesome6 name="add" size={40} color="white" />

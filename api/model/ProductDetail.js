@@ -12,6 +12,10 @@ const ProductDetailSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  format: {
+    type: String,
+    required: true,
+  },
 });
 
 const ProductDetail = mongoose.model("ProductDetail", ProductDetailSchema);

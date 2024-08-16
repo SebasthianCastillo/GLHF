@@ -29,10 +29,10 @@ export default function HomeScreen() {
       categories();
     }, [])
   );
-  const navigateToProductos = (productName: any) => {
+  const navigateToProductosFromCategory = (category: string) => {
     router.push({
       pathname: "/Products",
-      params: { name: productName },
+      params: { category: JSON.stringify(category) },
     });
   };
 
@@ -40,11 +40,11 @@ export default function HomeScreen() {
     <SafeAreaView className="bg-primary h-full">
       <ScrollView contentContainerStyle={{ height: "100%" }}>
         <View className="w-full flex justify-center items-center h-full px-5">
-          {categories.map((item: any) => (
+          {categories.map((category: any) => (
             <CustomButton
               containerStyles="w-full m-2"
-              text={item.Name}
-              HandlePress={() => navigateToProductos(item.Name)}
+              text={category.Name}
+              HandlePress={() => navigateToProductosFromCategory(category)}
             />
           ))}
 
