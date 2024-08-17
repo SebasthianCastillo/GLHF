@@ -1,9 +1,9 @@
-import { View, Text, TextInput, TouchableOpacity, Image } from "react-native";
+import { View, Text, TextInput } from "react-native";
 interface FieldProps {
-  title: string;
+  title?: string;
   value: string;
   placeholder: string;
-  onChangeText: any;
+  onChangeText: (text: string) => void;
   otherStyles: string;
   keyboardType?: "default" | "numeric" | "email-address" | "phone-pad";
 }

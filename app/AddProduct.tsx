@@ -1,9 +1,8 @@
 import { SafeAreaView } from "react-native-safe-area-context";
 import { View, ScrollView, Dimensions, Alert } from "react-native";
-import { useRouter } from "expo-router";
 import CustomField from "@/components/Field";
 import CustomButton from "@/components/Button";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import axios from "axios";
 import { useLocalSearchParams } from "expo-router";
 

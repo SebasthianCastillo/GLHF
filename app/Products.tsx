@@ -6,7 +6,6 @@ import {
   View,
   ScrollView,
   TouchableOpacity,
-  Alert,
   Pressable,
   Text,
 } from "react-native";
@@ -85,7 +84,7 @@ const Products = () => {
   // };
   return (
     <SafeAreaView className="bg-primary h-full">
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+      <ScrollView>
         <View className="p-2 bg-slate-950">
           {products.map((item: any) => (
             <View className="flex-row justify-between items-center">
@@ -113,7 +112,7 @@ const Products = () => {
 
               {/* Custom Field */}
 
-              <CustomField
+              {/* <CustomField
                 title={item.name}
                 value={CantidadProducto}
                 onChangeText={(CantidadProducto: any) =>
@@ -122,7 +121,16 @@ const Products = () => {
                 placeholder="Cant"
                 keyboardType="numeric"
                 otherStyles="mb-5"
-              />
+              /> */}
+              <CustomField
+                value={CantidadProducto}
+                onChangeText={(CantidadProducto: any) =>
+                  setCantidadProducto(CantidadProducto)
+                }
+                placeholder="Cant"
+                keyboardType="numeric"
+                otherStyles="mb-5"
+              ></CustomField>
 
               {/* Increase Button */}
               <Pressable>
