@@ -29,7 +29,7 @@ export default function HomeScreen() {
       categories();
     }, [])
   );
-  const navigateToProductosFromCategory = (category: string) => {
+  const navigateToProductosFromCategory = (category: object) => {
     router.push({
       pathname: "/Products",
       params: { category: JSON.stringify(category) },
@@ -53,7 +53,7 @@ export default function HomeScreen() {
             className="p-10"
             onPress={() => router.push("/AddCategory")}
           >
-            <View className="p-4 bg-yellow-500 rounded-full shadow-lg">
+            <View className="w-16 h-16 bg-yellow-500 rounded-full shadow-lg justify-center items-center">
               <FontAwesome6 name="add" size={40} color="white" />
             </View>
           </TouchableOpacity>

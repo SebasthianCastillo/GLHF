@@ -3,7 +3,6 @@ import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import cors from "cors";
 import Category from "./model/Category.js";
-
 import Producto from "./model/Producto.js";
 // const Category = require("./model/Category.js");
 
@@ -67,7 +66,8 @@ app.get("/categories", async (req, res) => {
 });
 app.get("/productsByIDCategory", async (req, res) => {
   try {
-    const products = await Producto.find(req.CategoryID);
+    const CategoryID = req.query.CategoryKey;
+    const products = await Producto.find({ CategoryID: CategoryID });
     res.status(200).json(products);
   } catch (error) {
     console.log(error);

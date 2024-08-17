@@ -12,10 +12,9 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
-import { DataTable } from "react-native-paper";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { Picker } from "@react-native-picker/picker";
 import CustomField from "@/components/Field";
-import CustomButton from "@/components/Button";
 import { router } from "expo-router";
 
 const Products = () => {
@@ -33,7 +32,10 @@ const Products = () => {
       const products = async () => {
         try {
           const response = await axios.get(
-            "http://192.168.1.120:5000/productsByIDCategory"
+            "http://192.168.1.120:5000/productsByIDCategory",
+            {
+              params: { CategoryKey: categoryObject._id },
+            }
           );
           setProducts(response.data);
         } catch (error) {
@@ -83,96 +85,76 @@ const Products = () => {
   // };
   return (
     <SafeAreaView className="bg-primary h-full">
-      <ScrollView contentContainerStyle={{ height: "100%" }}>
-        <View className="w-full flex justify-center items-center h-full px-5">
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <View className="p-2 bg-slate-950">
           {products.map((item: any) => (
-            <View className=" bg-white-300 rounded-md flex-row">
-              <Text className="p-2 text-base text-gray-100 font-pmedium">
+            <View className="flex-row justify-between items-center">
+              <Text className="text-base text-white font-bold">
                 {item.Name}
               </Text>
-              {/* Combo Box */}
-              <View className="w-10">
-                <View className="border border-gray-300 rounded-lg overflow-hidden">
-                  <Picker
-                    selectedValue={selectedValue}
-                    onValueChange={(itemValue, itemIndex) =>
-                      setSelectedValue(itemValue)
-                    }
-                  >
-                    <Picker.Item label="P" value="P" />
-                    <Picker.Item label="KG" value="KG" />
-                    <Picker.Item label="GR" value="GR" />
-                  </Picker>
-                </View>
-              </View>
-              {/* Botón con signo mas */}
-              <Pressable className="p-10">
-                {/* // onPress={handlePressAdd}> */}
 
-                <View className="p-4 bg-white-500 rounded-full shadow-lg">
-                  <FontAwesome6 name="minus" size={20} color="white" />
+              <View className="border border-yellow-300 rounded-md w-14 h-8">
+                <Picker
+                  selectedValue={selectedValue}
+                  onValueChange={(itemValue) => setSelectedValue(itemValue)}
+                  className=""
+                >
+                  <Picker.Item label="Porción" value="P" />
+                  <Picker.Item label="KG" value="KG" />
+                  <Picker.Item label="GR" value="GR" />
+                </Picker>
+              </View>
+
+              <Pressable>
+                <View className="p-1 rounded-md shadow-sm">
+                  <FontAwesome6 name="minus" size={22} color="white" />
                 </View>
               </Pressable>
+
+              {/* Custom Field */}
 
               <CustomField
                 title={item.name}
                 value={CantidadProducto}
-                onChangeText={(text: any) => setCantidadProducto(text)}
-                otherStyles="mt-10"
-                placeholder="Nombre Categoría"
+                onChangeText={(CantidadProducto: any) =>
+                  setCantidadProducto(CantidadProducto)
+                }
+                placeholder="Cant"
                 keyboardType="numeric"
+                otherStyles="mb-5"
               />
-              {/* Segundo botón con signo menos */}
-              <Pressable className="p-10">
-                {/* onPress={handlePressDecrease}> */}
 
-                <View className="p-4 bg-white-500 rounded-full shadow-lg">
-                  <FontAwesome6 name="add" size={20} color="white" />
+              {/* Increase Button */}
+              <Pressable>
+                <View className="p-1 rounded-md shadow-sm">
+                  <FontAwesome6 name="add" size={22} color="white" />
                 </View>
               </Pressable>
 
-              {/* Botón Historial */}
-              <CustomButton
-                containerStyles=""
-                text="Historial"
-                HandlePress={() => ""}
-                // {() => navigateToProductos(item.Name)}
-              />
-
-              {/* <DataTable>
-                <DataTable.Header>
-                  <DataTable.Title>P</DataTable.Title>
-                  <DataTable.Title>A</DataTable.Title>
-                  <DataTable.Title>HD</DataTable.Title>
-                  <DataTable.Title>H</DataTable.Title>
-                  <DataTable.Title>NW</DataTable.Title>
-                </DataTable.Header>
-                <DataTable.Row>
-                  <DataTable.Cell>{item?.present}</DataTable.Cell>
-                  <DataTable.Cell>{item?.absent}</DataTable.Cell>
-                  <DataTable.Cell>{item?.halfday}</DataTable.Cell>
-                  <DataTable.Cell>1</DataTable.Cell>
-                  <DataTable.Cell>8</DataTable.Cell>
-                </DataTable.Row>
-              </DataTable> */}
+              {/* Historial Button */}
+              <Pressable>
+                <View className="p-1 rounded-md shadow-sm">
+                  <FontAwesome5 name="history" size={24} color="white" />
+                </View>
+              </Pressable>
             </View>
           ))}
-          <TouchableOpacity
-            activeOpacity={0.7}
-            className="p-10"
-            onPress={() =>
-              router.push({
-                pathname: "/AddProduct",
-                params: { CategoryKey: categoryObject._id },
-              })
-            }
-          >
-            <View className="p-4 bg-green-500 rounded-full shadow-lg">
-              <FontAwesome6 name="add" size={40} color="white" />
-            </View>
-          </TouchableOpacity>
         </View>
       </ScrollView>
+      <TouchableOpacity
+        activeOpacity={0.7}
+        className="p-10 items-center"
+        onPress={() =>
+          router.push({
+            pathname: "/AddProduct",
+            params: { CategoryKey: categoryObject._id },
+          })
+        }
+      >
+        <View className="w-16 h-16 bg-green-500 rounded-full shadow-lg items-center justify-center">
+          <FontAwesome6 name="add" size={40} color="white" />
+        </View>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 };
