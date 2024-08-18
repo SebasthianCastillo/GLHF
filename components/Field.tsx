@@ -3,9 +3,10 @@ interface FieldProps {
   title?: string;
   value: string;
   placeholder: string;
-  onChangeText: (text: string) => void;
+  onChangeText?: (text: string) => void;
   otherStyles: string;
   keyboardType?: "default" | "numeric" | "email-address" | "phone-pad";
+  editable?: boolean;
 }
 
 const CustomField: React.FC<FieldProps> = ({
@@ -15,6 +16,7 @@ const CustomField: React.FC<FieldProps> = ({
   onChangeText,
   otherStyles,
   keyboardType,
+  editable,
 }) => {
   return (
     <View className={`${otherStyles}`}>
@@ -27,6 +29,7 @@ const CustomField: React.FC<FieldProps> = ({
           placeholderTextColor="#7B7B8B"
           onChangeText={onChangeText}
           keyboardType={keyboardType}
+          editable={editable}
         />
       </View>
     </View>

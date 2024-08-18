@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
   Pressable,
   Text,
+  Button,
+  TextInput,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
@@ -25,6 +27,7 @@ const Products = () => {
   const [CantidadProducto, setCantidadProducto] = useState("");
   const [selectedValue, setSelectedValue] = useState("P");
   const [cantidad, setCantidad] = useState("");
+  const [showInput, setShowInput] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -44,25 +47,27 @@ const Products = () => {
       products();
     }, [])
   );
-  // const handlePressAdd = () => {
-  //     const categoriesData = {
-  //       Name: name,
-  //     };
+  const handlePressMinus = () => {
+    const categoriesData = {
+      Name: name,
+    };
 
-  //     axios
-  //       .post("http://192.168.1.120:5000/addCategory", categoriesData)
-  //       .then((response) => {
-  //         Alert.alert("Categoría Agregada 💾");
-  //         setName("");
-  //         // router.push("/");
-  //       })
-  //       .catch((error) => {
-  //         console.log(categoriesData);
-  //         Alert.alert("Error");
-  //         console.log(error);
-  //         router.push("/");
-  //       });
-  //   };
+    axios
+      .post("http://192.168.1.120:5000/addCategory", categoriesData)
+      .then((response) => {
+        // router.push("/");
+      })
+      .catch((error) => {
+        console.log(categoriesData);
+
+        console.log(error);
+        router.push("/");
+      });
+  };
+
+  const handleLongPressMinus = () => {
+    setShowInput(true);
+  };
   // const handlePressDecrease = () => {
   //   const categoriesData = {
   //     Name: name,
@@ -104,11 +109,30 @@ const Products = () => {
                 </Picker>
               </View>
 
-              <Pressable>
+              {/* Minus button */}
+              <Pressable
+                onPress={handlePressMinus}
+                onLongPress={handleLongPressMinus}
+              >
                 <View className="p-1 rounded-md shadow-sm">
                   <FontAwesome6 name="minus" size={22} color="white" />
                 </View>
               </Pressable>
+
+              {showInput && (
+                <View className="mt-5 p-4 rounded-lg bg-white shadow-md">
+                  <CustomField
+                    value={CantidadProducto}
+                    onChangeText={(CantidadProducto: any) =>
+                      setCantidadProducto(CantidadProducto)
+                    }
+                    placeholder="Cant"
+                    keyboardType="numeric"
+                    otherStyles="mb-5"
+                  ></CustomField>
+                  <Button title="Agregar" onPress={handlePressMinus} />
+                </View>
+              )}
 
               {/* Custom Field */}
 
@@ -124,9 +148,7 @@ const Products = () => {
               /> */}
               <CustomField
                 value={CantidadProducto}
-                onChangeText={(CantidadProducto: any) =>
-                  setCantidadProducto(CantidadProducto)
-                }
+                editable={false}
                 placeholder="Cant"
                 keyboardType="numeric"
                 otherStyles="mb-5"
