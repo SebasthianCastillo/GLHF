@@ -4,6 +4,8 @@ import mongoose from "mongoose";
 import cors from "cors";
 import Category from "./model/Category.js";
 import Producto from "./model/Producto.js";
+import ProductDetail from "./model/ProductDetail.js";
+import { MongoClient, ObjectId } from "mongodb";
 // const Category = require("./model/Category.js");
 
 const app = express();
@@ -41,10 +43,10 @@ app.post("/addCategory", async (req, res) => {
 });
 app.post("/addProduct", async (req, res) => {
   try {
-    const { Name, CategoryID } = req.body;
+    const { Name, quantity, CategoryID } = req.body;
     const newProducto = new Producto({
       Name,
-
+      quantity,
       CategoryID,
     });
     await newProducto.save();
@@ -52,6 +54,45 @@ app.post("/addProduct", async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Error al agregar un producto" });
+  }
+});
+
+app.post("/addProductDetail", async (req, res) => {
+  try {
+    const { quantity, date, format, operation } = req.body;
+    const newProductDetail = new ProductDetail({
+      quantity,
+      date,
+      format,
+      operation,
+    });
+
+    await newProductDetail.save();
+    res.status(201).json({ message: "Product Detail saved successfully" });
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ message: "Error al agregar el detalle de producto" });
+  }
+});
+app.patch("/quantityUpdateProduct", async (req, res) => {
+  const { _id, quantity, operation } = req.body;
+  // Los cambios a realizar deben venir en el cuerpo de la solicitud
+  const filter = { _id: new ObjectId(_id) };
+
+  // Definir la actualización: incrementar o decrementar el campo
+  const update = {
+    $inc: { quantity: operation === "add" ? quantity : -quantity },
+  };
+  try {
+    // Actualizar el documento
+    await Producto.updateOne(filter, update);
+
+    res.status(201).json({ message: "Product Detail saved successfully" });
+  } catch (error) {
+    res.status(500).send("Error al actualizar el documento");
+    res.status(500).json({ message: "Internal Server Error" });
   }
 });
 

@@ -1,5 +1,5 @@
 import { SafeAreaView } from "react-native-safe-area-context";
-import { View, ScrollView, Dimensions, Alert } from "react-native";
+import { View, ScrollView, Dimensions, Alert, Text } from "react-native";
 import CustomField from "@/components/Field";
 import CustomButton from "@/components/Button";
 import { useState } from "react";
@@ -8,14 +8,15 @@ import { useLocalSearchParams } from "expo-router";
 
 const AddProduct = () => {
   const [ProductName, setProductName] = useState("");
-  const [date, setDate] = useState("");
+  const [quantityProduct, setquantityProduct] = useState(0);
   const { CategoryKey } = useLocalSearchParams();
-
+  const { CategoryName } = useLocalSearchParams();
   const [CategoryID, setCategoryID] = useState("");
 
   const HandleRegister = () => {
     const ProductData = {
       Name: ProductName,
+      quantity: quantityProduct,
       CategoryID: CategoryKey,
     };
     axios
@@ -34,6 +35,9 @@ const AddProduct = () => {
   };
   return (
     <SafeAreaView className="bg-primary h-full">
+      <View className="justify-center items-center">
+        <Text className="text-slate-50">{`Categoría: ${CategoryName}`}</Text>
+      </View>
       <ScrollView>
         <View
           className="w-full flex justify-center h-full px-4 my-6"

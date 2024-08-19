@@ -1,18 +1,18 @@
 const mongoose = require("mongoose");
 const ProductDetailSchema = new mongoose.Schema({
-  ProductDetailId: {
-    type: String,
-    required: true,
-  },
   quantity: {
-    type: String,
+    type: Number,
     required: true,
   },
   date: {
-    type: String,
+    type: Date,
     required: true,
   },
   format: {
+    type: String,
+    required: true,
+  },
+  operation: {
     type: String,
     required: true,
   },
