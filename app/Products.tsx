@@ -99,6 +99,7 @@ const Products = () => {
       date: new Date(),
       format: formatValue,
       operation: operation,
+      ProductID: idProducto,
     };
 
     axios
@@ -336,7 +337,9 @@ const Products = () => {
                   onPress={() =>
                     router.push({
                       pathname: "/ProductDetail",
-                      params: { category: JSON.stringify(category) },
+                      params: {
+                        product: JSON.stringify(item),
+                      },
                     })
                   }
                 >

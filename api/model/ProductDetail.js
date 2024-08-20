@@ -16,6 +16,10 @@ const ProductDetailSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  ProductID: {
+    type: String,
+    required: true,
+  },
 });
 
 const ProductDetail = mongoose.model("ProductDetail", ProductDetailSchema);

@@ -59,12 +59,13 @@ app.post("/addProduct", async (req, res) => {
 
 app.post("/addProductDetail", async (req, res) => {
   try {
-    const { quantity, date, format, operation } = req.body;
+    const { quantity, date, format, operation, ProductID } = req.body;
     const newProductDetail = new ProductDetail({
       quantity,
       date,
       format,
       operation,
+      ProductID,
     });
 
     await newProductDetail.save();
@@ -105,11 +106,23 @@ app.get("/categories", async (req, res) => {
     res.status(500).json({ message: "Error al cargar las categorías" });
   }
 });
+
 app.get("/productsByIDCategory", async (req, res) => {
   try {
     const CategoryID = req.query.CategoryKey;
     const products = await Producto.find({ CategoryID: CategoryID });
     res.status(200).json(products);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error al cargar los productos" });
+  }
+});
+
+app.get("/productDetailByIDProduct", async (req, res) => {
+  try {
+    const ProductID = req.query.ProductKey;
+    const productDetail = await ProductDetail.find({ ProductID: ProductID });
+    res.status(200).json(productDetail);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Error al cargar los productos" });
