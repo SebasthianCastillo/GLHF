@@ -9,14 +9,12 @@ import {
   Pressable,
   Text,
   Button,
-  TextInput,
   StyleSheet,
   TouchableWithoutFeedback,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
-import { Picker } from "@react-native-picker/picker";
 import CustomField from "@/components/Field";
 import { router } from "expo-router";
 import DropDownPicker from "react-native-dropdown-picker";
@@ -32,10 +30,17 @@ const Products = () => {
   const dropdownRef = useRef(null);
   const [selectedValue, setSelectedValue] = useState("P");
   const [quantityProduct, setQuantityProduct] = useState("");
+
+  const [selectedItemId, setSelectedItemId] = useState("");
+
   const [showInputCustomCant, setShowInputCustomCant] = useState(false);
   const [showInputCant, setShowInputCant] = useState(true);
   const [showInputAdd, setShowInputAdd] = useState(true);
   const [showInputMinus, setShowInputMinus] = useState(true);
+  const [showInputAdd2, setShowInputAdd2] = useState(false);
+  const [showInputMinus2, setShowInputMinus2] = useState(false);
+  const [showInputCant2, setShowInputCant2] = useState(false);
+
   const [isOnAdd, setShowInputisOnAdd] = useState(false);
   const [open, setOpen] = useState(false);
   const [formatValue, setFormatValue] = useState("P");
@@ -65,6 +70,7 @@ const Products = () => {
       productsFunction();
     }, [])
   );
+
   const productsFunction = async () => {
     try {
       const response = await axios.get(
@@ -78,6 +84,7 @@ const Products = () => {
       console.log("error fetching products data", error);
     }
   };
+
   // funcion Sumar
 
   const handlePressAdd = (
@@ -100,10 +107,11 @@ const Products = () => {
         // router.push("/");
         console.log(response);
         quantityUpdateProduct(idProducto, quantityProduct, operation);
+        productsFunction();
+        handlePressOutside();
       })
       .catch((error) => {
         console.log(addProductDetail);
-
         console.log(error);
       });
   };
@@ -162,40 +170,59 @@ const Products = () => {
       });
   };
 
-  const handleLongPressMinus = () => {
-    setShowInputCant(false);
-    setShowInputCustomCant(true);
+  const handleLongPressMinus = (ItemId: any) => {
+    setSelectedItemId(ItemId);
     setShowInputAdd(false);
     setShowInputMinus(false);
-  };
-
-  const handleLongPressAdd = () => {
     setShowInputCant(false);
     setShowInputCustomCant(true);
+    setShowInputMinus2(true);
+    setShowInputCant2(true);
+    setShowInputAdd2(true);
+    setShowInputisOnAdd(false);
+  };
+
+  const handleLongPressAdd = (ItemId: any) => {
+    setSelectedItemId(ItemId);
+    setShowInputCant(false);
     setShowInputAdd(false);
     setShowInputMinus(false);
     setShowInputisOnAdd(true);
+    setShowInputCustomCant(true);
+    setShowInputAdd2(true);
+    setShowInputCant2(true);
+    setShowInputMinus2(true);
   };
 
-  const handlePressOutside = (event: any) => {
+  const handlePressOutside = () => {
     // Verifica si el toque está fuera del área del dropdown
     setShowInputCant(true);
     setShowInputAdd(true);
     setShowInputMinus(true);
     setShowInputCustomCant(false);
+    setShowInputMinus2(false);
+    setShowInputAdd2(false);
+    setShowInputCant2(false);
   };
-
+  // const shouldShowMinusButton = (itemID: any) => {
+  //   if (itemID === selectedItemId) {
+  //     setShowInputMinus(false);
+  //   }
+  //   setShowInputMinus(true);
+  //   return showInputMinus;
+  // };
   return (
     <TouchableWithoutFeedback onPress={handlePressOutside}>
       <SafeAreaView className="bg-primary h-full">
         <ScrollView>
-          <View className="p-3 bg-slate-950">
+          <View className="p-4 space-y-3 bg-slate-950">
             {products.map((item: any) => (
-              <View className="flex-row justify-between items-center ">
-                <Text className="text-base text-white font-bold">
-                  {item.Name}
-                </Text>
-
+              <View className="flex-row justify-between items-center">
+                <View className="w-20">
+                  <Text className="text-base text-white font-bold">
+                    {item.Name}
+                  </Text>
+                </View>
                 <View style={styles.container}>
                   <DropDownPicker
                     open={open}
@@ -220,14 +247,24 @@ const Products = () => {
                 {showInputMinus && (
                   <Pressable
                     onPress={() => handlePressMinus(item._id, "single")}
-                    onLongPress={handleLongPressMinus}
+                    onLongPress={() => handleLongPressMinus(item._id)}
                   >
                     <View className="p-1 rounded-md shadow-sm">
                       <FontAwesome6 name="minus" size={22} color="white" />
                     </View>
                   </Pressable>
                 )}
-                {showInputCustomCant && (
+                {showInputMinus2 && item._id !== selectedItemId && (
+                  <Pressable
+                    onPress={() => handlePressMinus(item._id, "single")}
+                    onLongPress={() => handleLongPressMinus(item._id)}
+                  >
+                    <View className="p-1 rounded-md shadow-sm">
+                      <FontAwesome6 name="minus" size={22} color="white" />
+                    </View>
+                  </Pressable>
+                )}
+                {showInputCustomCant && item._id === selectedItemId && (
                   <View className="p-1 rounded-lg shadow-md space-y-2">
                     <CustomField
                       value={CantidadProducto}
@@ -261,12 +298,33 @@ const Products = () => {
                     ></CustomField>
                   </View>
                 )}
+                {showInputCant2 && item._id !== selectedItemId && (
+                  <View>
+                    <CustomField
+                      value={item.quantity}
+                      editable={false}
+                      placeholder={`${item.quantity}`}
+                      keyboardType="numeric"
+                      otherStyles=""
+                    ></CustomField>
+                  </View>
+                )}
 
                 {/* Add button */}
                 {showInputAdd && (
                   <Pressable
                     onPress={() => handlePressAdd(item._id, "single")}
-                    onLongPress={handleLongPressAdd}
+                    onLongPress={() => handleLongPressAdd(item._id)}
+                  >
+                    <View className="p-1 rounded-md shadow-sm">
+                      <FontAwesome6 name="add" size={22} color="white" />
+                    </View>
+                  </Pressable>
+                )}
+                {showInputAdd2 && item._id !== selectedItemId && (
+                  <Pressable
+                    onPress={() => handlePressAdd(item._id, "single")}
+                    onLongPress={() => handleLongPressAdd(item._id)}
                   >
                     <View className="p-1 rounded-md shadow-sm">
                       <FontAwesome6 name="add" size={22} color="white" />
@@ -274,7 +332,14 @@ const Products = () => {
                   </Pressable>
                 )}
                 {/* Historial Button */}
-                <Pressable>
+                <Pressable
+                  onPress={() =>
+                    router.push({
+                      pathname: "/ProductDetail",
+                      params: { category: JSON.stringify(category) },
+                    })
+                  }
+                >
                   <View className="p-1 rounded-md shadow-sm">
                     <FontAwesome5 name="history" size={24} color="white" />
                   </View>
