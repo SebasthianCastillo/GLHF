@@ -93,7 +93,7 @@ const Products = () => {
   ) => {
     const quantityProduct =
       fromWhatQuantityCallfunction === "single" ? 1 : CantidadProducto;
-    const operation = "add";
+    let operation = "add";
     const addProductDetail = {
       quantity: quantityProduct,
       date: new Date(),
@@ -123,12 +123,13 @@ const Products = () => {
   ) => {
     const quantityProduct =
       fromWhatQuantityCallfunction === "single" ? 1 : CantidadProducto;
-    const operation = "minus";
+    let operation = "minus";
     const addProductDetail = {
       quantity: quantityProduct,
       date: new Date(),
       format: formatValue,
       operation: operation,
+      ProductID: idProducto,
     };
 
     axios
@@ -137,6 +138,8 @@ const Products = () => {
         // router.push("/");
         console.log(response);
         quantityUpdateProduct(idProducto, quantityProduct, operation);
+        productsFunction();
+        handlePressOutside();
       })
       .catch((error) => {
         console.log(addProductDetail);
@@ -281,7 +284,11 @@ const Products = () => {
                       <Button
                         color="#F59E0B"
                         title={`${isOnAdd ? "Agregar" : "Restar"}`}
-                        onPress={() => handlePressAdd(item._id, "multiple")}
+                        onPress={() =>
+                          isOnAdd
+                            ? handlePressAdd(item._id, "multiple")
+                            : handlePressMinus(item._id, "multiple")
+                        }
                       />
                     </View>
                   </View>
