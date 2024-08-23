@@ -117,12 +117,20 @@ app.get("/productsByIDCategory", async (req, res) => {
     res.status(500).json({ message: "Error al cargar los productos" });
   }
 });
-app.get("/productDetailSummaryByOperation", async (req, res) => {
+app.get("/productDetailSummaryByOperationAdd", async (req, res) => {
   try {
     const ProductID = req.query.ProductKey;
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    const currentMonth = new Date(req.query.currentMonth);
+    const startOfMonth = new Date(
+      currentMonth.getFullYear(),
+      currentMonth.getMonth(),
+      1
+    );
+    const endOfMonth = new Date(
+      currentMonth.getFullYear(),
+      currentMonth.getMonth() + 1,
+      0
+    );
 
     const ProductDetailSummary = await ProductDetail.aggregate([
       {
@@ -149,7 +157,56 @@ app.get("/productDetailSummaryByOperation", async (req, res) => {
         : 0;
 
     // Devolver como texto plano
-    res.send(totalQuantity.toString());
+    console.log(totalQuantity);
+    res.status(200).json(ProductDetailSummary);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error al cargar los productos" });
+  }
+});
+
+app.get("/productDetailSummaryByOperationMinus", async (req, res) => {
+  try {
+    const ProductID = req.query.ProductKey;
+    const currentMonth = new Date(req.query.currentMonth);
+    const startOfMonth = new Date(
+      currentMonth.getFullYear(),
+      currentMonth.getMonth(),
+      1
+    );
+    const endOfMonth = new Date(
+      currentMonth.getFullYear(),
+      currentMonth.getMonth() + 1,
+      0
+    );
+
+    const ProductDetailSummary = await ProductDetail.aggregate([
+      {
+        $match: {
+          operation: "minus",
+          ProductID: ProductID, // Añadir ProductID al match
+          date: {
+            $gte: startOfMonth,
+            $lte: endOfMonth,
+          },
+        },
+      },
+      {
+        $group: {
+          _id: null, // No agrupar por ProductID, solo sumar
+          totalQuantity: { $sum: "$quantity" },
+        },
+      },
+    ]);
+
+    const totalQuantity =
+      ProductDetailSummary.length > 0
+        ? ProductDetailSummary[0].totalQuantity
+        : 0;
+
+    // Devolver como texto plano
+    console.log(totalQuantity);
+    res.status(200).json(ProductDetailSummary);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Error al cargar los productos" });
