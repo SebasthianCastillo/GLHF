@@ -5,12 +5,12 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useLocalSearchParams } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import axios from "axios";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { response } from "express";
+import { configureLayoutAnimationBatch } from "react-native-reanimated/lib/typescript/reanimated2/core";
 
 interface ProductDetail {
   _id: string;
@@ -25,13 +25,17 @@ const ProductDetail = () => {
   const { product } = useLocalSearchParams();
   const [productDetail, setProductsDetail] = useState<ProductDetail[]>([]);
   const [filteredDetails, setFilteredDetails] = useState<ProductDetail[]>([]);
-  const [ProductDetailSummaryAdd, setProductDetailSummaryAdd] = useState("");
+  const [ProductDetailSummaryAdd, setProductDetailSummaryAdd] =
+    useState<number>(0);
+  const [ProductDetailSummaryMinus, setProductDetailSummaryMinus] =
+    useState<number>(0);
   const [currentMonth, setCurrentMonth] = useState<number>(
     new Date().getMonth()
   );
   const [currentYear, setCurrentYear] = useState<number>(
     new Date().getFullYear()
   );
+  const [globaItemId, setGlobaItemId] = useState("");
 
   const productObject = Array.isArray(product)
     ? JSON.parse(product[0])
@@ -42,42 +46,59 @@ const ProductDetail = () => {
       const productDetailFunction = async () => {
         try {
           const response = await axios.get(
-            "http://192.168.194.133:5000/productDetailByIDProduct",
+            "http://192.168.1.102:5000/productDetailByIDProduct",
             {
               params: { ProductKey: productObject._id },
             }
           );
-          setProductsDetail(response.data);
+
           filterByMonth(response.data, currentMonth, currentYear); // Filter data initially
         } catch (error) {
           console.log("error fetching products data", error);
         }
       };
+
       productDetailFunction();
     }, [currentMonth, currentYear])
   );
-  useFocusEffect(
-    useCallback(() => {
-      const productDetailSummaryAdd = async () => {
-        try {
-          const response = await axios.get(
-            "http://192.168.194.133:5000/productDetailSummaryByOperation",
-            {
-              params: { ProductKey: productObject._id },
-            }
-          );
 
-          filterByMonth(response.data, currentMonth, currentYear); // Filter data initially
-
-          // Establece el estado con el valor de `totalQuantity`
-          setProductDetailSummaryAdd(response.data);
-        } catch (error) {
-          console.log("error fetching products detail summary data", error);
+  const fetchSummaryData = async (currentMonth: Date) => {
+    try {
+      const addResponse = await axios.get(
+        "http://192.168.1.102:5000/productDetailSummaryByOperationAdd",
+        {
+          params: {
+            ProductKey: productObject._id,
+            currentMonth: currentMonth,
+          },
         }
-      };
-      productDetailSummaryAdd();
-    }, [currentMonth, currentYear])
-  );
+      );
+
+      const minusResponse = await axios.get(
+        "http://192.168.1.102:5000/productDetailSummaryByOperationMinus",
+        {
+          params: {
+            ProductKey: productObject._id,
+            currentMonth: currentMonth,
+          },
+        }
+      );
+
+      if (Array.isArray(addResponse.data) && addResponse.data.length > 0) {
+        setProductDetailSummaryAdd(addResponse.data[0].totalQuantity);
+      } else {
+        setProductDetailSummaryAdd(0); // Establece un valor predeterminado si el array está vacío
+      }
+
+      if (Array.isArray(minusResponse.data) && minusResponse.data.length > 0) {
+        setProductDetailSummaryMinus(minusResponse.data[0].totalQuantity);
+      } else {
+        setProductDetailSummaryMinus(0); // Establece un valor predeterminado si el array está vacío
+      }
+    } catch (error) {
+      console.log("error fetching products detail summary data", error);
+    }
+  };
 
   const filterByMonth = (
     data: ProductDetail[],
@@ -86,9 +107,11 @@ const ProductDetail = () => {
   ) => {
     const filtered = data.filter((item) => {
       const itemDate = new Date(item.date);
+
       return itemDate.getMonth() === month && itemDate.getFullYear() === year;
     });
     setFilteredDetails(filtered);
+    fetchSummaryData(filtered[0].date);
   };
 
   const handlePrevMonth = () => {
@@ -157,46 +180,52 @@ const ProductDetail = () => {
 
   return (
     <SafeAreaView className="bg-primary h-full">
+      <View className="flex-row items-center justify-between px-4 py-3 bg-primary">
+        <TouchableOpacity onPress={handlePrevMonth} className="px-3 py-1">
+          <Text className="text-2xl text-yellow-500">&lt;</Text>
+        </TouchableOpacity>
+        <Text className="text-lg font-semibold text-white">
+          {formatMonthYear(currentMonth, currentYear)}
+        </Text>
+        <TouchableOpacity onPress={handleNextMonth} className="px-3 py-1">
+          <Text className="text-2xl text-yellow-500">&gt;</Text>
+        </TouchableOpacity>
+      </View>
+      {/* Header de columnas */}
+      <View className="flex-row h-12 bg-primary">
+        <View className="flex-1 items-center justify-center">
+          <Text className="text-lg font-bold text-white">Cantidad</Text>
+        </View>
+        <View className="flex-1 items-center justify-center">
+          <Text className="text-lg font-bold text-white">Formato</Text>
+        </View>
+        <View className="flex-1 items-center justify-center">
+          <Text className="text-lg font-bold text-white">Fecha</Text>
+        </View>
+      </View>
       <ScrollView>
-        <View className="flex-row items-center justify-between px-4 py-3 bg-primary  ">
-          <TouchableOpacity onPress={handlePrevMonth} className="px-3 py-1">
-            <Text className="text-2xl text-yellow-500">&lt;</Text>
-          </TouchableOpacity>
-          <Text className="text-lg font-semibold text-white">
-            {formatMonthYear(currentMonth, currentYear)}
-          </Text>
-          <TouchableOpacity onPress={handleNextMonth} className="px-3 py-1">
-            <Text className="text-2xl text-yellow-500">&gt;</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Header de columnas */}
-        <View className="flex-row h-12 bg-primary ">
-          <View className="flex-1 items-center justify-center  ">
-            <Text className="text-lg font-bold text-white">Cantidad</Text>
-          </View>
-          <View className="flex-1 items-center justify-center  ">
-            <Text className="text-lg font-bold text-white">Formato</Text>
-          </View>
-          <View className="flex-1 items-center justify-center">
-            <Text className="text-lg font-bold text-white">Fecha</Text>
-          </View>
-        </View>
-
         <FlatList
           data={filteredDetails}
           renderItem={renderItem}
           keyExtractor={(item) => item._id.toString()} // Asegúrate de que `item.id` sea único
         />
-        <View
-          className="p-1 mb-2  bg-emerald-600
-      rounded-lg shadow-md"
-        >
-          <Text className="text-4xl font-bold text-white">
-            {ProductDetailSummaryAdd}
-          </Text>
-        </View>
       </ScrollView>
+      <View className="flex-row justify-between mt-4">
+        <View className="h-24 w-36">
+          <View className="flex-1 items-center justify-center bg-emerald-600 rounded-lg shadow-lg p-4">
+            <Text className="text-3xl font-bold text-white">
+              {ProductDetailSummaryAdd}
+            </Text>
+          </View>
+        </View>
+        <View className="h-24 w-36">
+          <View className="flex-1 items-center justify-center bg-red-500 rounded-lg shadow-lg p-4">
+            <Text className="text-3xl font-bold text-white">
+              {ProductDetailSummaryMinus}
+            </Text>
+          </View>
+        </View>
+      </View>
     </SafeAreaView>
   );
 };

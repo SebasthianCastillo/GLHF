@@ -11,6 +11,7 @@ import {
   Button,
   StyleSheet,
   TouchableWithoutFeedback,
+  Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
@@ -30,9 +31,7 @@ const Products = () => {
   const dropdownRef = useRef(null);
   const [selectedValue, setSelectedValue] = useState("P");
   const [quantityProduct, setQuantityProduct] = useState("");
-
   const [selectedItemId, setSelectedItemId] = useState("");
-
   const [showInputCustomCant, setShowInputCustomCant] = useState(false);
   const [showInputCant, setShowInputCant] = useState(true);
   const [showInputAdd, setShowInputAdd] = useState(true);
@@ -40,16 +39,23 @@ const Products = () => {
   const [showInputAdd2, setShowInputAdd2] = useState(false);
   const [showInputMinus2, setShowInputMinus2] = useState(false);
   const [showInputCant2, setShowInputCant2] = useState(false);
-
+  const [formatValues, setFormatValues] = useState<{ [key: string]: string }>(
+    {}
+  );
   const [isOnAdd, setShowInputisOnAdd] = useState(false);
-  const [open, setOpen] = useState(false);
   const [formatValue, setFormatValue] = useState("P");
   const [items, setItems] = useState([
     { label: "P", value: "P" },
     { label: "KG", value: "KG" },
     { label: "GR", value: "GR" },
   ]);
-
+  // const [openDropdowns, setOpenDropdowns] = useState<{
+  //   [key: string]: boolean;
+  // }>({});
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+  const [selectedValues, setSelectedValues] = useState<SelectedValuesType>({});
   let CategoryName = categoryObject.Name;
 
   useFocusEffect(
@@ -208,13 +214,22 @@ const Products = () => {
     setShowInputAdd2(false);
     setShowInputCant2(false);
   };
-  // const shouldShowMinusButton = (itemID: any) => {
-  //   if (itemID === selectedItemId) {
-  //     setShowInputMinus(false);
-  //   }
-  //   setShowInputMinus(true);
-  //   return showInputMinus;
-  // };
+
+  const handleDropdownOpen = (id: string) => {
+    setOpenDropdownId(openDropdownId === id ? null : id);
+  };
+
+  type SelectedValuesType = {
+    [key: string]: string; // Las claves son las ids de tipo string, y los valores también son strings
+  };
+
+  const handleDropdownChange = (id: string, newValue: string) => {
+    setSelectedValues((prevValues) => ({
+      ...prevValues,
+      [id]: newValue,
+    }));
+    // Aquí puedes manejar cualquier otra lógica necesaria con el nuevo valor seleccionado
+  };
   return (
     <TouchableWithoutFeedback onPress={handlePressOutside}>
       <SafeAreaView className="bg-primary h-full">
@@ -227,20 +242,32 @@ const Products = () => {
                     {item.Name}
                   </Text>
                 </View>
-                <View style={styles.container}>
+
+                <View
+                  style={[
+                    styles.container,
+                    { zIndex: openDropdownId === item._id ? 1000 : 1 },
+                  ]}
+                >
                   <DropDownPicker
-                    open={open}
-                    value={formatValue}
+                    open={openDropdownId === item._id}
+                    value={selectedValues[item._id] || "P"}
                     items={items}
-                    setOpen={setOpen}
-                    setValue={setFormatValue}
-                    setItems={setItems}
+                    setOpen={() => handleDropdownOpen(item._id)}
+                    setValue={(callback) => {
+                      const selectedValue = callback(formatValues[item._id]);
+                      handleDropdownChange(item._id, selectedValue);
+                    }}
+                    setItems={() => {}}
                     containerStyle={styles.dropdownContainer}
                     style={styles.dropdown}
                     textStyle={styles.dropdownText}
-                    dropDownContainerStyle={styles.dropdownList}
+                    dropDownContainerStyle={[
+                      styles.dropdownList,
+                      { zIndex: 1001 },
+                    ]}
                     labelStyle={styles.dropdownLabel}
-                    arrowIconStyle={styles.arrowIcon}
+                    arrowIconStyle={{ width: 0, height: 0 }}
                     listItemContainerStyle={styles.listItemContainer}
                     tickIconStyle={styles.tickIcon}
                     listItemLabelStyle={styles.listItemLabel}
@@ -380,6 +407,7 @@ const Products = () => {
     </TouchableWithoutFeedback>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     width: 54, // Width of the square
@@ -403,7 +431,7 @@ const styles = StyleSheet.create({
     color: "white", // White text
   },
   dropdownList: {
-    backgroundColor: "transparent", // Transparent background
+    backgroundColor: "white", // Transparent background
     borderColor: "white", // No border color
     borderWidth: 1, // No border width
     borderRadius: 4,
@@ -423,7 +451,7 @@ const styles = StyleSheet.create({
     height: 0, // Hide the tick icon
   },
   listItemLabel: {
-    color: "white", // White text for list items
+    color: "black", // White text for list items
   },
   buttonContainer: {
     width: "auto", // Ancho del contenedor del botón
