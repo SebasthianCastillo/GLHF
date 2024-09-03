@@ -57,7 +57,7 @@ const Products = () => {
       const productsFunction = async () => {
         try {
           const response = await axios.get(
-            "http://192.168.1.120:5000/productsByIDCategory",
+            "http://192.168.194.133:5000/productsByIDCategory",
             {
               params: { CategoryKey: categoryObject._id },
             }
@@ -74,7 +74,7 @@ const Products = () => {
   const productsFunction = async () => {
     try {
       const response = await axios.get(
-        "http://192.168.1.120:5000/productsByIDCategory",
+        "http://192.168.194.133:5000/productsByIDCategory",
         {
           params: { CategoryKey: categoryObject._id },
         }
@@ -103,7 +103,7 @@ const Products = () => {
     };
 
     axios
-      .post("http://192.168.1.120:5000/addProductDetail", addProductDetail)
+      .post("http://192.168.194.133:5000/addProductDetail", addProductDetail)
       .then((response) => {
         // router.push("/");
         console.log(response);
@@ -133,7 +133,7 @@ const Products = () => {
     };
 
     axios
-      .post("http://192.168.1.120:5000/addProductDetail", addProductDetail)
+      .post("http://192.168.194.133:5000/addProductDetail", addProductDetail)
       .then((response) => {
         // router.push("/");
         console.log(response);
@@ -161,7 +161,7 @@ const Products = () => {
 
     axios
       .patch(
-        "http://192.168.1.120:5000/quantityUpdateProduct",
+        "http://192.168.194.133:5000/quantityUpdateProduct",
         UpdateQuantityData
       )
       .then((response) => {

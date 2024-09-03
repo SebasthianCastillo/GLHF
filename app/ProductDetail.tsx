@@ -42,7 +42,7 @@ const ProductDetail = () => {
       const productDetailFunction = async () => {
         try {
           const response = await axios.get(
-            "http://192.168.1.120:5000/productDetailByIDProduct",
+            "http://192.168.194.133:5000/productDetailByIDProduct",
             {
               params: { ProductKey: productObject._id },
             }
@@ -61,14 +61,13 @@ const ProductDetail = () => {
       const productDetailSummaryAdd = async () => {
         try {
           const response = await axios.get(
-            "http://192.168.1.120:5000/productDetailSummaryByOperation",
+            "http://192.168.194.133:5000/productDetailSummaryByOperation",
             {
               params: { ProductKey: productObject._id },
             }
           );
 
           filterByMonth(response.data, currentMonth, currentYear); // Filter data initially
-          console.log(response.data);
 
           // Establece el estado con el valor de `totalQuantity`
           setProductDetailSummaryAdd(response.data);
