@@ -11,12 +11,12 @@ import {
   Button,
   StyleSheet,
   TouchableWithoutFeedback,
-  Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import CustomField from "@/components/Field";
+import CustomDropdown from "@/components/Dropdown";
 import { router } from "expo-router";
 import DropDownPicker from "react-native-dropdown-picker";
 
@@ -27,10 +27,6 @@ const Products = () => {
     : JSON.parse(category || "{}");
   const [products, setProducts] = useState([]);
   const [CantidadProducto, setCantidadProducto] = useState(0);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const dropdownRef = useRef(null);
-  const [selectedValue, setSelectedValue] = useState("P");
-  const [quantityProduct, setQuantityProduct] = useState("");
   const [selectedItemId, setSelectedItemId] = useState("");
   const [showInputCustomCant, setShowInputCustomCant] = useState(false);
   const [showInputCant, setShowInputCant] = useState(true);
@@ -52,10 +48,9 @@ const Products = () => {
   // const [openDropdowns, setOpenDropdowns] = useState<{
   //   [key: string]: boolean;
   // }>({});
-  const [isModalVisible, setModalVisible] = useState(false);
-  const [open, setOpen] = useState(false);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const [selectedValues, setSelectedValues] = useState<SelectedValuesType>({});
+
   let CategoryName = categoryObject.Name;
 
   useFocusEffect(
