@@ -223,6 +223,24 @@ app.get("/productDetailByIDProduct", async (req, res) => {
     res.status(500).json({ message: "Error al cargar los productos" });
   }
 });
+app.delete("/deleteProduct/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    // Busca el producto por ID y elimínalo
+    const result = await Producto.findByIdAndDelete(id);
+
+    if (!result) {
+      return res.status(404).json({ message: "Producto no encontrado" });
+    }
+
+    // Envía una respuesta exitosa
+    res.status(200).json({ message: "Producto eliminado exitosamente" });
+  } catch (error) {
+    console.error("Error al eliminar el producto:", error);
+    res.status(500).json({ message: "Error interno del servidor" });
+  }
+});
 
 app.get("/", async (req, res) => {
   try {

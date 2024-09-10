@@ -10,7 +10,6 @@ import { useLocalSearchParams } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import axios from "axios";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { configureLayoutAnimationBatch } from "react-native-reanimated/lib/typescript/reanimated2/core";
 
 interface ProductDetail {
   _id: string;
@@ -23,7 +22,6 @@ interface ProductDetail {
 
 const ProductDetail = () => {
   const { product } = useLocalSearchParams();
-  const [productDetail, setProductsDetail] = useState<ProductDetail[]>([]);
   const [filteredDetails, setFilteredDetails] = useState<ProductDetail[]>([]);
   const [ProductDetailSummaryAdd, setProductDetailSummaryAdd] =
     useState<number>(0);
@@ -35,7 +33,6 @@ const ProductDetail = () => {
   const [currentYear, setCurrentYear] = useState<number>(
     new Date().getFullYear()
   );
-  const [globaItemId, setGlobaItemId] = useState("");
 
   const productObject = Array.isArray(product)
     ? JSON.parse(product[0])
@@ -46,7 +43,7 @@ const ProductDetail = () => {
       const productDetailFunction = async () => {
         try {
           const response = await axios.get(
-            "http://192.168.1.102:5000/productDetailByIDProduct",
+            "http://192.168.82.7:5000/productDetailByIDProduct",
             {
               params: { ProductKey: productObject._id },
             }
@@ -65,7 +62,7 @@ const ProductDetail = () => {
   const fetchSummaryData = async (currentMonth: Date) => {
     try {
       const addResponse = await axios.get(
-        "http://192.168.1.102:5000/productDetailSummaryByOperationAdd",
+        "http://192.168.82.7:5000/productDetailSummaryByOperationAdd",
         {
           params: {
             ProductKey: productObject._id,
@@ -75,7 +72,7 @@ const ProductDetail = () => {
       );
 
       const minusResponse = await axios.get(
-        "http://192.168.1.102:5000/productDetailSummaryByOperationMinus",
+        "http://192.168.82.7:5000/productDetailSummaryByOperationMinus",
         {
           params: {
             ProductKey: productObject._id,
@@ -152,25 +149,25 @@ const ProductDetail = () => {
         item.operation === "add" ? "bg-emerald-600" : "bg-red-500"
       } rounded-lg shadow-md`}
     >
-      <View className="flex-row h-24">
+      <View className="flex-row h-9">
         {/* Cuadro de Cantidad */}
         <View className="flex-1 items-center justify-center border-r border-gray-300">
-          <Text className="text-4xl font-bold text-white">{`${
+          <Text className="text-2xl font-bold text-white">{`${
             item.operation === "add" ? "+" : "-"
           } ${item.quantity}`}</Text>
         </View>
 
         {/* Cuadro de Formato */}
         <View className="flex-1 items-center justify-center border-r border-gray-300">
-          <Text className="text-4xl font-bold text-white">{item.format}</Text>
+          <Text className="text-2xl font-bold text-white">{item.format}</Text>
         </View>
 
         {/* Cuadro de Fecha */}
         <View className="flex-1 items-center justify-center">
-          <Text className="text-xl font-bold text-white">
+          <Text className="text-xm font-bold text-white">
             {new Date(item.date).toLocaleDateString()}
           </Text>
-          <Text className="text-lg font-medium text-white">
+          <Text className="text-sm font-medium text-white">
             {new Date(item.date).toLocaleTimeString()}
           </Text>
         </View>

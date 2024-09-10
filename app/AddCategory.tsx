@@ -7,13 +7,8 @@ import { useState } from "react";
 import axios from "axios";
 
 const AddCategory = () => {
-  const [input, setInput] = useState("");
   const [name, setName] = useState("");
   const router = useRouter();
-
-  const [Form, setForm] = useState({
-    name: "",
-  });
 
   const HandleRegister = () => {
     const categoriesData = {
@@ -21,7 +16,7 @@ const AddCategory = () => {
     };
 
     axios
-      .post("http://192.168.194.133:5000/addCategory", categoriesData)
+      .post("http://192.168.82.7:5000/addCategory", categoriesData)
       .then((response) => {
         Alert.alert("Categoría Agregada 💾");
         setName("");

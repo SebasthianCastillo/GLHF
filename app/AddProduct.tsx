@@ -20,7 +20,7 @@ const AddProduct = () => {
       CategoryID: CategoryKey,
     };
     axios
-      .post("http://192.168.194.133:5000/addProduct", ProductData)
+      .post("http://192.168.82.7:5000/addProduct", ProductData)
       .then((response) => {
         Alert.alert("Producto Agregado 💾");
         setProductName("");

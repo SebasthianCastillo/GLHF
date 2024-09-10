@@ -11,12 +11,14 @@ import {
   Button,
   StyleSheet,
   TouchableWithoutFeedback,
+  Alert,
+  Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import CustomField from "@/components/Field";
-import CustomDropdown from "@/components/Dropdown";
+import ModalProducts from "@/components/Dropdown";
 import { router } from "expo-router";
 import DropDownPicker from "react-native-dropdown-picker";
 
@@ -50,6 +52,7 @@ const Products = () => {
   // }>({});
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const [selectedValues, setSelectedValues] = useState<SelectedValuesType>({});
+  const [showOptionsModal, setShowOptionsModal] = useState(false); // Para mostrar el menú de opciones
 
   let CategoryName = categoryObject.Name;
 
@@ -58,7 +61,7 @@ const Products = () => {
       const productsFunction = async () => {
         try {
           const response = await axios.get(
-            "http://192.168.194.133:5000/productsByIDCategory",
+            "http://192.168.82.7:5000/productsByIDCategory",
             {
               params: { CategoryKey: categoryObject._id },
             }
@@ -75,7 +78,7 @@ const Products = () => {
   const productsFunction = async () => {
     try {
       const response = await axios.get(
-        "http://192.168.194.133:5000/productsByIDCategory",
+        "http://192.168.82.7:5000/productsByIDCategory",
         {
           params: { CategoryKey: categoryObject._id },
         }
@@ -104,7 +107,7 @@ const Products = () => {
     };
 
     axios
-      .post("http://192.168.194.133:5000/addProductDetail", addProductDetail)
+      .post("http://192.168.82.7:5000/addProductDetail", addProductDetail)
       .then((response) => {
         // router.push("/");
         console.log(response);
@@ -134,7 +137,7 @@ const Products = () => {
     };
 
     axios
-      .post("http://192.168.194.133:5000/addProductDetail", addProductDetail)
+      .post("http://192.168.82.7:5000/addProductDetail", addProductDetail)
       .then((response) => {
         // router.push("/");
         console.log(response);
@@ -162,7 +165,7 @@ const Products = () => {
 
     axios
       .patch(
-        "http://192.168.194.133:5000/quantityUpdateProduct",
+        "http://192.168.82.7:5000/quantityUpdateProduct",
         UpdateQuantityData
       )
       .then((response) => {
@@ -225,6 +228,45 @@ const Products = () => {
     }));
     // Aquí puedes manejar cualquier otra lógica necesaria con el nuevo valor seleccionado
   };
+  const confirmDelete = () => {
+    Alert.alert(
+      "Confirmación",
+      "¿Estás seguro de que deseas eliminar este producto?",
+      [
+        {
+          text: "Cancelar",
+          style: "cancel",
+        },
+        {
+          text: "Aceptar",
+          onPress: () => {
+            deleteProduct(selectedItemId); // Llamar a la función de eliminación si se confirma
+          },
+        },
+      ]
+    );
+  };
+
+  // Función para manejar el long press y mostrar las opciones
+  const handleLongPressDelete = (idProducto: any) => {
+    setSelectedItemId(idProducto); // Guardar el ID del producto seleccionado
+    setShowOptionsModal(true); // Mostrar el menú de opciones
+  };
+  const deleteProduct = async (idProducto: any) => {
+    try {
+      await axios.delete(
+        `http://192.168.82.7:5000/deleteProduct/${idProducto}`
+      );
+      // Refrescar la lista de productos después de eliminar
+      const response = await axios.get(
+        "http://192.168.82.7:5000/productsByIDCategory",
+        { params: { CategoryKey: categoryObject._id } }
+      );
+      setProducts(response.data);
+    } catch (error) {
+      console.log("Error deleting product", error);
+    }
+  };
   return (
     <TouchableWithoutFeedback onPress={handlePressOutside}>
       <SafeAreaView className="bg-primary h-full">
@@ -233,9 +275,14 @@ const Products = () => {
             {products.map((item: any) => (
               <View className="flex-row justify-between items-center">
                 <View className="w-20">
-                  <Text className="text-base text-white font-bold">
-                    {item.Name}
-                  </Text>
+                  <Pressable
+                    key={item._id}
+                    onLongPress={() => handleLongPressDelete(item._id)} // Manejar el long press
+                  >
+                    <Text className="text-base text-white font-bold">
+                      {item.Name}
+                    </Text>
+                  </Pressable>
                 </View>
 
                 <View
@@ -373,12 +420,19 @@ const Products = () => {
                   }
                 >
                   <View className="p-1 rounded-md shadow-sm">
-                    <FontAwesome5 name="history" size={24} color="white" />
+                    <FontAwesome5 name="history" size={24} color="#eab308" />
                   </View>
                 </Pressable>
               </View>
             ))}
           </View>
+          {showOptionsModal && (
+            <ModalProducts
+              showOptionsModal={showOptionsModal}
+              setShowOptionsModal={setShowOptionsModal}
+              onDelete={confirmDelete}
+            />
+          )}
         </ScrollView>
 
         <TouchableOpacity
@@ -394,7 +448,7 @@ const Products = () => {
             })
           }
         >
-          <View className="w-16 h-16 bg-green-500 rounded-full shadow-lg items-center justify-center">
+          <View className="w-16 h-16 bg-yellow-500 rounded-full shadow-lg items-center justify-center">
             <FontAwesome6 name="add" size={40} color="white" />
           </View>
         </TouchableOpacity>
