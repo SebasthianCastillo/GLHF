@@ -30,7 +30,7 @@ const AddProduct = () => {
       .catch((error) => {
         console.log(ProductData);
         Alert.alert("Error");
-        console.log(error);
+        console.log("Error adding product", error);
       });
   };
   return (

@@ -18,7 +18,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import CustomField from "@/components/Field";
-import ModalProducts from "@/components/Dropdown";
+import ModalProducts from "@/components/OptionModal";
 import { router } from "expo-router";
 import DropDownPicker from "react-native-dropdown-picker";
 
@@ -117,7 +117,7 @@ const Products = () => {
       })
       .catch((error) => {
         console.log(addProductDetail);
-        console.log(error);
+        console.log("Error AddProductDetail", error);
       });
   };
   // Funcion Resta
@@ -148,7 +148,7 @@ const Products = () => {
       .catch((error) => {
         console.log(addProductDetail);
 
-        console.log(error);
+        console.log("Error AddProductDetail minus", error);
       });
   };
   //Funcion para actualizar cantidad de producto
@@ -174,7 +174,7 @@ const Products = () => {
       })
       .catch((error) => {
         console.log(UpdateQuantityData);
-        console.log(error);
+        console.log("Error quantity update product", error);
       });
   };
 
@@ -277,7 +277,7 @@ const Products = () => {
                 <View className="w-20">
                   <Pressable
                     key={item._id}
-                    onLongPress={() => handleLongPressDelete(item._id)} // Manejar el long press
+                    onLongPress={() => handleLongPressDelete(item._id)} // handle long press
                   >
                     <Text className="text-base text-white font-bold">
                       {item.Name}

@@ -6,19 +6,19 @@ const StyledView = styled(View);
 const StyledText = styled(Text);
 const StyledTouchableOpacity = styled(TouchableOpacity);
 
-interface EnhancedModalProps {
+interface OptionModalProps {
   showOptionsModal: boolean;
   setShowOptionsModal: (show: boolean) => void;
 
   onDelete: () => void;
 }
 
-export default function EnhancedModal({
+export default function OptionModal({
   showOptionsModal,
   setShowOptionsModal,
 
   onDelete,
-}: EnhancedModalProps) {
+}: OptionModalProps) {
   const [animation] = React.useState(new Animated.Value(0));
 
   React.useEffect(() => {

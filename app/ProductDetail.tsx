@@ -51,7 +51,7 @@ const ProductDetail = () => {
 
           filterByMonth(response.data, currentMonth, currentYear); // Filter data initially
         } catch (error) {
-          console.log("error fetching products data", error);
+          console.log("error fetching products detail by id data", error);
         }
       };
 

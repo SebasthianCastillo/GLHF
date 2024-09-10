@@ -25,7 +25,7 @@ const AddCategory = () => {
       .catch((error) => {
         console.log(categoriesData);
         Alert.alert("Error");
-        console.log(error);
+        console.log("Error adding category", error);
         router.push("/");
       });
   };
