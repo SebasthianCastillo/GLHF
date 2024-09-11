@@ -16,7 +16,7 @@ const AddCategory = () => {
     };
 
     axios
-      .post("http://192.168.82.7:5000/addCategory", categoriesData)
+      .post("http://192.168.194.133:5000/addCategory", categoriesData)
       .then((response) => {
         Alert.alert("Categoría Agregada 💾");
         setName("");

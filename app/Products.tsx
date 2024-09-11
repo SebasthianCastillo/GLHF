@@ -61,7 +61,7 @@ const Products = () => {
       const productsFunction = async () => {
         try {
           const response = await axios.get(
-            "http://192.168.82.7:5000/productsByIDCategory",
+            "http://192.168.194.133:5000/productsByIDCategory",
             {
               params: { CategoryKey: categoryObject._id },
             }
@@ -78,7 +78,7 @@ const Products = () => {
   const productsFunction = async () => {
     try {
       const response = await axios.get(
-        "http://192.168.82.7:5000/productsByIDCategory",
+        "http://192.168.194.133:5000/productsByIDCategory",
         {
           params: { CategoryKey: categoryObject._id },
         }
@@ -107,9 +107,8 @@ const Products = () => {
     };
 
     axios
-      .post("http://192.168.82.7:5000/addProductDetail", addProductDetail)
+      .post("http://192.168.194.133:5000/addProductDetail", addProductDetail)
       .then((response) => {
-        // router.push("/");
         console.log(response);
         quantityUpdateProduct(idProducto, quantityProduct, operation);
         productsFunction();
@@ -137,7 +136,7 @@ const Products = () => {
     };
 
     axios
-      .post("http://192.168.82.7:5000/addProductDetail", addProductDetail)
+      .post("http://192.168.194.133:5000/addProductDetail", addProductDetail)
       .then((response) => {
         // router.push("/");
         console.log(response);
@@ -165,7 +164,7 @@ const Products = () => {
 
     axios
       .patch(
-        "http://192.168.82.7:5000/quantityUpdateProduct",
+        "http://192.168.194.133:5000/quantityUpdateProduct",
         UpdateQuantityData
       )
       .then((response) => {
@@ -196,6 +195,7 @@ const Products = () => {
     setShowInputAdd(false);
     setShowInputMinus(false);
     setShowInputisOnAdd(true);
+
     setShowInputCustomCant(true);
     setShowInputAdd2(true);
     setShowInputCant2(true);
@@ -226,6 +226,8 @@ const Products = () => {
       ...prevValues,
       [id]: newValue,
     }));
+    setFormatValue(newValue);
+
     // Aquí puedes manejar cualquier otra lógica necesaria con el nuevo valor seleccionado
   };
   const confirmDelete = () => {
@@ -255,11 +257,11 @@ const Products = () => {
   const deleteProduct = async (idProducto: any) => {
     try {
       await axios.delete(
-        `http://192.168.82.7:5000/deleteProduct/${idProducto}`
+        `http://192.168.194.133:5000/deleteProduct/${idProducto}`
       );
       // Refrescar la lista de productos después de eliminar
       const response = await axios.get(
-        "http://192.168.82.7:5000/productsByIDCategory",
+        "http://192.168.194.133:5000/productsByIDCategory",
         { params: { CategoryKey: categoryObject._id } }
       );
       setProducts(response.data);

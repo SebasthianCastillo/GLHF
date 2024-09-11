@@ -19,7 +19,7 @@ export default function HomeScreen() {
       const categories = async () => {
         try {
           const response = await axios.get(
-            "http://192.168.82.7:5000/categories"
+            "http://192.168.194.133:5000/categories"
           );
           setcategories(response.data);
         } catch (error) {

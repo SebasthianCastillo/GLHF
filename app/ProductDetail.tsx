@@ -43,7 +43,7 @@ const ProductDetail = () => {
       const productDetailFunction = async () => {
         try {
           const response = await axios.get(
-            "http://192.168.82.7:5000/productDetailByIDProduct",
+            "http://192.168.194.133:5000/productDetailByIDProduct",
             {
               params: { ProductKey: productObject._id },
             }
@@ -51,7 +51,12 @@ const ProductDetail = () => {
 
           filterByMonth(response.data, currentMonth, currentYear); // Filter data initially
         } catch (error) {
-          console.log("error fetching products detail by id data", error);
+          console.log(
+            "error fetching products detail by id data or month dosent have products",
+            error
+          );
+          setProductDetailSummaryAdd(0);
+          setProductDetailSummaryMinus(0);
         }
       };
 
@@ -62,7 +67,7 @@ const ProductDetail = () => {
   const fetchSummaryData = async (currentMonth: Date) => {
     try {
       const addResponse = await axios.get(
-        "http://192.168.82.7:5000/productDetailSummaryByOperationAdd",
+        "http://192.168.194.133:5000/productDetailSummaryByOperationAdd",
         {
           params: {
             ProductKey: productObject._id,
@@ -72,7 +77,7 @@ const ProductDetail = () => {
       );
 
       const minusResponse = await axios.get(
-        "http://192.168.82.7:5000/productDetailSummaryByOperationMinus",
+        "http://192.168.194.133:5000/productDetailSummaryByOperationMinus",
         {
           params: {
             ProductKey: productObject._id,
