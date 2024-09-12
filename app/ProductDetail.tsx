@@ -44,7 +44,7 @@ const ProductDetail = () => {
       const productDetailFunction = async () => {
         try {
           const response = await axios.get(
-            "http://192.168.194.133:5000/productDetailByIDProduct",
+            "https://glhf.onrender.com/productDetailByIDProduct",
             {
               params: { ProductKey: productObject._id },
             }
@@ -68,7 +68,7 @@ const ProductDetail = () => {
   const fetchSummaryData = async (currentMonth: Date) => {
     try {
       const addResponse = await axios.get(
-        "http://192.168.194.133:5000/productDetailSummaryByOperationAdd",
+        "https://glhf.onrender.com/productDetailSummaryByOperationAdd",
         {
           params: {
             ProductKey: productObject._id,
@@ -78,7 +78,7 @@ const ProductDetail = () => {
       );
 
       const minusResponse = await axios.get(
-        "http://192.168.194.133:5000/productDetailSummaryByOperationMinus",
+        "https://glhf.onrender.com/productDetailSummaryByOperationMinus",
         {
           params: {
             ProductKey: productObject._id,

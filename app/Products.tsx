@@ -58,7 +58,7 @@ const Products = () => {
       const productsFunction = async () => {
         try {
           const response = await axios.get(
-            "http://192.168.194.133:5000/productsByIDCategory",
+            "https://glhf.onrender.com/productsByIDCategory",
             {
               params: { CategoryKey: categoryObject._id },
             }
@@ -75,7 +75,7 @@ const Products = () => {
   const productsFunction = async () => {
     try {
       const response = await axios.get(
-        "http://192.168.194.133:5000/productsByIDCategory",
+        "https://glhf.onrender.com/productsByIDCategory",
         {
           params: { CategoryKey: categoryObject._id },
         }
@@ -104,7 +104,7 @@ const Products = () => {
     };
 
     axios
-      .post("http://192.168.194.133:5000/addProductDetail", addProductDetail)
+      .post("https://glhf.onrender.com/addProductDetail", addProductDetail)
       .then((response) => {
         console.log(response);
         quantityUpdateProduct(idProducto, quantityProduct, operation);
@@ -135,7 +135,7 @@ const Products = () => {
     };
 
     axios
-      .post("http://192.168.194.133:5000/addProductDetail", addProductDetail)
+      .post("https://glhf.onrender.com/addProductDetail", addProductDetail)
       .then((response) => {
         // router.push("/");
         console.log(response);
@@ -165,7 +165,7 @@ const Products = () => {
 
     axios
       .patch(
-        "http://192.168.194.133:5000/quantityUpdateProduct",
+        "https://glhf.onrender.com/quantityUpdateProduct",
         UpdateQuantityData
       )
       .then((response) => {
@@ -261,11 +261,11 @@ const Products = () => {
   const deleteProduct = async (idProducto: any) => {
     try {
       await axios.delete(
-        `http://192.168.194.133:5000/deleteProduct/${idProducto}`
+        `https://glhf.onrender.com/deleteProduct/${idProducto}`
       );
       // Refrescar la lista de productos después de eliminar
       const response = await axios.get(
-        "http://192.168.194.133:5000/productsByIDCategory",
+        "https://glhf.onrender.com/productsByIDCategory",
         { params: { CategoryKey: categoryObject._id } }
       );
       setProducts(response.data);

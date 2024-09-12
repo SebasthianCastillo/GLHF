@@ -17,7 +17,7 @@ export default function HomeScreen() {
       const categories = async () => {
         try {
           const response = await axios.get(
-            "http://192.168.194.133:5000/categories"
+            "https://glhf.onrender.com/categories"
           );
           setcategories(response.data);
         } catch (error) {

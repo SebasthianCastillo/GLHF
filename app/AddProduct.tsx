@@ -20,7 +20,7 @@ const AddProduct = () => {
       CategoryID: CategoryKey,
     };
     axios
-      .post("http://192.168.194.133:5000/addProduct", ProductData)
+      .post("https://glhf.onrender.com/addProduct", ProductData)
       .then((response) => {
         Alert.alert("Producto Agregado 💾");
         setProductName("");
