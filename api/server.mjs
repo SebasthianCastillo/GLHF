@@ -9,12 +9,12 @@ import { MongoClient, ObjectId } from "mongodb";
 // const Category = require("./model/Category.js");
 
 const app = express();
-const port = 5000;
+const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 // Connect to MongoDB
-const MONGO_URI = "mongodb+srv://scastillohgo:1234@GLHF.8qefkqx.mongodb.net/";
+const MONGO_URI = process.env.DB_URL;
 mongoose
   .connect(MONGO_URI, {})
   .then(() => {
@@ -24,7 +24,7 @@ mongoose
     console.log("Error connecting to MongoDB", error);
   });
 
-app.listen(port, () => {
+app.listen(PORT, () => {
   console.log(`Server is running on port ${port}`);
 });
 
