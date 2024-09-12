@@ -7,6 +7,10 @@ import { router } from "expo-router";
 import axios from "axios";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
+import Constants from "expo-constants";
+
+const API_URL =
+  Constants.manifest?.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
 
 export default function HomeScreen() {
   const [categories, setcategories] = useState([]);
@@ -16,9 +20,7 @@ export default function HomeScreen() {
     useCallback(() => {
       const categories = async () => {
         try {
-          const response = await axios.get(
-            "https://glhf.onrender.com/categories"
-          );
+          const response = await axios.get(`${API_URL}/categories`);
           setcategories(response.data);
         } catch (error) {
           console.log("error fetching categories data", error);

@@ -20,6 +20,10 @@ import CustomField from "@/components/Field";
 import ModalProducts from "@/components/OptionModal";
 import { router } from "expo-router";
 import DropDownPicker from "react-native-dropdown-picker";
+import Constants from "expo-constants";
+
+const API_URL =
+  Constants.manifest?.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
 
 const Products = () => {
   const { category } = useLocalSearchParams();
@@ -57,12 +61,9 @@ const Products = () => {
     useCallback(() => {
       const productsFunction = async () => {
         try {
-          const response = await axios.get(
-            "https://glhf.onrender.com/productsByIDCategory",
-            {
-              params: { CategoryKey: categoryObject._id },
-            }
-          );
+          const response = await axios.get(`${API_URL}/productsByIDCategory`, {
+            params: { CategoryKey: categoryObject._id },
+          });
           setProducts(response.data);
         } catch (error) {
           console.log("error fetching products data", error);
@@ -74,12 +75,9 @@ const Products = () => {
 
   const productsFunction = async () => {
     try {
-      const response = await axios.get(
-        "https://glhf.onrender.com/productsByIDCategory",
-        {
-          params: { CategoryKey: categoryObject._id },
-        }
-      );
+      const response = await axios.get(`${API_URL}/productsByIDCategory`, {
+        params: { CategoryKey: categoryObject._id },
+      });
       setProducts(response.data);
     } catch (error) {
       console.log("error fetching products data", error);
@@ -104,7 +102,7 @@ const Products = () => {
     };
 
     axios
-      .post("https://glhf.onrender.com/addProductDetail", addProductDetail)
+      .post(`${API_URL}/addProductDetail`, addProductDetail)
       .then((response) => {
         console.log(response);
         quantityUpdateProduct(idProducto, quantityProduct, operation);
@@ -135,7 +133,7 @@ const Products = () => {
     };
 
     axios
-      .post("https://glhf.onrender.com/addProductDetail", addProductDetail)
+      .post(`${API_URL}/addProductDetail`, addProductDetail)
       .then((response) => {
         // router.push("/");
         console.log(response);
@@ -164,10 +162,7 @@ const Products = () => {
     };
 
     axios
-      .patch(
-        "https://glhf.onrender.com/quantityUpdateProduct",
-        UpdateQuantityData
-      )
+      .patch(`${API_URL}/quantityUpdateProduct`, UpdateQuantityData)
       .then((response) => {
         productsFunction();
         console.log(UpdateQuantityData);
@@ -260,14 +255,11 @@ const Products = () => {
   //funcion para eliminar producto
   const deleteProduct = async (idProducto: any) => {
     try {
-      await axios.delete(
-        `https://glhf.onrender.com/deleteProduct/${idProducto}`
-      );
+      await axios.delete(`${API_URL}/deleteProduct/${idProducto}`);
       // Refrescar la lista de productos después de eliminar
-      const response = await axios.get(
-        "https://glhf.onrender.com/productsByIDCategory",
-        { params: { CategoryKey: categoryObject._id } }
-      );
+      const response = await axios.get("${API_URL}/productsByIDCategory", {
+        params: { CategoryKey: categoryObject._id },
+      });
       setProducts(response.data);
     } catch (error) {
       console.log("Error deleting product", error);

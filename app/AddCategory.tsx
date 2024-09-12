@@ -5,6 +5,10 @@ import CustomField from "@/components/Field";
 import CustomButton from "@/components/Button";
 import { useState } from "react";
 import axios from "axios";
+import Constants from "expo-constants";
+
+const API_URL =
+  Constants.manifest?.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
 
 const AddCategory = () => {
   const [name, setName] = useState("");
@@ -16,7 +20,7 @@ const AddCategory = () => {
     };
 
     axios
-      .post("https://glhf.onrender.com/addCategory", categoriesData)
+      .post(`${API_URL}/addCategory`, categoriesData)
       .then((response) => {
         Alert.alert("Categoría Agregada 💾");
         setName("");

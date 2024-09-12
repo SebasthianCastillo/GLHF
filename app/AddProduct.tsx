@@ -5,6 +5,10 @@ import CustomButton from "@/components/Button";
 import { useState } from "react";
 import axios from "axios";
 import { useLocalSearchParams } from "expo-router";
+import Constants from "expo-constants";
+
+const API_URL =
+  Constants.manifest?.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
 
 const AddProduct = () => {
   const [ProductName, setProductName] = useState("");
@@ -20,7 +24,7 @@ const AddProduct = () => {
       CategoryID: CategoryKey,
     };
     axios
-      .post("https://glhf.onrender.com/addProduct", ProductData)
+      .post(`${API_URL}/addProduct`, ProductData)
       .then((response) => {
         Alert.alert("Producto Agregado 💾");
         setProductName("");

@@ -10,6 +10,10 @@ import { useLocalSearchParams } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import axios from "axios";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Constants from "expo-constants";
+
+const API_URL =
+  Constants.manifest?.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
 
 interface ProductDetail {
   _id: string;
@@ -44,7 +48,7 @@ const ProductDetail = () => {
       const productDetailFunction = async () => {
         try {
           const response = await axios.get(
-            "https://glhf.onrender.com/productDetailByIDProduct",
+            `${API_URL}/productDetailByIDProduct`,
             {
               params: { ProductKey: productObject._id },
             }
@@ -68,7 +72,7 @@ const ProductDetail = () => {
   const fetchSummaryData = async (currentMonth: Date) => {
     try {
       const addResponse = await axios.get(
-        "https://glhf.onrender.com/productDetailSummaryByOperationAdd",
+        `${API_URL}/productDetailSummaryByOperationAdd`,
         {
           params: {
             ProductKey: productObject._id,
@@ -78,7 +82,7 @@ const ProductDetail = () => {
       );
 
       const minusResponse = await axios.get(
-        "https://glhf.onrender.com/productDetailSummaryByOperationMinus",
+        `${API_URL}/productDetailSummaryByOperationMinus`,
         {
           params: {
             ProductKey: productObject._id,
