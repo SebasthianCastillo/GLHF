@@ -1,11 +1,16 @@
-import { SafeAreaView } from "react-native-safe-area-context";
-import { View, ScrollView, Dimensions, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import CustomField from "@/components/Field";
 import CustomButton from "@/components/Button";
-import { useState } from "react";
-import axios from "axios";
-import Constants from "expo-constants";
+import {
+  View,
+  ScrollView,
+  Alert,
+  SafeAreaView,
+  useState,
+  axios,
+  Constants,
+  Dimensions,
+} from "../app/shared"; // Centralized imports
 
 const API_URL =
   Constants.manifest?.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;

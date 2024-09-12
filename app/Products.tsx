@@ -1,7 +1,10 @@
-import React, { useState, useCallback, useRef } from "react";
-import { useLocalSearchParams } from "expo-router";
-import axios from "axios";
+import React from "react";
 import { useFocusEffect } from "@react-navigation/native";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import CustomField from "@/components/Field";
+import ModalProducts from "@/components/OptionModal";
+import DropDownPicker from "react-native-dropdown-picker";
 import {
   View,
   ScrollView,
@@ -12,15 +15,16 @@ import {
   StyleSheet,
   TouchableWithoutFeedback,
   Alert,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
-import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
-import CustomField from "@/components/Field";
-import ModalProducts from "@/components/OptionModal";
-import { router } from "expo-router";
-import DropDownPicker from "react-native-dropdown-picker";
-import Constants from "expo-constants";
+  RefreshControl,
+  SafeAreaView,
+  useSafeAreaInsets,
+  useState,
+  useCallback,
+  router,
+  axios,
+  Constants,
+  useLocalSearchParams,
+} from "../app/shared"; // Centralized imports
 
 const API_URL =
   Constants.manifest?.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
@@ -54,7 +58,8 @@ const Products = () => {
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const [selectedValues, setSelectedValues] = useState<SelectedValuesType>({});
   const [showOptionsModal, setShowOptionsModal] = useState(false); // Para mostrar el menú de opciones
-
+  const [IsRefreshing, setIsRefreshing] = useState(false);
+  const { top } = useSafeAreaInsets();
   let CategoryName = categoryObject.Name;
 
   useFocusEffect(
@@ -257,7 +262,7 @@ const Products = () => {
     try {
       await axios.delete(`${API_URL}/deleteProduct/${idProducto}`);
       // Refrescar la lista de productos después de eliminar
-      const response = await axios.get("${API_URL}/productsByIDCategory", {
+      const response = await axios.get(`${API_URL}/productsByIDCategory`, {
         params: { CategoryKey: categoryObject._id },
       });
       setProducts(response.data);
@@ -265,10 +270,27 @@ const Products = () => {
       console.log("Error deleting product", error);
     }
   };
+  const onRefreshingProducts = async () => {
+    productsFunction();
+    setIsRefreshing(true);
+
+    setTimeout(() => {
+      setIsRefreshing(false);
+    }, 2000);
+  };
   return (
     <TouchableWithoutFeedback onPress={handlePressOutside}>
       <SafeAreaView className="bg-primary h-full">
-        <ScrollView>
+        <ScrollView
+          refreshControl={
+            <RefreshControl
+              refreshing={IsRefreshing}
+              progressViewOffset={top}
+              onRefresh={onRefreshingProducts}
+              colors={["green", "orange"]}
+            />
+          }
+        >
           <View className="p-4 space-y-3 bg-slate-950">
             {products.map((item: any) => (
               <View className="flex-row justify-between items-center">

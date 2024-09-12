@@ -1,19 +1,28 @@
-import { View, ScrollView, TouchableOpacity, Text, Image } from "react-native";
 import CustomButton from "@/components/Button";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
-import { SafeAreaView } from "react-native-safe-area-context";
-import React, { useState } from "react";
-import { router } from "expo-router";
-import axios from "axios";
 import { useFocusEffect } from "@react-navigation/native";
-import { useCallback } from "react";
-import Constants from "expo-constants";
+import {
+  View,
+  ScrollView,
+  TouchableOpacity,
+  RefreshControl,
+  SafeAreaView,
+  useSafeAreaInsets,
+  useState,
+  useCallback,
+  router,
+  axios,
+  Constants,
+  Image,
+} from "../app/shared"; // Centralized imports
 
 const API_URL =
   Constants.manifest?.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
 
 export default function HomeScreen() {
   const [categories, setcategories] = useState([]);
+  const [IsRefreshing, setIsRefreshing] = useState(false);
+  const { top } = useSafeAreaInsets();
 
   // Carga lista entre navegaciones automaticamente
   useFocusEffect(
@@ -29,6 +38,22 @@ export default function HomeScreen() {
       categories();
     }, [])
   );
+  const Callcategories = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/categories`);
+      setcategories(response.data);
+    } catch (error) {
+      console.log("error fetching categories data", error);
+    }
+  };
+  const onRefreshingProducts = async () => {
+    Callcategories();
+    setIsRefreshing(true);
+
+    setTimeout(() => {
+      setIsRefreshing(false);
+    }, 2000);
+  };
   const navigateToProductosFromCategory = (category: object) => {
     router.push({
       pathname: "/Products",
@@ -38,7 +63,17 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView className="bg-primary h-full">
-      <ScrollView contentContainerStyle={{ height: "100%" }}>
+      <ScrollView
+        contentContainerStyle={{ height: "100%" }}
+        refreshControl={
+          <RefreshControl
+            refreshing={IsRefreshing}
+            progressViewOffset={top}
+            onRefresh={onRefreshingProducts}
+            colors={["green", "orange"]}
+          />
+        }
+      >
         <View className="w-full flex justify-center items-center h-full px-5">
           <View className="items-center pb-28">
             <Image

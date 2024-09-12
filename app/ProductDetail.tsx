@@ -1,16 +1,18 @@
+import React from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import {
   View,
-  Text,
-  FlatList,
   ScrollView,
   TouchableOpacity,
-} from "react-native";
-import React, { useState, useCallback, useEffect } from "react";
-import { useLocalSearchParams } from "expo-router";
-import { useFocusEffect } from "@react-navigation/native";
-import axios from "axios";
-import { SafeAreaView } from "react-native-safe-area-context";
-import Constants from "expo-constants";
+  Text,
+  SafeAreaView,
+  useState,
+  useCallback,
+  axios,
+  Constants,
+  useLocalSearchParams,
+  FlatList,
+} from "../app/shared"; // Centralized imports
 
 const API_URL =
   Constants.manifest?.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
@@ -69,6 +71,7 @@ const ProductDetail = () => {
     }, [currentMonth, currentYear])
   );
 
+  // Cuenta cuantos productos fueron agregados y quitados por mes
   const fetchSummaryData = async (currentMonth: Date) => {
     try {
       const addResponse = await axios.get(
@@ -214,7 +217,7 @@ const ProductDetail = () => {
         <FlatList
           data={filteredDetails}
           renderItem={renderItem}
-          keyExtractor={(item) => item._id.toString()} // Asegúrate de que `item.id` sea único
+          keyExtractor={(item) => item._id.toString()}
         />
       </ScrollView>
       <View className="flex-row justify-between mt-4">
@@ -223,6 +226,14 @@ const ProductDetail = () => {
             <Text className="text-3xl font-bold text-white">
               {ProductDetailSummaryAdd}
             </Text>
+          </View>
+        </View>
+        <View className="h-24 w-36">
+          <View className="flex-1 items-center justify-center bg-yellow-500 rounded-lg shadow-lg p-4">
+            <Text className="text-3xl font-bold text-white pt-5">
+              {ProductDetailSummaryAdd - ProductDetailSummaryMinus}
+            </Text>
+            <Text className="text-center pt-1 ">Disponible</Text>
           </View>
         </View>
         <View className="h-24 w-36">
