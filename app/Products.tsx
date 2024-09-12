@@ -12,7 +12,6 @@ import {
   StyleSheet,
   TouchableWithoutFeedback,
   Alert,
-  Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
@@ -47,9 +46,7 @@ const Products = () => {
     { label: "KG", value: "KG" },
     { label: "GR", value: "GR" },
   ]);
-  // const [openDropdowns, setOpenDropdowns] = useState<{
-  //   [key: string]: boolean;
-  // }>({});
+
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const [selectedValues, setSelectedValues] = useState<SelectedValuesType>({});
   const [showOptionsModal, setShowOptionsModal] = useState(false); // Para mostrar el menú de opciones
@@ -119,7 +116,9 @@ const Products = () => {
         console.log("Error AddProductDetail", error);
       });
   };
+
   // Funcion Resta
+
   const handlePressMinus = (
     idProducto: any,
     fromWhatQuantityCallfunction: string
@@ -150,7 +149,9 @@ const Products = () => {
         console.log("Error AddProductDetail minus", error);
       });
   };
+
   //Funcion para actualizar cantidad de producto
+
   const quantityUpdateProduct = (
     idProducto: any,
     quantityProduct: number,
@@ -202,8 +203,8 @@ const Products = () => {
     setShowInputMinus2(true);
   };
 
+  // Verifica si el toque está fuera del área del dropdown
   const handlePressOutside = () => {
-    // Verifica si el toque está fuera del área del dropdown
     setShowInputCant(true);
     setShowInputAdd(true);
     setShowInputMinus(true);
@@ -221,15 +222,16 @@ const Products = () => {
     [key: string]: string; // Las claves son las ids de tipo string, y los valores también son strings
   };
 
+  //maneja el comportamiento de los dropdown para elegir formato P, KG, GR
   const handleDropdownChange = (id: string, newValue: string) => {
     setSelectedValues((prevValues) => ({
       ...prevValues,
       [id]: newValue,
     }));
     setFormatValue(newValue);
-
-    // Aquí puedes manejar cualquier otra lógica necesaria con el nuevo valor seleccionado
   };
+
+  //modal para confirmar eliminacion
   const confirmDelete = () => {
     Alert.alert(
       "Confirmación",
@@ -254,6 +256,8 @@ const Products = () => {
     setSelectedItemId(idProducto); // Guardar el ID del producto seleccionado
     setShowOptionsModal(true); // Mostrar el menú de opciones
   };
+
+  //funcion para eliminar producto
   const deleteProduct = async (idProducto: any) => {
     try {
       await axios.delete(

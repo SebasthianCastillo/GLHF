@@ -38,6 +38,7 @@ const ProductDetail = () => {
     ? JSON.parse(product[0])
     : JSON.parse(product || "{}");
 
+  // carga lista de historial de productos
   useFocusEffect(
     useCallback(() => {
       const productDetailFunction = async () => {

@@ -1,4 +1,4 @@
-import { View, ScrollView, TouchableOpacity } from "react-native";
+import { View, ScrollView, TouchableOpacity, Text, Image } from "react-native";
 import CustomButton from "@/components/Button";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -10,8 +10,6 @@ import { useCallback } from "react";
 
 export default function HomeScreen() {
   const [categories, setcategories] = useState([]);
-  //   const [input, setInput] = useState("");
-  //   const router = useRouter();
 
   // Carga lista entre navegaciones automaticamente
   useFocusEffect(
@@ -40,6 +38,12 @@ export default function HomeScreen() {
     <SafeAreaView className="bg-primary h-full">
       <ScrollView contentContainerStyle={{ height: "100%" }}>
         <View className="w-full flex justify-center items-center h-full px-5">
+          <View className="items-center pb-28">
+            <Image
+              source={require("../assets/images/LL.png")} // Update path to your logo
+              style={{ width: 100, height: 100 }} // Adjust size as needed
+            />
+          </View>
           {categories.map((category: any) => (
             <CustomButton
               containerStyles="w-full m-2"
