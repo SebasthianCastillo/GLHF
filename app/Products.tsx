@@ -90,7 +90,6 @@ const Products = () => {
   };
 
   // funcion Sumar
-
   const handlePressAdd = (
     idProducto: any,
     fromWhatQuantityCallfunction: string
@@ -109,7 +108,6 @@ const Products = () => {
     axios
       .post(`${API_URL}/addProductDetail`, addProductDetail)
       .then((response) => {
-        console.log(response);
         quantityUpdateProduct(idProducto, quantityProduct, operation);
         productsFunction();
         handlePressOutside();
@@ -148,7 +146,6 @@ const Products = () => {
       })
       .catch((error) => {
         console.log(addProductDetail);
-
         console.log("Error AddProductDetail minus", error);
       });
   };
@@ -170,7 +167,6 @@ const Products = () => {
       .patch(`${API_URL}/quantityUpdateProduct`, UpdateQuantityData)
       .then((response) => {
         productsFunction();
-        console.log(UpdateQuantityData);
       })
       .catch((error) => {
         console.log(UpdateQuantityData);
@@ -270,10 +266,11 @@ const Products = () => {
       console.log("Error deleting product", error);
     }
   };
+
+  //funcion que se activa cuando se hace pull to refresh
   const onRefreshingProducts = async () => {
     productsFunction();
     setIsRefreshing(true);
-
     setTimeout(() => {
       setIsRefreshing(false);
     }, 2000);
