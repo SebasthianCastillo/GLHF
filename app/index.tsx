@@ -3,7 +3,7 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ColorPicker } from "react-native-color-picker";
-import { useFonts } from "expo-font";
+
 import {
   View,
   ScrollView,
@@ -134,9 +134,12 @@ export default function HomeScreen() {
               HandlePress={() => navigateToProductosFromCategory(category)}
               HandleOnLongPress={() => OnPressColorChange(category._id)} // Show color picker on long press
               style={{
-                backgroundColor: colors[category._id] || "white",
+                backgroundColor: colors[category._id] || "#F59E0B",
                 // Add your font family here
               }}
+              size={"text-lg"}
+              showIcon={true}
+              containerStylesText="pl-8"
             />
           ))}
 
@@ -158,8 +161,8 @@ export default function HomeScreen() {
             transparent={true}
             animationType="slide"
           >
-            <View className="flex-1 justify-center items-center bg-black bg-opacity-50">
-              <View className="w-4/5 bg-primary p-5 rounded-lg">
+            <View className="flex-1 justify-center items-center bg-primary bg-opacity-50">
+              <View className="w-4/5 bg-primary p-5 rounded-lg ">
                 <ColorPicker
                   onColorSelected={(color) => {
                     handleColorChange(color);
@@ -167,10 +170,14 @@ export default function HomeScreen() {
                   }}
                   style={{ height: 200 }}
                 />
-                <Button
-                  title="Cancel"
-                  onPress={() => setIsPickerVisible(false)}
-                />
+                <View className="items-center p-4">
+                  <CustomButton
+                    containerStyles="w-32 m-2 items-center"
+                    text={"Volver"}
+                    HandlePress={() => setIsPickerVisible(false)}
+                    size={"text-lg"}
+                  />
+                </View>
               </View>
             </View>
           </Modal>
