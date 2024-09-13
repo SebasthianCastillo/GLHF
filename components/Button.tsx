@@ -18,7 +18,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
   style,
 }) => {
   const [loaded] = useFonts({
-    Monserrat: require("../assets/fonts/Montserrat-Regular.ttf"),
+    Monserrat: require("../assets/fonts/Montserrat-SemiBold.ttf"),
   });
   return (
     <TouchableOpacity

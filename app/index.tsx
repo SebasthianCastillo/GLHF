@@ -32,9 +32,7 @@ export default function HomeScreen() {
   const { top } = useSafeAreaInsets();
   const [colors, setColors] = useState<{ [key: string]: string }>({}); // Object to hold colors for each category
   const [selectedCategoryId, setSelectedCategoryId] = useState(null); // Category ID for which color is being changed
-  const [loaded] = useFonts({
-    Monserrat: require("../assets/fonts/Montserrat-Regular.ttf"),
-  });
+
   // Carga lista entre navegaciones automaticamente
   useFocusEffect(
     useCallback(() => {
