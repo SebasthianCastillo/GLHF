@@ -23,7 +23,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
   containerStylesText,
 }) => {
   const [loaded] = useFonts({
-    Monserrat: require("../assets/fonts/Montserrat-SemiBold.ttf"),
+    Rubik: require("../assets/fonts/Rubik-VariableFont_wght.ttf"),
   });
   return (
     <TouchableOpacity
@@ -40,7 +40,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
           <Text
             className={`text-primary ${size}`}
             style={{
-              fontFamily: "Monserrat",
+              fontFamily: "Rubik",
               textAlign: "center",
               flex: 1,
             }}

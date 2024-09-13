@@ -9,7 +9,7 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [loaded] = useFonts({
-    Monserrat: require("../assets/fonts/Montserrat-Regular.ttf"),
+    Rubik: require("../assets/fonts/Rubik-VariableFont_wght.ttf"),
   });
 
   useEffect(() => {
