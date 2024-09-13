@@ -1,5 +1,5 @@
-import { TouchableOpacity, Text, StyleSheet, ViewStyle } from "react-native";
-
+import { TouchableOpacity, Text, ViewStyle } from "react-native";
+import { useFonts } from "expo-font";
 interface CustomButtonProps {
   text: string;
   HandlePress: () => void;
@@ -17,6 +17,9 @@ const CustomButton: React.FC<CustomButtonProps> = ({
   size,
   style,
 }) => {
+  const [loaded] = useFonts({
+    Monserrat: require("../assets/fonts/Montserrat-Regular.ttf"),
+  });
   return (
     <TouchableOpacity
       activeOpacity={0.7}
@@ -25,7 +28,12 @@ const CustomButton: React.FC<CustomButtonProps> = ({
       className={`bg-yellow-600 rounded-xl min-h-[45px] flex flex-row justify-center items-center ${containerStyles}`}
       style={style}
     >
-      <Text className={`text-primary ${size}}`}>{text}</Text>
+      <Text
+        className={`text-primary ${size}}`}
+        style={{ fontFamily: "Monserrat" }}
+      >
+        {text}
+      </Text>
     </TouchableOpacity>
   );
 };

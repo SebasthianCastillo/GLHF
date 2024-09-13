@@ -3,7 +3,7 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ColorPicker } from "react-native-color-picker";
-
+import { useFonts } from "expo-font";
 import {
   View,
   ScrollView,
@@ -28,11 +28,13 @@ const API_URL =
 export default function HomeScreen() {
   const [categories, setcategories] = useState([]);
   const [IsRefreshing, setIsRefreshing] = useState(false);
-  const [ChangeColor, setChangeColor] = useState("bg-yellow-500");
   const [IsPickerVisible, setIsPickerVisible] = useState(false); // To toggle color picker modal
   const { top } = useSafeAreaInsets();
   const [colors, setColors] = useState<{ [key: string]: string }>({}); // Object to hold colors for each category
   const [selectedCategoryId, setSelectedCategoryId] = useState(null); // Category ID for which color is being changed
+  const [loaded] = useFonts({
+    Monserrat: require("../assets/fonts/Montserrat-Regular.ttf"),
+  });
   // Carga lista entre navegaciones automaticamente
   useFocusEffect(
     useCallback(() => {
@@ -135,7 +137,8 @@ export default function HomeScreen() {
               HandleOnLongPress={() => OnPressColorChange(category._id)} // Show color picker on long press
               style={{
                 backgroundColor: colors[category._id] || "white",
-              }} // Apply color for the specific category
+                // Add your font family here
+              }}
             />
           ))}
 
