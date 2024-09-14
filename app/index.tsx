@@ -133,7 +133,7 @@ export default function HomeScreen() {
               Captain Chef
             </Text>
             <Image
-              source={require("../assets/images/CaptainChefPNG.png")} // Logo
+              source={require("../assets/images/CaptainChefPNG.jpg")} // Logo
               style={{ width: 180, height: 180 }}
             />
           </View>
