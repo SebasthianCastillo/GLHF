@@ -28,7 +28,6 @@ const API_URL =
 
 export default function HomeScreen() {
   const [categories, setcategories] = useState([]);
-
   const [IsPickerVisible, setIsPickerVisible] = useState(false); // To toggle color picker modal
   const [colors, setColors] = useState<{ [key: string]: string }>({}); // Object to hold colors for each category
   const [selectedCategoryId, setSelectedCategoryId] = useState(null); // Category ID for which color is being changed
@@ -133,7 +132,7 @@ export default function HomeScreen() {
               Captain Chef
             </Text>
             <Image
-              source={require("../assets/images/CaptainChefPNG.jpg")} // Logo
+              source={require("../assets/images/CaptainChefPNG.png")} // Logo
               style={{ width: 180, height: 180 }}
             />
           </View>

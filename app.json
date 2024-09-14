@@ -17,7 +17,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/CaptainChef.png",
+        "foregroundImage": "./assets/images/CaptainChef.jpg",
         "backgroundColor": "#ffffff"
       },
       "package": "com.sebb21.GLHF"
