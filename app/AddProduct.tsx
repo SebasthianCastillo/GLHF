@@ -23,6 +23,7 @@ const AddProduct = () => {
   const { CategoryName } = useLocalSearchParams();
   const [CategoryID, setCategoryID] = useState("");
 
+  //Funcion que añade nuevo producto
   const HandleRegister = () => {
     const ProductData = {
       Name: ProductName,

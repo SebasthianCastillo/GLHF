@@ -1,5 +1,3 @@
-import React from "react";
-import { useFocusEffect } from "@react-navigation/native";
 import {
   View,
   ScrollView,
@@ -12,6 +10,8 @@ import {
   Constants,
   useLocalSearchParams,
   FlatList,
+  useFocusEffect,
+  React,
 } from "../app/shared"; // Centralized imports
 
 const API_URL =
@@ -110,6 +110,7 @@ const ProductDetail = () => {
     }
   };
 
+  // Funcion que filtra la data por mes
   const filterByMonth = (
     data: ProductDetail[],
     month: number,
@@ -124,6 +125,7 @@ const ProductDetail = () => {
     fetchSummaryData(filtered[0].date);
   };
 
+  // setea cambio de mes en vista producto detail
   const handlePrevMonth = () => {
     const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
     const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear;
@@ -131,6 +133,7 @@ const ProductDetail = () => {
     setCurrentYear(prevYear);
   };
 
+  // setea cambio de mes en vista producto detail
   const handleNextMonth = () => {
     const nextMonth = currentMonth === 11 ? 0 : currentMonth + 1;
     const nextYear = currentMonth === 11 ? currentYear + 1 : currentYear;

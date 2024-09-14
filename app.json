@@ -38,7 +38,7 @@
       "eas": {
         "projectId": "c69b3306-b872-4414-a490-dedbd3b5cfb6"
       },
-      "API_URL": "https://glhf.onrender.com"
+      "API_URL": "http://192.168.194.133:5000"
     }
   }
 }

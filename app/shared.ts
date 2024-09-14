@@ -13,6 +13,7 @@ export {
   FlatList,
   Dimensions,
   Modal,
+  ActivityIndicator,
 } from "react-native";
 export {
   SafeAreaView,
@@ -23,3 +24,6 @@ export { router } from "expo-router";
 export { default as axios } from "axios";
 export { default as Constants } from "expo-constants";
 export { useLocalSearchParams } from "expo-router";
+export { useFocusEffect } from "@react-navigation/native";
+export { default as React } from "react";
+export { useRouter } from "expo-router";

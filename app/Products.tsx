@@ -1,5 +1,3 @@
-import React from "react";
-import { useFocusEffect } from "@react-navigation/native";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import CustomField from "@/components/Field";
@@ -24,6 +22,8 @@ import {
   axios,
   Constants,
   useLocalSearchParams,
+  useFocusEffect,
+  React,
 } from "../app/shared"; // Centralized imports
 
 const API_URL =
@@ -62,6 +62,7 @@ const Products = () => {
   const { top } = useSafeAreaInsets();
   let CategoryName = categoryObject.Name;
 
+  // Funcion que trae los productos segun categoria
   useFocusEffect(
     useCallback(() => {
       const productsFunction = async () => {
@@ -77,7 +78,7 @@ const Products = () => {
       productsFunction();
     }, [])
   );
-
+  // Funcion que trae los productos segun categoria
   const productsFunction = async () => {
     try {
       const response = await axios.get(`${API_URL}/productsByIDCategory`, {
@@ -89,7 +90,7 @@ const Products = () => {
     }
   };
 
-  // funcion Sumar
+  // Funcion Sumar cantidad de producto
   const handlePressAdd = (
     idProducto: any,
     fromWhatQuantityCallfunction: string
@@ -118,7 +119,7 @@ const Products = () => {
       });
   };
 
-  // Funcion Resta
+  // Funcion Resta cantidad de producto
 
   const handlePressMinus = (
     idProducto: any,
@@ -192,7 +193,6 @@ const Products = () => {
     setShowInputAdd(false);
     setShowInputMinus(false);
     setShowInputisOnAdd(true);
-
     setShowInputCustomCant(true);
     setShowInputAdd2(true);
     setShowInputCant2(true);

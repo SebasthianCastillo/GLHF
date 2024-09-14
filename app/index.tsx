@@ -1,6 +1,5 @@
 import CustomButton from "@/components/Button";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
-import { useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ColorPicker } from "react-native-color-picker";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -8,9 +7,7 @@ import {
   View,
   ScrollView,
   TouchableOpacity,
-  RefreshControl,
   SafeAreaView,
-  useSafeAreaInsets,
   useState,
   useCallback,
   router,
@@ -20,8 +17,10 @@ import {
   useEffect,
   Modal,
   Text,
+  useFocusEffect,
+  Pressable,
+  ActivityIndicator,
 } from "../app/shared"; // Centralized imports
-import { Pressable, ActivityIndicator } from "react-native";
 
 const API_URL =
   Constants.manifest?.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
@@ -32,6 +31,7 @@ export default function HomeScreen() {
   const [colors, setColors] = useState<{ [key: string]: string }>({}); // Object to hold colors for each category
   const [selectedCategoryId, setSelectedCategoryId] = useState(null); // Category ID for which color is being changed
   const [loading, setLoading] = useState(false);
+
   // Carga lista entre navegaciones automaticamente
   useFocusEffect(
     useCallback(() => {
@@ -56,6 +56,8 @@ export default function HomeScreen() {
       console.log("error fetching categories data", error);
     }
   };
+
+  // Funcion que actualiza vista pull-to-refresh
   const onRefreshingProducts = async () => {
     CallCategories();
     setLoading(true);
@@ -63,6 +65,8 @@ export default function HomeScreen() {
       setLoading(false);
     }, 2000);
   };
+
+  //navega a vista productos
   const navigateToProductosFromCategory = (category: object) => {
     router.push({
       pathname: "/Products",
@@ -70,6 +74,7 @@ export default function HomeScreen() {
     });
   };
 
+  //Levanta modal para elegir color de boton de categoria segun id
   const OnPressColorChange = (categoryId: any) => {
     setSelectedCategoryId(categoryId); // Set the current category ID
     setIsPickerVisible(true);
