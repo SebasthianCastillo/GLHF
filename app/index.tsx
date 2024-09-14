@@ -3,7 +3,7 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ColorPicker } from "react-native-color-picker";
-
+import Ionicons from "@expo/vector-icons/Ionicons";
 import {
   View,
   ScrollView,
@@ -19,20 +19,20 @@ import {
   Image,
   useEffect,
   Modal,
-  Button,
+  Text,
 } from "../app/shared"; // Centralized imports
+import { Pressable, ActivityIndicator } from "react-native";
 
 const API_URL =
   Constants.manifest?.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
 
 export default function HomeScreen() {
   const [categories, setcategories] = useState([]);
-  const [IsRefreshing, setIsRefreshing] = useState(false);
+
   const [IsPickerVisible, setIsPickerVisible] = useState(false); // To toggle color picker modal
-  const { top } = useSafeAreaInsets();
   const [colors, setColors] = useState<{ [key: string]: string }>({}); // Object to hold colors for each category
   const [selectedCategoryId, setSelectedCategoryId] = useState(null); // Category ID for which color is being changed
-
+  const [loading, setLoading] = useState(false);
   // Carga lista entre navegaciones automaticamente
   useFocusEffect(
     useCallback(() => {
@@ -49,7 +49,7 @@ export default function HomeScreen() {
   );
 
   //funcion que se activa cuando se hace pull to refresh
-  const Callcategories = async () => {
+  const CallCategories = async () => {
     try {
       const response = await axios.get(`${API_URL}/categories`);
       setcategories(response.data);
@@ -58,10 +58,10 @@ export default function HomeScreen() {
     }
   };
   const onRefreshingProducts = async () => {
-    Callcategories();
-    setIsRefreshing(true);
+    CallCategories();
+    setLoading(true);
     setTimeout(() => {
-      setIsRefreshing(false);
+      setLoading(false);
     }, 2000);
   };
   const navigateToProductosFromCategory = (category: object) => {
@@ -107,24 +107,34 @@ export default function HomeScreen() {
       }
     }
   };
+  // contentContainerStyle={{ height: "100%" }}
+  // refreshControl={
+  //   <RefreshControl
+  //     refreshing={IsRefreshing}
+  //     progressViewOffset={top}
+  //     onRefresh={onRefreshingProducts}
+  //     colors={["green", "orange"]}
+  //   />
+  // }
   return (
     <SafeAreaView className="bg-primary h-full">
-      <ScrollView
-        contentContainerStyle={{ height: "100%" }}
-        refreshControl={
-          <RefreshControl
-            refreshing={IsRefreshing}
-            progressViewOffset={top}
-            onRefresh={onRefreshingProducts}
-            colors={["green", "orange"]}
-          />
-        }
-      >
+      <Pressable onPress={onRefreshingProducts} className="pt-2 pl-4">
+        {loading ? (
+          <ActivityIndicator size="large" color="white" />
+        ) : (
+          <Ionicons name="reload" size={34} color="white" />
+        )}
+      </Pressable>
+
+      <ScrollView>
         <TouchableOpacity className="w-full flex justify-center items-center h-full px-5">
-          <View className="items-center pb-28">
+          <View className="items-center pb-10">
+            <Text className="text-slate-300 font-bold text-2xl">
+              Captain Chef
+            </Text>
             <Image
-              source={require("../assets/images/LL.png")} // Logo
-              style={{ width: 100, height: 100 }}
+              source={require("../assets/images/CaptainChefPNG.png")} // Logo
+              style={{ width: 180, height: 180 }}
             />
           </View>
           {categories.map((category: any) => (
@@ -135,7 +145,6 @@ export default function HomeScreen() {
               HandleOnLongPress={() => OnPressColorChange(category._id)} // Show color picker on long press
               style={{
                 backgroundColor: colors[category._id] || "#F59E0B",
-                // Add your font family here
               }}
               size={"text-lg"}
               showIcon={true}
@@ -155,7 +164,7 @@ export default function HomeScreen() {
             </View>
           </TouchableOpacity>
           {/* Modal for color picker */}
-          {/* {IsPickerVisible && ( */}
+
           <Modal
             visible={IsPickerVisible}
             transparent={true}

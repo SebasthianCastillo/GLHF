@@ -38,7 +38,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
           className={`flex-1 flex-row items-center justify-between ${containerStylesText}`}
         >
           <Text
-            className={`text-primary ${size}`}
+            className={`text-zinc-900 ${size} font-bold`}
             style={{
               fontFamily: "Rubik",
               textAlign: "center",
