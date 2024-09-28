@@ -37,44 +37,35 @@ const Products = () => {
   const [products, setProducts] = useState([]);
   const [CantidadProducto, setCantidadProducto] = useState(0);
   const [selectedItemId, setSelectedItemId] = useState("");
-  const [showInputCustomCant, setShowInputCustomCant] = useState(false);
-  const [showInputCant, setShowInputCant] = useState(true);
-  const [showInputAdd, setShowInputAdd] = useState(true);
-  const [showInputMinus, setShowInputMinus] = useState(true);
-  const [showInputAdd2, setShowInputAdd2] = useState(false);
-  const [showInputMinus2, setShowInputMinus2] = useState(false);
-  const [showInputCant2, setShowInputCant2] = useState(false);
   const [formatValues, setFormatValues] = useState<{ [key: string]: string }>(
     {}
   );
-  const [isOnAdd, setShowInputisOnAdd] = useState(false);
+
   const [formatValue, setFormatValue] = useState("P");
   const [items, setItems] = useState([
     { label: "P", value: "P" },
     { label: "KG", value: "KG" },
     { label: "GR", value: "GR" },
   ]);
-
+  const [justifyContent, setJustifyContent] = useState("opacity-100");
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const [selectedValues, setSelectedValues] = useState<SelectedValuesType>({});
   const [showOptionsModal, setShowOptionsModal] = useState(false); // Para mostrar el menú de opciones
   const [IsRefreshing, setIsRefreshing] = useState(false);
   const { top } = useSafeAreaInsets();
+  const [pressedItemId, setPressedItemId] = useState<string | null>(null);
   let CategoryName = categoryObject.Name;
+
+  const [inputVisibility, setInputVisibility] = useState({
+    showCant: true,
+    showCustomCant: false,
+    showSecondCant: false,
+    isOnAdd: false,
+  });
 
   // Funcion que trae los productos segun categoria
   useFocusEffect(
     useCallback(() => {
-      const productsFunction = async () => {
-        try {
-          const response = await axios.get(`${API_URL}/productsByIDCategory`, {
-            params: { CategoryKey: categoryObject._id },
-          });
-          setProducts(response.data);
-        } catch (error) {
-          console.log("error fetching products data", error);
-        }
-      };
       productsFunction();
     }, [])
   );
@@ -175,41 +166,20 @@ const Products = () => {
       });
   };
 
-  const handleLongPressMinus = (ItemId: any) => {
-    setSelectedItemId(ItemId);
-    setShowInputAdd(false);
-    setShowInputMinus(false);
-    setShowInputCant(false);
-    setShowInputCustomCant(true);
-    setShowInputMinus2(true);
-    setShowInputCant2(true);
-    setShowInputAdd2(true);
-    setShowInputisOnAdd(false);
-  };
-
-  const handleLongPressAdd = (ItemId: any) => {
-    setSelectedItemId(ItemId);
-    setShowInputCant(false);
-    setShowInputAdd(false);
-    setShowInputMinus(false);
-    setShowInputisOnAdd(true);
-    setShowInputCustomCant(true);
-    setShowInputAdd2(true);
-    setShowInputCant2(true);
-    setShowInputMinus2(true);
-  };
-
   // Verifica si el toque está fuera del área del dropdown
   const handlePressOutside = () => {
-    setShowInputCant(true);
-    setShowInputAdd(true);
-    setShowInputMinus(true);
-    setShowInputCustomCant(false);
-    setShowInputMinus2(false);
-    setShowInputAdd2(false);
-    setShowInputCant2(false);
+    resetAllVisibility();
   };
-
+  const resetAllVisibility = () => {
+    setInputVisibility({
+      showCant: true,
+      showCustomCant: false,
+      showSecondCant: false,
+      isOnAdd: false,
+    });
+    setCantidadProducto(0);
+    setPressedItemId("");
+  };
   const handleDropdownOpen = (id: string) => {
     setOpenDropdownId(openDropdownId === id ? null : id);
   };
@@ -275,6 +245,18 @@ const Products = () => {
       setIsRefreshing(false);
     }, 2000);
   };
+  const toggleSignVisibility = (id: string, isAdd: boolean) => {
+    setSelectedItemId(id);
+    setPressedItemId(id); // Almacena el ID de la fila presionada
+    setInputVisibility((prevState) => ({
+      ...prevState,
+      showCant: !prevState.showCant,
+      showCustomCant: !prevState.showCustomCant,
+      showSecondCant: !prevState.showSecondCant,
+      isOnAdd: isAdd,
+    }));
+  };
+
   return (
     <TouchableWithoutFeedback onPress={handlePressOutside}>
       <SafeAreaView className="bg-primary h-full">
@@ -290,7 +272,7 @@ const Products = () => {
         >
           <View className="p-4 space-y-3 bg-slate-950">
             {products.map((item: any) => (
-              <View className="flex-row justify-between items-center">
+              <View className={`flex-row justify-between items-center`}>
                 <View className="w-20">
                   <Pressable
                     key={item._id}
@@ -334,54 +316,49 @@ const Products = () => {
                 </View>
 
                 {/* Minus button */}
-                {showInputMinus && (
-                  <Pressable
-                    onPress={() => handlePressMinus(item._id, "single")}
-                    onLongPress={() => handleLongPressMinus(item._id)}
+                <Pressable
+                  onPress={() => handlePressMinus(item._id, "single")}
+                  onLongPress={() => toggleSignVisibility(item._id, false)}
+                >
+                  <View
+                    className={`p-1 rounded-md shadow-sm ${
+                      pressedItemId === item._id ? "opacity-0" : "opacity-100"
+                    }`} // Condicional para opacidad
                   >
-                    <View className="p-1 rounded-md shadow-sm">
-                      <FontAwesome6 name="minus" size={22} color="white" />
-                    </View>
-                  </Pressable>
-                )}
-                {showInputMinus2 && item._id !== selectedItemId && (
-                  <Pressable
-                    onPress={() => handlePressMinus(item._id, "single")}
-                    onLongPress={() => handleLongPressMinus(item._id)}
-                  >
-                    <View className="p-1 rounded-md shadow-sm">
-                      <FontAwesome6 name="minus" size={22} color="white" />
-                    </View>
-                  </Pressable>
-                )}
-                {showInputCustomCant && item._id === selectedItemId && (
-                  <View className="p-1 rounded-lg shadow-md space-y-2">
-                    <CustomField
-                      value={CantidadProducto}
-                      onChangeText={(CantidadProducto: any) =>
-                        setCantidadProducto(CantidadProducto)
-                      }
-                      placeholder="Cantidad"
-                      keyboardType="numeric"
-                      otherStyles=""
-                    ></CustomField>
-
-                    <View style={styles.buttonContainer}>
-                      <Button
-                        color="#F59E0B"
-                        title={`${isOnAdd ? "Agregar" : "Restar"}`}
-                        onPress={() =>
-                          isOnAdd
-                            ? handlePressAdd(item._id, "multiple")
-                            : handlePressMinus(item._id, "multiple")
-                        }
-                      />
-                    </View>
+                    <FontAwesome6 name="minus" size={22} color="white" />
                   </View>
-                )}
+                </Pressable>
+
+                {/* Cant button when long press sign */}
+                {inputVisibility.showCustomCant &&
+                  item._id === selectedItemId && (
+                    <View className="rounded-lg shadow-md space-y-1">
+                      <CustomField
+                        value={CantidadProducto}
+                        onChangeText={(CantidadProducto: any) =>
+                          setCantidadProducto(CantidadProducto)
+                        }
+                        placeholder="0"
+                        keyboardType="numeric"
+                        otherStyles=""
+                      ></CustomField>
+
+                      <View style={styles.buttonContainer}>
+                        <Button
+                          color="#F59E0B"
+                          title={`${inputVisibility.isOnAdd ? "➕" : "➖"}`}
+                          onPress={() =>
+                            inputVisibility.isOnAdd
+                              ? handlePressAdd(item._id, "multiple")
+                              : handlePressMinus(item._id, "multiple")
+                          }
+                        />
+                      </View>
+                    </View>
+                  )}
 
                 {/* Custom Field */}
-                {showInputCant && (
+                {inputVisibility.showCant && (
                   <View>
                     <CustomField
                       value={item.quantity}
@@ -392,39 +369,33 @@ const Products = () => {
                     ></CustomField>
                   </View>
                 )}
-                {showInputCant2 && item._id !== selectedItemId && (
-                  <View>
-                    <CustomField
-                      value={item.quantity}
-                      editable={false}
-                      placeholder={`${item.quantity}`}
-                      keyboardType="numeric"
-                      otherStyles=""
-                    ></CustomField>
-                  </View>
-                )}
+                {inputVisibility.showSecondCant &&
+                  item._id !== selectedItemId && (
+                    <View>
+                      <CustomField
+                        value={item.quantity}
+                        editable={false}
+                        placeholder={`${item.quantity}`}
+                        keyboardType="numeric"
+                        otherStyles=""
+                      ></CustomField>
+                    </View>
+                  )}
 
                 {/* Add button */}
-                {showInputAdd && (
-                  <Pressable
-                    onPress={() => handlePressAdd(item._id, "single")}
-                    onLongPress={() => handleLongPressAdd(item._id)}
+                <Pressable
+                  onPress={() => handlePressAdd(item._id, "single")}
+                  onLongPress={() => toggleSignVisibility(item._id, true)}
+                >
+                  <View
+                    className={`p-1 rounded-md shadow-sm ${
+                      pressedItemId === item._id ? "opacity-0" : "opacity-100"
+                    }`} // Condicional para opacidad
                   >
-                    <View className="p-1 rounded-md shadow-sm">
-                      <FontAwesome6 name="add" size={22} color="white" />
-                    </View>
-                  </Pressable>
-                )}
-                {showInputAdd2 && item._id !== selectedItemId && (
-                  <Pressable
-                    onPress={() => handlePressAdd(item._id, "single")}
-                    onLongPress={() => handleLongPressAdd(item._id)}
-                  >
-                    <View className="p-1 rounded-md shadow-sm">
-                      <FontAwesome6 name="add" size={22} color="white" />
-                    </View>
-                  </Pressable>
-                )}
+                    <FontAwesome6 name="add" size={22} color="white" />
+                  </View>
+                </Pressable>
+
                 {/* Historial Button */}
                 <Pressable
                   onPress={() =>
