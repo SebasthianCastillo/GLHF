@@ -1,15 +1,21 @@
 import {
   View,
-  Text,
-  FlatList,
   ScrollView,
   TouchableOpacity,
-} from "react-native";
-import React, { useState, useCallback, useEffect } from "react";
-import { useLocalSearchParams } from "expo-router";
-import { useFocusEffect } from "@react-navigation/native";
-import axios from "axios";
-import { SafeAreaView } from "react-native-safe-area-context";
+  Text,
+  SafeAreaView,
+  useState,
+  useCallback,
+  axios,
+  Constants,
+  useLocalSearchParams,
+  FlatList,
+  useFocusEffect,
+  React,
+} from "../app/shared"; // Centralized imports
+
+const API_URL =
+  Constants.manifest?.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
 
 interface ProductDetail {
   _id: string;
@@ -44,7 +50,7 @@ const ProductDetail = () => {
       const productDetailFunction = async () => {
         try {
           const response = await axios.get(
-            "https://glhf.onrender.com/productDetailByIDProduct",
+            `${API_URL}/productDetailByIDProduct`,
             {
               params: { ProductKey: productObject._id },
             }
@@ -65,10 +71,11 @@ const ProductDetail = () => {
     }, [currentMonth, currentYear])
   );
 
+  // Cuenta cuantos productos fueron agregados y quitados por mes
   const fetchSummaryData = async (currentMonth: Date) => {
     try {
       const addResponse = await axios.get(
-        "https://glhf.onrender.com/productDetailSummaryByOperationAdd",
+        `${API_URL}/productDetailSummaryByOperationAdd`,
         {
           params: {
             ProductKey: productObject._id,
@@ -78,7 +85,7 @@ const ProductDetail = () => {
       );
 
       const minusResponse = await axios.get(
-        "https://glhf.onrender.com/productDetailSummaryByOperationMinus",
+        `${API_URL}/productDetailSummaryByOperationMinus`,
         {
           params: {
             ProductKey: productObject._id,
@@ -103,6 +110,7 @@ const ProductDetail = () => {
     }
   };
 
+  // Funcion que filtra la data por mes
   const filterByMonth = (
     data: ProductDetail[],
     month: number,
@@ -117,6 +125,7 @@ const ProductDetail = () => {
     fetchSummaryData(filtered[0].date);
   };
 
+  // setea cambio de mes en vista producto detail
   const handlePrevMonth = () => {
     const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
     const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear;
@@ -124,6 +133,7 @@ const ProductDetail = () => {
     setCurrentYear(prevYear);
   };
 
+  // setea cambio de mes en vista producto detail
   const handleNextMonth = () => {
     const nextMonth = currentMonth === 11 ? 0 : currentMonth + 1;
     const nextYear = currentMonth === 11 ? currentYear + 1 : currentYear;
@@ -210,7 +220,7 @@ const ProductDetail = () => {
         <FlatList
           data={filteredDetails}
           renderItem={renderItem}
-          keyExtractor={(item) => item._id.toString()} // Asegúrate de que `item.id` sea único
+          keyExtractor={(item) => item._id.toString()}
         />
       </ScrollView>
       <View className="flex-row justify-between mt-4">
@@ -219,6 +229,14 @@ const ProductDetail = () => {
             <Text className="text-3xl font-bold text-white">
               {ProductDetailSummaryAdd}
             </Text>
+          </View>
+        </View>
+        <View className="h-24 w-36">
+          <View className="flex-1 items-center justify-center bg-yellow-500 rounded-lg shadow-lg p-4">
+            <Text className="text-3xl font-bold text-white pt-5">
+              {ProductDetailSummaryAdd - ProductDetailSummaryMinus}
+            </Text>
+            <Text className="text-center pt-1 ">Disponible</Text>
           </View>
         </View>
         <View className="h-24 w-36">

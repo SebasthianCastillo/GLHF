@@ -1,10 +1,20 @@
-import { SafeAreaView } from "react-native-safe-area-context";
-import { View, ScrollView, Dimensions, Alert, Text } from "react-native";
 import CustomField from "@/components/Field";
 import CustomButton from "@/components/Button";
-import { useState } from "react";
-import axios from "axios";
-import { useLocalSearchParams } from "expo-router";
+import {
+  View,
+  ScrollView,
+  Text,
+  Alert,
+  SafeAreaView,
+  useState,
+  axios,
+  Constants,
+  useLocalSearchParams,
+  Dimensions,
+} from "../app/shared"; // Centralized imports
+
+const API_URL =
+  Constants.manifest?.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
 
 const AddProduct = () => {
   const [ProductName, setProductName] = useState("");
@@ -13,6 +23,7 @@ const AddProduct = () => {
   const { CategoryName } = useLocalSearchParams();
   const [CategoryID, setCategoryID] = useState("");
 
+  //Funcion que añade nuevo producto
   const HandleRegister = () => {
     const ProductData = {
       Name: ProductName,
@@ -20,7 +31,7 @@ const AddProduct = () => {
       CategoryID: CategoryKey,
     };
     axios
-      .post("https://glhf.onrender.com/addProduct", ProductData)
+      .post(`${API_URL}/addProduct`, ProductData)
       .then((response) => {
         Alert.alert("Producto Agregado 💾");
         setProductName("");

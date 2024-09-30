@@ -9,7 +9,6 @@ const StyledTouchableOpacity = styled(TouchableOpacity);
 interface OptionModalProps {
   showOptionsModal: boolean;
   setShowOptionsModal: (show: boolean) => void;
-
   onDelete: () => void;
 }
 

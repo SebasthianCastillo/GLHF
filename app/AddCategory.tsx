@@ -1,10 +1,19 @@
-import { SafeAreaView } from "react-native-safe-area-context";
-import { View, ScrollView, Dimensions, Alert } from "react-native";
-import { useRouter } from "expo-router";
 import CustomField from "@/components/Field";
 import CustomButton from "@/components/Button";
-import { useState } from "react";
-import axios from "axios";
+import {
+  View,
+  ScrollView,
+  Alert,
+  SafeAreaView,
+  useState,
+  axios,
+  Constants,
+  Dimensions,
+  useRouter,
+} from "../app/shared"; // Centralized imports
+
+const API_URL =
+  Constants.manifest?.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
 
 const AddCategory = () => {
   const [name, setName] = useState("");
@@ -16,7 +25,7 @@ const AddCategory = () => {
     };
 
     axios
-      .post("https://glhf.onrender.com/addCategory", categoriesData)
+      .post(`${API_URL}/addCategory`, categoriesData)
       .then((response) => {
         Alert.alert("Categoría Agregada 💾");
         setName("");
