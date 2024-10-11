@@ -3,6 +3,7 @@ import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import CustomField from "@/components/Field";
 import ModalProducts from "@/components/OptionModal";
 import DropDownPicker from "react-native-dropdown-picker";
+// import BackgroundTask from "react-native-background-task";
 import {
   View,
   ScrollView,
@@ -25,6 +26,7 @@ import {
   useFocusEffect,
   React,
 } from "../app/shared"; // Centralized imports
+import { useRef } from "react";
 
 const API_URL =
   Constants.manifest?.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
@@ -35,7 +37,7 @@ const Products = () => {
     ? JSON.parse(category[0])
     : JSON.parse(category || "{}");
   const [products, setProducts] = useState([]);
-  const [CantidadProducto, setCantidadProducto] = useState(0);
+  const [CantidadProducto, setCantidadProducto] = useState<number>(0);
   const [selectedItemId, setSelectedItemId] = useState("");
   const [formatValues, setFormatValues] = useState<{ [key: string]: string }>(
     {}
@@ -54,8 +56,10 @@ const Products = () => {
   const [IsRefreshing, setIsRefreshing] = useState(false);
   const { top } = useSafeAreaInsets();
   const [pressedItemId, setPressedItemId] = useState<string | null>(null);
+  const [textCantOfProduct, setTextCantOfProduct] = useState(0);
   let CategoryName = categoryObject.Name;
-
+  const refQuantityProduct = useRef(0);
+  const isAdd = useRef(false);
   const [inputVisibility, setInputVisibility] = useState({
     showCant: true,
     showCustomCant: false,
@@ -86,27 +90,66 @@ const Products = () => {
     idProducto: any,
     fromWhatQuantityCallfunction: string
   ) => {
-    const quantityProduct =
+    isAdd.current = true;
+    let operation = isAdd.current ? "add" : "minus";
+    let quantityProductType =
       fromWhatQuantityCallfunction === "single" ? 1 : CantidadProducto;
-    let operation = "add";
+
+    if (idProducto !== selectedItemId && selectedItemId !== "") {
+      SaveProductDetail(refQuantityProduct.current, operation, selectedItemId);
+      // setCantidadProducto(0);
+      quantityUpdateProduct(idProducto, refQuantityProduct.current, operation);
+      refQuantityProduct.current = 0;
+      setTextCantOfProduct(0);
+    }
+
+    setSelectedItemId(idProducto);
+    refQuantityProduct.current += quantityProductType;
+    setTextCantOfProduct(refQuantityProduct.current);
+  };
+
+  const SaveProductDetail = async (
+    quantityProduct: number,
+    operation: string,
+    IdProducto: string
+  ) => {
     const addProductDetail = {
       quantity: quantityProduct,
       date: new Date(),
       format: formatValue,
       operation: operation,
-      ProductID: idProducto,
+      ProductID: IdProducto,
     };
 
     axios
       .post(`${API_URL}/addProductDetail`, addProductDetail)
       .then((response) => {
-        quantityUpdateProduct(idProducto, quantityProduct, operation);
-        productsFunction();
-        handlePressOutside();
+        console.log("AddProductDetail sucess");
       })
       .catch((error) => {
         console.log(addProductDetail);
         console.log("Error AddProductDetail", error);
+      });
+  };
+
+  //Funcion para actualizar cantidad de producto
+  const quantityUpdateProduct = (
+    idProducto: any,
+    quantityProduct: number,
+    operation: string
+  ) => {
+    const UpdateQuantityData = {
+      _id: idProducto,
+      quantity: quantityProduct,
+      operation: operation,
+    };
+
+    axios
+      .patch(`${API_URL}/quantityUpdateProduct`, UpdateQuantityData)
+      .then((response) => {})
+      .catch((error) => {
+        console.log(UpdateQuantityData);
+        console.log("Error quantity update product", error);
       });
   };
 
@@ -116,8 +159,8 @@ const Products = () => {
     idProducto: any,
     fromWhatQuantityCallfunction: string
   ) => {
-    const quantityProduct =
-      fromWhatQuantityCallfunction === "single" ? 1 : CantidadProducto;
+    const quantityProduct = CantidadProducto;
+    // fromWhatQuantityCallfunction === "single" ? 1 :
     let operation = "minus";
     const addProductDetail = {
       quantity: quantityProduct,
@@ -142,34 +185,11 @@ const Products = () => {
       });
   };
 
-  //Funcion para actualizar cantidad de producto
-
-  const quantityUpdateProduct = (
-    idProducto: any,
-    quantityProduct: number,
-    operation: string
-  ) => {
-    const UpdateQuantityData = {
-      _id: idProducto,
-      quantity: quantityProduct,
-      operation: operation,
-    };
-
-    axios
-      .patch(`${API_URL}/quantityUpdateProduct`, UpdateQuantityData)
-      .then((response) => {
-        productsFunction();
-      })
-      .catch((error) => {
-        console.log(UpdateQuantityData);
-        console.log("Error quantity update product", error);
-      });
-  };
-
   // Verifica si el toque está fuera del área del dropdown
   const handlePressOutside = () => {
     resetAllVisibility();
   };
+  // resetea la visibilidad de los elementos
   const resetAllVisibility = () => {
     setInputVisibility({
       showCant: true,
@@ -177,9 +197,10 @@ const Products = () => {
       showSecondCant: false,
       isOnAdd: false,
     });
-    setCantidadProducto(0);
+
     setPressedItemId("");
   };
+
   const handleDropdownOpen = (id: string) => {
     setOpenDropdownId(openDropdownId === id ? null : id);
   };
@@ -188,7 +209,7 @@ const Products = () => {
     [key: string]: string; // Las claves son las ids de tipo string, y los valores también son strings
   };
 
-  //maneja el comportamiento de los dropdown para elegir formato P, KG, GR
+  //Maneja el comportamiento de los dropdown para elegir formato P, KG, GR
   const handleDropdownChange = (id: string, newValue: string) => {
     setSelectedValues((prevValues) => ({
       ...prevValues,
@@ -197,7 +218,7 @@ const Products = () => {
     setFormatValue(newValue);
   };
 
-  //modal para confirmar eliminacion
+  //Modal para confirmar eliminacion
   const confirmDelete = () => {
     Alert.alert(
       "Confirmación",
@@ -217,13 +238,13 @@ const Products = () => {
     );
   };
 
-  // Función para manejar el long press y mostrar las opciones
+  // Manejar el long press y mostrar las opciones
   const handleLongPressDelete = (idProducto: any) => {
     setSelectedItemId(idProducto); // Guardar el ID del producto seleccionado
     setShowOptionsModal(true); // Mostrar el menú de opciones
   };
 
-  //funcion para eliminar producto
+  //Elimina producto
   const deleteProduct = async (idProducto: any) => {
     try {
       await axios.delete(`${API_URL}/deleteProduct/${idProducto}`);
@@ -245,6 +266,7 @@ const Products = () => {
       setIsRefreshing(false);
     }, 2000);
   };
+  // Maneja la visibilidad de los signos + y - al hacer longpress en un registro
   const toggleSignVisibility = (id: string, isAdd: boolean) => {
     setSelectedItemId(id);
     setPressedItemId(id); // Almacena el ID de la fila presionada
@@ -256,6 +278,17 @@ const Products = () => {
       isOnAdd: isAdd,
     }));
   };
+
+  // BackgroundTask.define(async () => {
+  //   // Aquí haces la lógica para guardar los datos en la BD
+  //   await saveDataToDB();
+  //   BackgroundTask.finish();
+  // });
+
+  // // Ejecuta la tarea cuando la app se va al background
+  // useEffect(() => {
+  //   BackgroundTask.schedule();
+  // }, []);
 
   return (
     <TouchableWithoutFeedback onPress={handlePressOutside}>
@@ -336,9 +369,9 @@ const Products = () => {
                       <CustomField
                         value={CantidadProducto}
                         onChangeText={(CantidadProducto: any) =>
-                          setCantidadProducto(CantidadProducto)
+                          setCantidadProducto(Number(CantidadProducto))
                         }
-                        placeholder="0"
+                        placeholder=""
                         keyboardType="numeric"
                         otherStyles=""
                       ></CustomField>
@@ -358,33 +391,55 @@ const Products = () => {
                   )}
 
                 {/* Custom Field */}
+
                 {inputVisibility.showCant && (
                   <View>
                     <CustomField
-                      value={item.quantity}
+                      value={
+                        selectedItemId === item._id
+                          ? textCantOfProduct + Number(item.quantity)
+                          : item.quantity
+                      }
                       editable={false}
-                      placeholder={`${item.quantity}`}
+                      placeholder={
+                        selectedItemId === item._id
+                          ? `${textCantOfProduct + Number(item.quantity)}`
+                          : `${item.quantity}`
+                      }
                       keyboardType="numeric"
                       otherStyles=""
                     ></CustomField>
                   </View>
                 )}
-                {inputVisibility.showSecondCant &&
-                  item._id !== selectedItemId && (
+                {
+                  inputVisibility.showSecondCant && (
+                    // item._id !== selectedItemId && (
                     <View>
                       <CustomField
-                        value={item.quantity}
+                        value={
+                          selectedItemId === item._id
+                            ? textCantOfProduct + Number(item.quantity)
+                            : item.quantity
+                        }
                         editable={false}
-                        placeholder={`${item.quantity}`}
+                        placeholder={
+                          selectedItemId === item._id
+                            ? `${textCantOfProduct + Number(item.quantity)}`
+                            : `${item.quantity}`
+                        }
                         keyboardType="numeric"
                         otherStyles=""
                       ></CustomField>
                     </View>
-                  )}
+                  )
+                  // )}
+                }
 
                 {/* Add button */}
                 <Pressable
-                  onPress={() => handlePressAdd(item._id, "single")}
+                  onPress={() => {
+                    handlePressAdd(item._id, "single");
+                  }}
                   onLongPress={() => toggleSignVisibility(item._id, true)}
                 >
                   <View
@@ -398,14 +453,23 @@ const Products = () => {
 
                 {/* Historial Button */}
                 <Pressable
-                  onPress={() =>
+                  onPress={() => {
+                    // First function call: save to the database or perform another action
+                    if (refQuantityProduct.current != 0) {
+                      SaveProductDetail(
+                        refQuantityProduct.current,
+                        inputVisibility.isOnAdd ? `add` : `minus`,
+                        selectedItemId
+                      ); // Assuming saveBD() is a function that saves to your database
+                    }
+                    // Second function call: navigate to the ProductDetail page
                     router.push({
                       pathname: "/ProductDetail",
                       params: {
                         product: JSON.stringify(item),
                       },
-                    })
-                  }
+                    });
+                  }}
                 >
                   <View className="p-1 rounded-md shadow-sm">
                     <FontAwesome5 name="history" size={24} color="#eab308" />
