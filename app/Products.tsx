@@ -99,12 +99,12 @@ const Products = () => {
 
     axios
       .post(`${API_URL}/addProductDetail`, addProductDetail)
-      .then((response) => {
+      .then((response: any) => {
         quantityUpdateProduct(idProducto, quantityProduct, operation);
         productsFunction();
         handlePressOutside();
       })
-      .catch((error) => {
+      .catch((error: Error) => {
         console.log(addProductDetail);
         console.log("Error AddProductDetail", error);
       });
@@ -129,14 +129,14 @@ const Products = () => {
 
     axios
       .post(`${API_URL}/addProductDetail`, addProductDetail)
-      .then((response) => {
+      .then((response: any) => {
         // router.push("/");
         console.log(response);
         quantityUpdateProduct(idProducto, quantityProduct, operation);
         productsFunction();
         handlePressOutside();
       })
-      .catch((error) => {
+      .catch((error: Error) => {
         console.log(addProductDetail);
         console.log("Error AddProductDetail minus", error);
       });
@@ -157,10 +157,10 @@ const Products = () => {
 
     axios
       .patch(`${API_URL}/quantityUpdateProduct`, UpdateQuantityData)
-      .then((response) => {
+      .then((response: any) => {
         productsFunction();
       })
-      .catch((error) => {
+      .catch((error: Error) => {
         console.log(UpdateQuantityData);
         console.log("Error quantity update product", error);
       });
@@ -190,7 +190,7 @@ const Products = () => {
 
   //maneja el comportamiento de los dropdown para elegir formato P, KG, GR
   const handleDropdownChange = (id: string, newValue: string) => {
-    setSelectedValues((prevValues) => ({
+    setSelectedValues((prevValues: SelectedValuesType) => ({
       ...prevValues,
       [id]: newValue,
     }));
@@ -248,7 +248,7 @@ const Products = () => {
   const toggleSignVisibility = (id: string, isAdd: boolean) => {
     setSelectedItemId(id);
     setPressedItemId(id); // Almacena el ID de la fila presionada
-    setInputVisibility((prevState) => ({
+    setInputVisibility((prevState: any) => ({
       ...prevState,
       showCant: !prevState.showCant,
       showCustomCant: !prevState.showCustomCant,
@@ -295,7 +295,7 @@ const Products = () => {
                     value={selectedValues[item._id] || "P"}
                     items={items}
                     setOpen={() => handleDropdownOpen(item._id)}
-                    setValue={(callback) => {
+                    setValue={(callback: (value: string) => string) => {
                       const selectedValue = callback(formatValues[item._id]);
                       handleDropdownChange(item._id, selectedValue);
                     }}
