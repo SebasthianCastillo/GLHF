@@ -1579,7 +1579,7 @@
   dependencies:
     cross-spawn "^7.0.3"
 
-"@expo/vector-icons@^14.0.0", "@expo/vector-icons@^14.0.2":
+"@expo/vector-icons@*", "@expo/vector-icons@^14.0.0", "@expo/vector-icons@^14.0.2":
   version "14.0.2"
   resolved "https://registry.npmjs.org/@expo/vector-icons/-/vector-icons-14.0.2.tgz"
   integrity sha512-70LpmXQu4xa8cMxjp1fydgRPsalefnHaXLzIwaHMEzcZhnyjw2acZz8azRrZOslPVAWlxItOa2Dd7WtD/kI+CA==
@@ -2492,6 +2492,11 @@
   resolved "https://registry.npmjs.org/@tootallnate/once/-/once-2.0.0.tgz"
   integrity sha512-XCuKFP5PS55gnMVu3dty8KPatLqUoy/ZYzDzAGCQ8JNFCkLXzmI7vNHCR+XpbZaMWQK/vQubr7PkYq8g470J/A==
 
+"@tsconfig/react-native@^3.0.5":
+  version "3.0.5"
+  resolved "https://registry.npmjs.org/@tsconfig/react-native/-/react-native-3.0.5.tgz"
+  integrity sha512-0+pmYzHccvwWpFz2Tv5AJxp6UroLALmAy+SX34tKlwaCie1mNbtCv6uOJp7x8pKchgNA9/n6BGrx7uLQvw8p9A==
+
 "@types/babel__core@^7.1.14":
   version "7.20.5"
   resolved "https://registry.npmjs.org/@types/babel__core/-/babel__core-7.20.5.tgz"
@@ -2544,6 +2549,13 @@
   version "0.6.0"
   resolved "https://registry.npmjs.org/@types/cookie/-/cookie-0.6.0.tgz"
   integrity sha512-4Kh9a6B2bQciAhf7FSuMRRkUWecJgJu9nPnx3yzpsfXX/c50REIqpHY4C82bXP90qrLtXtkDxTZosYO3UpOwlA==
+
+"@types/expo__vector-icons@^10.0.2":
+  version "10.0.2"
+  resolved "https://registry.npmjs.org/@types/expo__vector-icons/-/expo__vector-icons-10.0.2.tgz"
+  integrity sha512-odXDQ7YgMzywZz2JVYwj9HURkg69hBWJ+Mpbpr1APJc4K90SBdSXMFjPLnSpweRIiZyb1lQqwl43JqZxXp+bVQ==
+  dependencies:
+    "@expo/vector-icons" "*"
 
 "@types/express-serve-static-core@^4.17.33":
   version "4.19.5"
