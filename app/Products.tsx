@@ -24,6 +24,7 @@ import {
   useLocalSearchParams,
   useFocusEffect,
   React,
+  Modal,
 } from "../app/shared"; // Centralized imports
 
 const API_URL =
@@ -62,6 +63,11 @@ const Products = () => {
     showSecondCant: false,
     isOnAdd: false,
   });
+
+  const [showFormatPicker, setShowFormatPicker] = useState(false);
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(
+    null
+  );
 
   // Funcion que trae los productos segun categoria
   useFocusEffect(
@@ -273,48 +279,29 @@ const Products = () => {
         >
           <View className="p-4 space-y-3 bg-slate-950">
             {products.map((item: any) => (
-              <View className={`flex-row justify-between items-center`}>
+              <View className="flex-row justify-between items-center">
                 <View className="w-20">
                   <Pressable
                     key={item._id}
-                    onLongPress={() => handleLongPressDelete(item._id)} // handle long press
+                    onLongPress={() => handleLongPressDelete(item._id)}
                   >
                     <Text className="text-base text-white font-bold">
                       {item.Name}
                     </Text>
                   </Pressable>
                 </View>
-
-                <View
-                  style={[
-                    styles.container,
-                    { zIndex: openDropdownId === item._id ? 1000 : 1 },
-                  ]}
+                {/* button for modal format picker */}
+                <Pressable
+                  onPress={() => {
+                    setSelectedProductId(item._id);
+                    setShowFormatPicker(true);
+                  }}
+                  className="w-16 h-10 bg-slate-800 rounded-md justify-center items-center"
                 >
-                  <DropDownPicker
-                    open={openDropdownId === item._id}
-                    value={selectedValues[item._id] || "P"}
-                    items={items}
-                    setOpen={() => handleDropdownOpen(item._id)}
-                    setValue={(callback: (value: string) => string) => {
-                      const selectedValue = callback(formatValues[item._id]);
-                      handleDropdownChange(item._id, selectedValue);
-                    }}
-                    setItems={() => {}}
-                    containerStyle={styles.dropdownContainer}
-                    style={styles.dropdown}
-                    textStyle={styles.dropdownText}
-                    dropDownContainerStyle={[
-                      styles.dropdownList,
-                      { zIndex: 1001 },
-                    ]}
-                    labelStyle={styles.dropdownLabel}
-                    arrowIconStyle={{ width: 0, height: 0 }}
-                    listItemContainerStyle={styles.listItemContainer}
-                    tickIconStyle={styles.tickIcon}
-                    listItemLabelStyle={styles.listItemLabel}
-                  />
-                </View>
+                  <Text className="text-white text-lg">
+                    {selectedValues[item._id] || "P"}
+                  </Text>
+                </Pressable>
 
                 {/* Minus button */}
                 <Pressable
@@ -441,6 +428,44 @@ const Products = () => {
             <FontAwesome6 name="add" size={40} color="white" />
           </View>
         </TouchableOpacity>
+
+        <Modal
+          visible={showFormatPicker}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setShowFormatPicker(false)}
+        >
+          <View className="flex-1 justify-end bg-black/50">
+            <View className="bg-slate-800 rounded-t-3xl p-4">
+              <View className="flex-row justify-between items-center mb-4">
+                <Text className="text-white text-lg font-bold">
+                  Seleccionar Formato
+                </Text>
+                <Pressable onPress={() => setShowFormatPicker(false)}>
+                  <Text className="text-white text-lg">✕</Text>
+                </Pressable>
+              </View>
+              <View className="space-y-2">
+                {items.map((item) => (
+                  <Pressable
+                    key={item.value}
+                    onPress={() => {
+                      if (selectedProductId) {
+                        handleDropdownChange(selectedProductId, item.value);
+                        setShowFormatPicker(false);
+                      }
+                    }}
+                    className="bg-slate-700 p-4 rounded-lg"
+                  >
+                    <Text className="text-white text-center text-lg">
+                      {item.label}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+          </View>
+        </Modal>
       </SafeAreaView>
     </TouchableWithoutFeedback>
   );
