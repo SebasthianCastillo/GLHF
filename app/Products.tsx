@@ -246,6 +246,7 @@ const Products = () => {
     }, 2000);
   };
   const toggleSignVisibility = (id: string, isAdd: boolean) => {
+    handlePressOutside();
     setSelectedItemId(id);
     setPressedItemId(id); // Almacena el ID de la fila presionada
     setInputVisibility((prevState: any) => ({
