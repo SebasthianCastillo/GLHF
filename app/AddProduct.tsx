@@ -26,6 +26,7 @@ const AddProduct = () => {
   const { CategoryKey } = useLocalSearchParams();
   const { CategoryName } = useLocalSearchParams();
   const [CategoryID, setCategoryID] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   //Funcion que añade nuevo producto
   const HandleRegister = () => {
@@ -37,7 +38,11 @@ const AddProduct = () => {
     axios
       .post(`${API_URL}/addProduct`, ProductData)
       .then((response) => {
-        Alert.alert("Producto Agregado 💾");
+        setSuccessMessage("Producto Agregado");
+        // Clear the success message after 3 seconds
+        setTimeout(() => {
+          setSuccessMessage("");
+        }, 3000);
         setProductName("");
         setCategoryID("");
         // router.push("/");
@@ -73,12 +78,21 @@ const AddProduct = () => {
             otherStyles="mt-10"
             placeholder="Nombre Producto"
           />
-
-          <View className="p-20">
+          <View className="flex justify-center items-center p-5">
+            {successMessage ? (
+              <Text className="text-green-600 font-extrabold text-sm">
+                {successMessage}
+              </Text>
+            ) : (
+              <Text className="">{}</Text>
+            )}
+          </View>
+          <View className="pt-14 pl-28 pr-28 pb-16">
             <CustomButton
               containerStyles="w-full"
               text="Agregar"
               HandlePress={HandleRegister}
+              size="text-base"
             />
           </View>
         </View>
