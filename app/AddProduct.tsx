@@ -1,5 +1,6 @@
 import CustomField from "@/components/Field";
 import CustomButton from "@/components/Button";
+
 import {
   View,
   ScrollView,
@@ -11,6 +12,9 @@ import {
   Constants,
   useLocalSearchParams,
   Dimensions,
+  router,
+  TouchableOpacity,
+  FontAwesome6,
 } from "../app/shared"; // Centralized imports
 
 const API_URL =
@@ -46,9 +50,15 @@ const AddProduct = () => {
   };
   return (
     <SafeAreaView className="bg-primary h-full">
-      <View className="justify-center items-center">
-        <Text className="text-slate-50">{`Categoría: ${CategoryName}`}</Text>
+      <View className="flex-row items-center p-4 bg-primary">
+        <TouchableOpacity onPress={() => router.back()} className="mr-4">
+          <FontAwesome6 name="arrow-left" size={24} color="white" />
+        </TouchableOpacity>
+        <Text className="text-white text-xl font-bold">{CategoryName}</Text>
       </View>
+      {/* <View className="justify-center items-center">
+        <Text className="text-slate-50">{`Categoría: ${CategoryName}`}</Text>
+      </View> */}
       <ScrollView>
         <View
           className="w-full flex justify-center h-full px-4 my-6"

@@ -1,8 +1,7 @@
-import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import CustomField from "@/components/Field";
 import ModalProducts from "@/components/OptionModal";
-import DropDownPicker from "react-native-dropdown-picker";
+
 import {
   View,
   ScrollView,
@@ -25,6 +24,7 @@ import {
   useFocusEffect,
   React,
   Modal,
+  FontAwesome6,
 } from "../app/shared"; // Centralized imports
 
 const API_URL =
@@ -267,6 +267,12 @@ const Products = () => {
   return (
     <TouchableWithoutFeedback onPress={handlePressOutside}>
       <SafeAreaView className="bg-primary h-full">
+        <View className="flex-row items-center p-4 bg-slate-950">
+          <TouchableOpacity onPress={() => router.back()} className="mr-4">
+            <FontAwesome6 name="arrow-left" size={24} color="white" />
+          </TouchableOpacity>
+          <Text className="text-white text-xl font-bold">{CategoryName}</Text>
+        </View>
         <ScrollView
           refreshControl={
             <RefreshControl

@@ -10,6 +10,8 @@ import {
   Constants,
   Dimensions,
   useRouter,
+  TouchableOpacity,
+  FontAwesome6,
 } from "../app/shared"; // Centralized imports
 
 const API_URL =
@@ -41,6 +43,11 @@ const AddCategory = () => {
 
   return (
     <SafeAreaView className="bg-primary h-full">
+      <View className="flex-row items-center p-4 bg-primary">
+        <TouchableOpacity onPress={() => router.back()} className="mr-4">
+          <FontAwesome6 name="arrow-left" size={24} color="white" />
+        </TouchableOpacity>
+      </View>
       <ScrollView>
         <View
           className="w-full flex justify-center h-full px-4 my-6"

@@ -12,6 +12,8 @@ import {
   FlatList,
   useFocusEffect,
   React,
+  router,
+  FontAwesome6,
 } from "../app/shared"; // Centralized imports
 
 const API_URL =
@@ -193,6 +195,14 @@ const ProductDetail = () => {
 
   return (
     <SafeAreaView className="bg-primary h-full">
+      <View className="flex-row items-center p-4 bg-primary">
+        <TouchableOpacity onPress={() => router.back()} className="mr-4">
+          <FontAwesome6 name="arrow-left" size={24} color="white" />
+        </TouchableOpacity>
+        <Text className="text-white text-xl font-bold">
+          {productObject.Name}
+        </Text>
+      </View>
       <View className="flex-row items-center justify-between px-4 py-3 bg-primary">
         <TouchableOpacity onPress={handlePrevMonth} className="px-3 py-1">
           <Text className="text-2xl text-yellow-500">&lt;</Text>
@@ -224,14 +234,14 @@ const ProductDetail = () => {
         />
       </ScrollView>
       <View className="flex-row justify-between mt-4">
-        <View className="h-24 w-36">
+        <View className="h-24 w-32">
           <View className="flex-1 items-center justify-center bg-emerald-600 rounded-lg shadow-lg p-4">
             <Text className="text-3xl font-bold text-white">
               {ProductDetailSummaryAdd}
             </Text>
           </View>
         </View>
-        <View className="h-24 w-36">
+        <View className="h-24 w-32">
           <View className="flex-1 items-center justify-center bg-yellow-500 rounded-lg shadow-lg p-4">
             <Text className="text-3xl font-bold text-white pt-5">
               {ProductDetailSummaryAdd - ProductDetailSummaryMinus}
@@ -239,7 +249,7 @@ const ProductDetail = () => {
             <Text className="text-center pt-1 ">Disponible</Text>
           </View>
         </View>
-        <View className="h-24 w-36">
+        <View className="h-24 w-32">
           <View className="flex-1 items-center justify-center bg-red-500 rounded-lg shadow-lg p-4">
             <Text className="text-3xl font-bold text-white">
               {ProductDetailSummaryMinus}
