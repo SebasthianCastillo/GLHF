@@ -241,6 +241,32 @@ app.delete("/deleteProduct/:id", async (req, res) => {
   }
 });
 
+app.patch("/updateProductName/:id", async (req, res) => {
+  const { id } = req.params;
+  const { newName } = req.body;
+
+  try {
+    // Find the product by ID and update its name
+    const updatedProduct = await Producto.findByIdAndUpdate(
+      id,
+      { Name: newName },
+      { new: true } // Return the updated document
+    );
+
+    if (!updatedProduct) {
+      return res.status(404).json({ message: "Producto no encontrado" });
+    }
+
+    res.status(200).json({
+      message: "Nombre del producto actualizado exitosamente",
+      product: updatedProduct,
+    });
+  } catch (error) {
+    console.error("Error al actualizar el nombre del producto:", error);
+    res.status(500).json({ message: "Error interno del servidor" });
+  }
+});
+
 app.get("/", async (req, res) => {
   try {
     res.send("hello");

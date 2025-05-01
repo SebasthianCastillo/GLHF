@@ -38,9 +38,7 @@ const Products = () => {
   const [products, setProducts] = useState([]);
   const [CantidadProducto, setCantidadProducto] = useState(0);
   const [selectedItemId, setSelectedItemId] = useState("");
-  const [formatValues, setFormatValues] = useState<{ [key: string]: string }>(
-    {}
-  );
+  const [selectedProductName, setSelectedProductName] = useState("");
 
   const [formatValue, setFormatValue] = useState("P");
   const [items, setItems] = useState([
@@ -48,7 +46,7 @@ const Products = () => {
     { label: "KG", value: "KG" },
     { label: "GR", value: "GR" },
   ]);
-  const [justifyContent, setJustifyContent] = useState("opacity-100");
+
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const [selectedValues, setSelectedValues] = useState<SelectedValuesType>({});
   const [showOptionsModal, setShowOptionsModal] = useState(false); // Para mostrar el menú de opciones
@@ -222,11 +220,35 @@ const Products = () => {
       ]
     );
   };
+  const ModifyProduct = async (idProducto: any, newName?: string) => {
+    try {
+      if (newName) {
+        // Update product name
+        await axios.patch(`${API_URL}/updateProductName/${idProducto}`, {
+          newName: newName,
+        });
+      }
+      // Refrescar la lista de productos después de eliminar
+      const response = await axios.get(`${API_URL}/productsByIDCategory`, {
+        params: { CategoryKey: categoryObject._id },
+      });
+      setProducts(response.data);
+    } catch (error) {
+      console.log("Error updating product", error);
+    }
+  };
+
+  const handleNameChange = (newName: string) => {
+    if (selectedItemId) {
+      ModifyProduct(selectedItemId, newName);
+    }
+  };
 
   // Función para manejar el long press y mostrar las opciones
-  const handleLongPressDelete = (idProducto: any) => {
-    setSelectedItemId(idProducto); // Guardar el ID del producto seleccionado
-    setShowOptionsModal(true); // Mostrar el menú de opciones
+  const handleLongPressProduct = (idProducto: any, productName: string) => {
+    setSelectedItemId(idProducto);
+    setSelectedProductName(productName);
+    setShowOptionsModal(true);
   };
 
   //funcion para eliminar producto
@@ -289,7 +311,9 @@ const Products = () => {
                 <View className="w-20">
                   <Pressable
                     key={item._id}
-                    onLongPress={() => handleLongPressDelete(item._id)}
+                    onLongPress={() =>
+                      handleLongPressProduct(item._id, item.Name)
+                    }
                   >
                     <Text className="text-base text-white font-bold">
                       {item.Name}
@@ -413,6 +437,9 @@ const Products = () => {
               showOptionsModal={showOptionsModal}
               setShowOptionsModal={setShowOptionsModal}
               onDelete={confirmDelete}
+              onModify={() => ModifyProduct(selectedItemId)}
+              productName={selectedProductName}
+              onNameChange={handleNameChange} //funcion con el nuevo nombre del producto por parametro
             />
           )}
         </ScrollView>
