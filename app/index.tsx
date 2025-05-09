@@ -21,9 +21,17 @@ import {
   ActivityIndicator,
 } from "../app/shared"; // Centralized imports
 import ColorPicker, { Swatches } from "reanimated-color-picker";
-
+import * as Google from "expo-auth-session/providers/google";
+import * as SecureStore from "expo-secure-store";
 const API_URL =
   Constants.manifest?.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
+
+const [request, response, promptAsync] = Google.useAuthRequest({
+  iosClientId:
+    "111790790742-kouha1h6vsf4m7tbigbe7snjl864tmt6.apps.googleusercontent.com",
+  androidClientId:
+    "111790790742-c2ephf26ovd1qac1rnok0ij3s4s66isa.apps.googleusercontent.com",
+});
 
 export default function HomeScreen() {
   const [categories, setcategories] = useState([]);
@@ -37,7 +45,22 @@ export default function HomeScreen() {
       CallCategories();
     }, [])
   );
-
+  useEffect(() => {
+    if (response?.type === "success") {
+      const { authentication } = response;
+      // Envía el token al backend
+      axios
+        .post(`${API_URL}/auth/google`, {
+          idToken: authentication?.accessToken,
+        })
+        .then((res) => {
+          const { token, user } = res.data;
+          SecureStore.setItemAsync("userToken", token); // Guardar JWT
+          console.log("Usuario logueado:", user);
+        })
+        .catch((err) => console.error("Login error", err));
+    }
+  }, [response]);
   const CallCategories = async () => {
     try {
       const response = await axios.get(`${API_URL}/categories`);
@@ -132,7 +155,20 @@ export default function HomeScreen() {
               containerStylesText="pl-8"
             />
           ))}
-
+          <TouchableOpacity
+            className="flex-row items-center justify-center bg-white border border-gray-300 rounded-3xl py-4 px-6  mb-4 shadow-sm"
+            activeOpacity={0.7}
+          >
+            <Image
+              source={{
+                uri: "https://img.icons8.com/?size=500&id=17949&format=png&color=000000",
+              }}
+              className="w-10 h-10 mr-3"
+            />
+            <Text className="text-gray-700 font-medium">
+              Continuar con Google
+            </Text>
+          </TouchableOpacity>
           <TouchableOpacity
             activeOpacity={0.7}
             className="p-10"
