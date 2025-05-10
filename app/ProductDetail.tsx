@@ -12,6 +12,8 @@ import {
   FlatList,
   useFocusEffect,
   React,
+  router,
+  FontAwesome6,
 } from "../app/shared"; // Centralized imports
 
 const API_URL =
@@ -193,6 +195,14 @@ const ProductDetail = () => {
 
   return (
     <SafeAreaView className="bg-primary h-full">
+      <View className="flex-row items-center p-4 bg-primary">
+        <TouchableOpacity onPress={() => router.back()} className="mr-4">
+          <FontAwesome6 name="arrow-left" size={24} color="white" />
+        </TouchableOpacity>
+        <Text className="text-white text-xl font-bold">
+          {productObject.Name}
+        </Text>
+      </View>
       <View className="flex-row items-center justify-between px-4 py-3 bg-primary">
         <TouchableOpacity onPress={handlePrevMonth} className="px-3 py-1">
           <Text className="text-2xl text-yellow-500">&lt;</Text>

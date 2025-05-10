@@ -20,7 +20,7 @@ const CustomField: React.FC<FieldProps> = ({
 }) => {
   return (
     <View className={`${otherStyles}`}>
-      <View className="w-full bg-black-100 rounded-2xl border-2 border-black-200 focus:border-secondary items-center justify-center ">
+      <View className="w-full h-11 bg-black-100 rounded-2xl border-2 border-black-200 focus:border-secondary items-center justify-center ">
         <TextInput
           className="flex-1 px-4 text-white font-psemibold text-base justify-center items-center text-center"
           value={value}

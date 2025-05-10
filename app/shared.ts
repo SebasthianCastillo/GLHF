@@ -27,3 +27,4 @@ export { useLocalSearchParams } from "expo-router";
 export { useFocusEffect } from "@react-navigation/native";
 export { default as React } from "react";
 export { useRouter } from "expo-router";
+export { FontAwesome6 } from "@expo/vector-icons";
