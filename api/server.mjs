@@ -27,34 +27,6 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
-app.post("/auth/google", async (req, res) => {
-  const { idToken } = req.body;
-
-  try {
-    // Verifica el token con Google
-    const googleResponse = await axios.get(
-      `https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`
-    );
-    const { sub: googleId, email, name, picture } = googleResponse.data;
-
-    // Busca o crea el usuario
-    let user = await User.findOne({ googleId });
-    if (!user) {
-      user = await User.create({ googleId, email, name, photo: picture });
-    }
-
-    // Crea un token JWT
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
-    });
-
-    res.json({ token, user });
-  } catch (err) {
-    console.error(err);
-    res.status(401).json({ error: "Token inválido" });
-  }
-});
-
 app.post("/addCategory", async (req, res) => {
   try {
     const { Name } = req.body;

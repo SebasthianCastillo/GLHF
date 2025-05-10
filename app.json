@@ -13,8 +13,7 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true,
-      "bundleidentifier": "com.sebb21.GLHF"
+      "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
