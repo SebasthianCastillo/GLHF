@@ -479,7 +479,7 @@ const Products = () => {
                 </Pressable>
               </View>
               <View className="space-y-2">
-                {items.map((item) => (
+                {items.map((item: any) => (
                   <Pressable
                     key={item.value}
                     onPress={() => {
