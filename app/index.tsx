@@ -19,11 +19,19 @@ import {
   useFocusEffect,
   Pressable,
   ActivityIndicator,
+  Button,
 } from "../app/shared"; // Centralized imports
 import ColorPicker, { Swatches } from "reanimated-color-picker";
-
+import * as Google from "expo-auth-session/providers/google";
+interface User {
+  authProvider: String;
+  providerId: String;
+  email: String;
+  name: String;
+  passwordHash: String;
+}
 const API_URL =
-  Constants.manifest?.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
+  Constants.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
 
 export default function HomeScreen() {
   const [categories, setcategories] = useState([]);
@@ -31,6 +39,16 @@ export default function HomeScreen() {
   const [colors, setColors] = useState<{ [key: string]: string }>({}); // Object to hold colors for each category
   const [selectedCategoryId, setSelectedCategoryId] = useState(""); // Category ID for which color is being changed
   const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    clientId:
+      "111790790742-bg3j6m60h4vn5tde5542segocpt6v0c9.apps.googleusercontent.com",
+    androidClientId:
+      "111790790742-2sg4mh0s4ibguf58th5lnjh7katdrak7.apps.googleusercontent.com",
+    iosClientId:
+      "111790790742-kouha1h6vsf4m7tbigbe7snjl864tmt6.apps.googleusercontent.com",
+  });
 
   useFocusEffect(
     useCallback(() => {
@@ -45,6 +63,56 @@ export default function HomeScreen() {
     } catch (error) {
       console.log("error fetching categories data", error);
     }
+  };
+
+  useEffect(() => {
+    getCurrentUser();
+  }, []);
+
+  // Paso 2: Verificamos si se recibió respuesta de Google
+  useEffect(() => {
+    if (response?.type === "success") {
+      const { authentication } = response;
+      getGoogleUserInfo(authentication?.accessToken);
+    }
+  }, [response]);
+
+  // Paso 3: Obtenemos perfil desde Google y lo enviamos al backend
+  const getGoogleUserInfo = async (accessToken?: string) => {
+    if (!accessToken) return;
+    const res = await fetch("https://www.googleapis.com/userinfo/v2/me", {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    const profile = await res.json();
+
+    const { data } = await axios.post(`${API_URL}/google`, {
+      providerId: profile.id,
+      name: profile.name,
+      email: profile.email,
+    });
+
+    await AsyncStorage.setItem("token", data.token);
+    setUser(data.user);
+  };
+
+  // Paso 4: Comprobar token si ya está guardado (autologin)
+  const getCurrentUser = async () => {
+    const token = await AsyncStorage.getItem("token");
+    if (!token) return;
+
+    try {
+      const { data } = await axios.get(`${API_URL}/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setUser(data.user);
+    } catch {
+      await AsyncStorage.removeItem("token");
+    }
+  };
+
+  const logout = async () => {
+    await AsyncStorage.removeItem("token");
+    setUser(null);
   };
 
   const onRefreshingProducts = async () => {
@@ -132,7 +200,29 @@ export default function HomeScreen() {
               containerStylesText="pl-8"
             />
           ))}
-
+          {user ? (
+            <>
+              <Text>Bienvenido, {user.name}</Text>
+              <Text>Tipo de login: {user.authProvider}</Text>
+              <Button title="Cerrar sesión" onPress={logout} />
+            </>
+          ) : (
+            <TouchableOpacity
+              className="flex-row items-center justify-center bg-white border border-gray-300 rounded-3xl py-4 px-6  mb-4 shadow-sm"
+              activeOpacity={0.7}
+              onPress={() => promptAsync()}
+            >
+              <Image
+                source={{
+                  uri: "https://img.icons8.com/?size=500&id=17949&format=png&color=000000",
+                }}
+                className="w-10 h-10 mr-3"
+              />
+              <Text className="text-gray-700 font-medium">
+                Continuar con Google
+              </Text>
+            </TouchableOpacity>
+          )}
           <TouchableOpacity
             activeOpacity={0.7}
             className="p-10"
@@ -156,7 +246,7 @@ export default function HomeScreen() {
                 <ColorPicker
                   style={{ width: "70%" }}
                   value={colors[selectedCategoryId] || "red"}
-                  onComplete={({ hex }) => {
+                  onComplete={({ hex }: { hex: string }) => {
                     handleColorChange(hex);
                     setIsPickerVisible(false);
                   }}
