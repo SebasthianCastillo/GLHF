@@ -64,7 +64,7 @@ export default function HomeScreen() {
       console.log("error fetching categories data", error);
     }
   };
-
+// #region Google Auth
   useEffect(() => {
     getCurrentUser();
   }, []);
@@ -107,14 +107,14 @@ export default function HomeScreen() {
       setUser(data.user);
     } catch {
       await AsyncStorage.removeItem("token");
-    }
+    } 
   };
 
   const logout = async () => {
     await AsyncStorage.removeItem("token");
     setUser(null);
   };
-
+// #endregion
   const onRefreshingProducts = async () => {
     CallCategories();
     setLoading(true);

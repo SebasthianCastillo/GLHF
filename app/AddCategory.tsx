@@ -16,7 +16,7 @@ import {
 } from "../app/shared"; // Centralized imports
 
 const API_URL =
-  Constants.manifest?.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
+  Constants.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
 
 const AddCategory = () => {
   const [name, setName] = useState("");
