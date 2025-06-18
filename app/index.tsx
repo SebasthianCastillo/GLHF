@@ -20,16 +20,19 @@ import {
   Pressable,
   ActivityIndicator,
   Button,
-} from "../app/shared"; // Centralized imports
+} from "./lib/shared"; // Centralized imports
 import ColorPicker, { Swatches } from "reanimated-color-picker";
 import * as Google from "expo-auth-session/providers/google";
-interface User {
-  authProvider: String;
-  providerId: String;
-  email: String;
-  name: String;
-  passwordHash: String;
-}
+import * as AuthSession from "expo-auth-session";
+import * as WebBrowser from "expo-web-browser";
+import { GoogleSignin, User } from "@react-native-google-signin/google-signin";
+// interface User {
+//   authProvider: String;
+//   providerId: String;
+//   email: String;
+//   name: String;
+//   passwordHash: String;
+// }
 const API_URL =
   Constants.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
 
@@ -41,18 +44,27 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<User | null>(null);
 
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId:
-      "111790790742-bg3j6m60h4vn5tde5542segocpt6v0c9.apps.googleusercontent.com",
-    androidClientId:
-      "111790790742-2sg4mh0s4ibguf58th5lnjh7katdrak7.apps.googleusercontent.com",
-    iosClientId:
-      "111790790742-kouha1h6vsf4m7tbigbe7snjl864tmt6.apps.googleusercontent.com",
+  GoogleSignin.configure({
+    webClientId:
+      "305169218247-rd7peu927l4f43nhl6ecuj79rumi8ueu.apps.googleusercontent.com",
+    profileImageSize: 150,
   });
+  const handleGoogleSign = async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      const response = await GoogleSignin.signIn();
 
+      console.log(response);
+      // setAuth(response.data);
+      // getGoogleUserInfo(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   useFocusEffect(
     useCallback(() => {
       CallCategories();
+      getCurrentUser();
     }, [])
   );
 
@@ -64,35 +76,35 @@ export default function HomeScreen() {
       console.log("error fetching categories data", error);
     }
   };
-// #region Google Auth
-  useEffect(() => {
-    getCurrentUser();
-  }, []);
+  // #region Google Auth
 
-  // Paso 2: Verificamos si se recibió respuesta de Google
-  useEffect(() => {
-    if (response?.type === "success") {
-      const { authentication } = response;
-      getGoogleUserInfo(authentication?.accessToken);
-    }
-  }, [response]);
+  //Paso 2: Verificamos si se recibió respuesta de Google
+  // useEffect(() => {
+  //   console.log("here");
+  //   if (response?.type === "success") {
+  //     const accessToken = response.authentication?.accessToken;
+  //     console.log("✅ accessToken:", accessToken);
+  //     // getGoogleUserInfo(accessToken);
+  //   }
+  // }, [response]);
 
   // Paso 3: Obtenemos perfil desde Google y lo enviamos al backend
   const getGoogleUserInfo = async (accessToken?: string) => {
-    if (!accessToken) return;
-    const res = await fetch("https://www.googleapis.com/userinfo/v2/me", {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-    const profile = await res.json();
+    // if (!accessToken) return;
+    // const res = await fetch("https://www.googleapis.com/userinfo/v2/me", {
+    //   headers: { Authorization: `Bearer ${accessToken}` },
+    // });
+    // const profile = await res.json();
 
-    const { data } = await axios.post(`${API_URL}/google`, {
-      providerId: profile.id,
-      name: profile.name,
-      email: profile.email,
-    });
+    // const { data } = await axios.post(`${API_URL}/google`, {
+    //   providerId: profile.id,
+    //   name: profile.name,
+    //   email: profile.email,
+    // });
 
-    await AsyncStorage.setItem("token", data.token);
-    setUser(data.user);
+    // await AsyncStorage.setItem("token", data.token);
+    // setUser(data.user);
+    console.log("accessToken", accessToken);
   };
 
   // Paso 4: Comprobar token si ya está guardado (autologin)
@@ -107,14 +119,14 @@ export default function HomeScreen() {
       setUser(data.user);
     } catch {
       await AsyncStorage.removeItem("token");
-    } 
+    }
   };
 
   const logout = async () => {
     await AsyncStorage.removeItem("token");
     setUser(null);
   };
-// #endregion
+  // #endregion
   const onRefreshingProducts = async () => {
     CallCategories();
     setLoading(true);
@@ -202,15 +214,15 @@ export default function HomeScreen() {
           ))}
           {user ? (
             <>
-              <Text>Bienvenido, {user.name}</Text>
-              <Text>Tipo de login: {user.authProvider}</Text>
+              <Text>Bienvenido, {"hola"}</Text>
+              <Text>Tipo de login: {"hola"}</Text>
               <Button title="Cerrar sesión" onPress={logout} />
             </>
           ) : (
             <TouchableOpacity
               className="flex-row items-center justify-center bg-white border border-gray-300 rounded-3xl py-4 px-6  mb-4 shadow-sm"
               activeOpacity={0.7}
-              onPress={() => promptAsync()}
+              onPress={() => handleGoogleSign()}
             >
               <Image
                 source={{

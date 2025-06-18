@@ -13,7 +13,7 @@ import {
   TouchableOpacity,
   FontAwesome6,
   Text,
-} from "../app/shared"; // Centralized imports
+} from "./lib/shared"; // Centralized imports
 
 const API_URL =
   Constants.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
