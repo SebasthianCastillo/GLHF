@@ -8,9 +8,9 @@ import Category from "./model/Category.js";
 import Producto from "./model/Producto.js";
 import ProductDetail from "./model/ProductDetail.js";
 import User from "./model/User.js";
-import { MongoClient, ObjectId } from "mongodb";
+import { ObjectId } from "mongodb";
 import jwt from "jsonwebtoken";
-
+import requireAuth from "./middleware/auth.js";
 const app = express();
 const PORT = process.env.PORT || 5000;
 app.use(cors());
@@ -29,11 +29,53 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
-app.post("/addCategory", async (req, res) => {
+//#region auth google
+/*---------------------- Google Auth---------------------- */
+app.post("/google", async (req, res) => {
+  const { providerId, name, email, avatar } = req.body;
+
+  let user = await User.findOne({ email });
+
+  if (!user) {
+    user = new User({
+      email,
+      name,
+      avatar,
+      authProviders: [{ provider: "google", providerId }],
+    });
+  } else {
+    const alreadyLinked = user.authProviders.some(
+      (p) => p.provider === "google"
+    );
+    if (!alreadyLinked) {
+      user.authProviders.push({ provider: "google", providerId });
+    }
+  }
+
+  await user.save(); // Paso 6: Se crea el usuario si no existe
+
+  // Paso 7: Genera token JWT con el userId de MongoDB
+  const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+    expiresIn: "7d",
+  });
+
+  res.json({ token, user }); // Paso 8: Se devuelve token y datos de usuario
+});
+
+// Paso 9: Obtener datos del usuario actual desde token
+
+app.get("/currentUser", requireAuth, async (req, res) => {
+  res.json({ user: req.user }); // ← user is set by the middleware
+});
+
+//#endregion
+// #region Category funcs
+app.post("/addCategory", requireAuth, async (req, res) => {
   try {
     const { Name } = req.body;
     const newCategory = new Category({
       Name,
+      UserID: req.user._id,
     });
     await newCategory.save();
     res.status(201).json({ message: "Category saved successfully" });
@@ -42,6 +84,18 @@ app.post("/addCategory", async (req, res) => {
     res.status(500).json({ message: "Error al agregar una categoría" });
   }
 });
+app.get("/categories", requireAuth, async (req, res) => {
+  try {
+    const categories = await Category.find({ UserId: req.user._id });
+    res.status(200).json(categories);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error al cargar las categorías" });
+  }
+});
+// #endregion
+
+// #region Product funcs
 app.post("/addProduct", async (req, res) => {
   try {
     const { Name, quantity, CategoryID } = req.body;
@@ -95,16 +149,6 @@ app.patch("/quantityUpdateProduct", async (req, res) => {
   } catch (error) {
     res.status(500).send("Error al actualizar el documento");
     res.status(500).json({ message: "Internal Server Error" });
-  }
-});
-
-app.get("/categories", async (req, res) => {
-  try {
-    const categories = await Category.find();
-    res.status(200).json(categories);
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Error al cargar las categorías" });
   }
 });
 
@@ -277,41 +321,4 @@ app.get("/", async (req, res) => {
     res.status(500).json({ message: "Error" });
   }
 });
-
-/*---------------------- Google Auth---------------------- */
-app.post("/google", async (req, res) => {
-  const { providerId, name, email } = req.body;
-
-  let user = await User.findOne({ authProvider: "google", providerId });
-
-  if (!user) {
-    user = new User({
-      authProvider: "google",
-      providerId,
-      name,
-      email,
-    });
-    await user.save(); // Paso 6: Se crea el usuario si no existe
-  }
-  // Paso 7: Genera token JWT con el userId de MongoDB
-  const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-    expiresIn: "7d",
-  });
-
-  res.json({ token, user }); // Paso 8: Se devuelve token y datos de usuario
-});
-
-// Paso 9: Obtener datos del usuario actual desde token
-app.get("/me", async (req, res) => {
-  const authHeader = req.headers.authorization;
-  const token = authHeader && authHeader.split(" ")[1];
-  if (!token) return res.sendStatus(401);
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.userId);
-    res.json({ user });
-  } catch (err) {
-    res.sendStatus(403);
-  }
-});
+// #endregion

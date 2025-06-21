@@ -22,19 +22,7 @@ import {
   Button,
 } from "./lib/shared"; // Centralized imports
 import ColorPicker, { Swatches } from "reanimated-color-picker";
-import * as Google from "expo-auth-session/providers/google";
-import * as AuthSession from "expo-auth-session";
-import * as WebBrowser from "expo-web-browser";
 import { GoogleSignin, User } from "@react-native-google-signin/google-signin";
-// interface User {
-//   authProvider: String;
-//   providerId: String;
-//   email: String;
-//   name: String;
-//   passwordHash: String;
-// }
-const API_URL =
-  Constants.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
 
 export default function HomeScreen() {
   const [categories, setcategories] = useState([]);
@@ -42,23 +30,28 @@ export default function HomeScreen() {
   const [colors, setColors] = useState<{ [key: string]: string }>({}); // Object to hold colors for each category
   const [selectedCategoryId, setSelectedCategoryId] = useState(""); // Category ID for which color is being changed
   const [loading, setLoading] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
+  const [auth, setAuth] = useState<User | null>(null);
+
+  const API_URL =
+    Constants.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
+  const WEB_CLIENT_ID_GOOGLE =
+    "305169218247-rd7peu927l4f43nhl6ecuj79rumi8ueu.apps.googleusercontent.com";
 
   GoogleSignin.configure({
-    webClientId:
-      "305169218247-rd7peu927l4f43nhl6ecuj79rumi8ueu.apps.googleusercontent.com",
+    webClientId: WEB_CLIENT_ID_GOOGLE,
     profileImageSize: 150,
   });
   const handleGoogleSign = async () => {
+    console.log(API_URL);
+    console.log(WEB_CLIENT_ID_GOOGLE);
     try {
       await GoogleSignin.hasPlayServices();
       const response = await GoogleSignin.signIn();
 
       console.log(response);
-      // setAuth(response.data);
-      // getGoogleUserInfo(response.data);
+      getGoogleUserInfo(response);
     } catch (error) {
-      console.log(error);
+      console.log("Error en autenticación ", error);
     }
   };
   useFocusEffect(
@@ -77,7 +70,51 @@ export default function HomeScreen() {
     }
   };
   // #region Google Auth
+  // Paso 3: Obtenemos perfil desde Google y lo enviamos al backend
+  const getGoogleUserInfo = async (response: User) => {
+    // if (!accessToken) return;
+    // const res = await fetch("https://www.googleapis.com/userinfo/v2/me", {
+    //   headers: { Authorization: `Bearer ${accessToken}` },
+    // });
+    // const profile = await res.json();
 
+    try {
+      console.log(API_URL);
+      const { data } = await axios.post(`${API_URL}/google`, {
+        providerId: response.user.id,
+        name: response.user.name,
+        email: response.user.email,
+        avatar: response.user.photo,
+      });
+
+      await AsyncStorage.setItem("token", data.token);
+      setAuth(response);
+    } catch (error) {
+      console.log("error google data", error);
+    }
+  };
+
+  // Paso 4: Comprobar token si ya está guardado (autologin)
+  const getCurrentUser = async () => {
+    const token = await AsyncStorage.getItem("token");
+    if (!token) return;
+
+    try {
+      const { data } = await axios.get(`${API_URL}/currentUser`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setAuth(data.user);
+    } catch (error) {
+      console.log("error current user", error);
+      await AsyncStorage.removeItem("token");
+    }
+  };
+
+  const logout = async () => {
+    await AsyncStorage.removeItem("token");
+    setAuth(null);
+  };
+  // #region auth2
   //Paso 2: Verificamos si se recibió respuesta de Google
   // useEffect(() => {
   //   console.log("here");
@@ -89,43 +126,41 @@ export default function HomeScreen() {
   // }, [response]);
 
   // Paso 3: Obtenemos perfil desde Google y lo enviamos al backend
-  const getGoogleUserInfo = async (accessToken?: string) => {
-    // if (!accessToken) return;
-    // const res = await fetch("https://www.googleapis.com/userinfo/v2/me", {
-    //   headers: { Authorization: `Bearer ${accessToken}` },
-    // });
-    // const profile = await res.json();
-
-    // const { data } = await axios.post(`${API_URL}/google`, {
-    //   providerId: profile.id,
-    //   name: profile.name,
-    //   email: profile.email,
-    // });
-
-    // await AsyncStorage.setItem("token", data.token);
-    // setUser(data.user);
-    console.log("accessToken", accessToken);
-  };
+  // const getGoogleUserInfo = async (accessToken?: string) => {
+  // if (!accessToken) return;
+  // const res = await fetch("https://www.googleapis.com/userinfo/v2/me", {
+  //   headers: { Authorization: `Bearer ${accessToken}` },
+  // });
+  // const profile = await res.json();
+  // const { data } = await axios.post(`${API_URL}/google`, {
+  //   providerId: profile.id,
+  //   name: profile.name,
+  //   email: profile.email,
+  // });
+  // await AsyncStorage.setItem("token", data.token);
+  // setUser(data.user);
+  // };
 
   // Paso 4: Comprobar token si ya está guardado (autologin)
-  const getCurrentUser = async () => {
-    const token = await AsyncStorage.getItem("token");
-    if (!token) return;
+  // const getCurrentUser = async () => {
+  //   const token = await AsyncStorage.getItem("token");
+  //   if (!token) return;
 
-    try {
-      const { data } = await axios.get(`${API_URL}/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setUser(data.user);
-    } catch {
-      await AsyncStorage.removeItem("token");
-    }
-  };
+  //   try {
+  //     const { data } = await axios.get(`${API_URL}/me`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     });
+  //     setUser(data.user);
+  //   } catch {
+  //     await AsyncStorage.removeItem("token");
+  //   }
+  // };
 
-  const logout = async () => {
-    await AsyncStorage.removeItem("token");
-    setUser(null);
-  };
+  // const logout = async () => {
+  //   await AsyncStorage.removeItem("token");
+  //   setUser(null);
+  // };
+  //#endregion
   // #endregion
   const onRefreshingProducts = async () => {
     CallCategories();
@@ -212,10 +247,10 @@ export default function HomeScreen() {
               containerStylesText="pl-8"
             />
           ))}
-          {user ? (
+          {auth ? (
             <>
-              <Text>Bienvenido, {"hola"}</Text>
-              <Text>Tipo de login: {"hola"}</Text>
+              <Text>Bienvenido, {auth.user.name}</Text>
+              <Image source={{ uri: auth.user.photo as string }} />
               <Button title="Cerrar sesión" onPress={logout} />
             </>
           ) : (
@@ -228,7 +263,7 @@ export default function HomeScreen() {
                 source={{
                   uri: "https://img.icons8.com/?size=500&id=17949&format=png&color=000000",
                 }}
-                className="w-10 h-10 mr-3"
+                className="w-5 h-5 mr-3"
               />
               <Text className="text-gray-700 font-medium">
                 Continuar con Google

@@ -16,6 +16,7 @@
     "api/server.mjs",
     "api/model/Producto.js",
     "api/model/ProductDetail.js",
-    "api/model/Category.js"
+    "api/model/Category.js",
+    "api/middleware/auth.js"
   ]
 }

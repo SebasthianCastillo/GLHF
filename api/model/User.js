@@ -1,13 +1,24 @@
 const mongoose = require("mongoose");
 
-const userSchema = new mongoose.Schema({
-  authProvider: { type: String, required: true }, // 'google', 'github', 'local', etc.
-  providerId: { type: String, required: true }, // ID del usuario en el proveedor externo (o email para login local)
-  email: String,
-  name: String,
-  passwordHash: String, // solo para login local
-});
-
+const userSchema = new mongoose.Schema(
+  {
+    email: { type: String, required: true, unique: true },
+    name: String,
+    avatar: String,
+    authProviders: [
+      {
+        provider: {
+          type: String,
+          enum: ["google", "github", "local"],
+          required: true,
+        },
+        providerId: String,
+      },
+    ],
+    passwordHash: String, // For local auth
+  },
+  { timestamps: true }
+);
 const User = mongoose.model("User", userSchema);
 
 module.exports = User;
