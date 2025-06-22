@@ -1,10 +1,9 @@
 const jwt = require("jsonwebtoken");
 const User = require("../model/User.js");
 require("dotenv").config();
-const { Request, Response, NextFunction } = require("express");
 
 const requireAuth = async (req, res, next) => {
-  const authHeader = req.headers.authorization;
+  const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
   if (!token) return res.status(401).json({ message: "No token provided" });
 
@@ -16,7 +15,7 @@ const requireAuth = async (req, res, next) => {
     const decoded = jwt.verify(token, secret);
     const user = await User.findById(decoded.userId);
     if (!user) return res.status(401).json({ message: "User not found" });
-    req.user = user;
+    res.user = user;
     next();
   } catch (err) {
     res.status(403).json({ message: "Invalid token" });

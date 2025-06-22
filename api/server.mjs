@@ -16,7 +16,12 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-
+app.use(
+  cors({
+    origin: "*", // or restrict to your app origin if needed
+    allowedHeaders: ["Content-Type", "Authorization"], // VERY IMPORTANT
+  })
+);
 // Connect to MongoDB
 const DB_URL = process.env.DB_URL;
 
@@ -31,6 +36,7 @@ app.listen(PORT, () => {
 
 //#region auth google
 /*---------------------- Google Auth---------------------- */
+
 app.post("/google", async (req, res) => {
   const { providerId, name, email, avatar } = req.body;
 
@@ -52,9 +58,9 @@ app.post("/google", async (req, res) => {
     }
   }
 
-  await user.save(); // Paso 6: Se crea el usuario si no existe
+  await user.save(); // Se crea el usuario si no existe
 
-  // Paso 7: Genera token JWT con el userId de MongoDB
+  // Genera token JWT con el userId de MongoDB
   const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
     expiresIn: "7d",
   });
@@ -62,10 +68,10 @@ app.post("/google", async (req, res) => {
   res.json({ token, user }); // Paso 8: Se devuelve token y datos de usuario
 });
 
-// Paso 9: Obtener datos del usuario actual desde token
+// Obtener datos del usuario actual desde token
 
 app.get("/currentUser", requireAuth, async (req, res) => {
-  res.json({ user: req.user }); // ← user is set by the middleware
+  res.status(200).json({ user: res.user }); // ← user is set by the middleware
 });
 
 //#endregion

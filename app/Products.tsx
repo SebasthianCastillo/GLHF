@@ -134,7 +134,6 @@ const Products = () => {
     axios
       .post(`${API_URL}/addProductDetail`, addProductDetail)
       .then((response: any) => {
-        // router.push("/");
         console.log(response);
         quantityUpdateProduct(idProducto, quantityProduct, operation);
         productsFunction();
@@ -418,7 +417,7 @@ const Products = () => {
                 <Pressable
                   onPress={() =>
                     router.push({
-                      pathname: "/ProductDetail",
+                      pathname: "../ProductDetail",
                       params: {
                         product: JSON.stringify(item),
                       },
@@ -449,7 +448,7 @@ const Products = () => {
           className="p-10 items-center"
           onPress={() =>
             router.push({
-              pathname: "/AddProduct",
+              pathname: "../AddProduct",
               params: {
                 CategoryKey: categoryObject._id,
                 CategoryName: CategoryName,

@@ -12,14 +12,6 @@
       "type": "node"
     },
     {
-      "name": "Debug Node Server",
-      "type": "node",
-      "request": "launch",
-      "program": "${workspaceFolder}/api/server.mjs",
-      "cwd": "${workspaceFolder}/api",
-      "runtimeArgs": ["--experimental-modules"]
-    },
-    {
       "name": "Attach to Hermes application",
       "request": "attach",
       "type": "reactnativedirect",

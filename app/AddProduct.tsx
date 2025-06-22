@@ -45,7 +45,6 @@ const AddProduct = () => {
         }, 3000);
         setProductName("");
         setCategoryID("");
-        // router.push("/");
       })
       .catch((error) => {
         console.log(ProductData);

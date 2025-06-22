@@ -30,30 +30,29 @@ export default function HomeScreen() {
   const [colors, setColors] = useState<{ [key: string]: string }>({}); // Object to hold colors for each category
   const [selectedCategoryId, setSelectedCategoryId] = useState(""); // Category ID for which color is being changed
   const [loading, setLoading] = useState(false);
-  const [auth, setAuth] = useState<User | null>(null);
+  const [auth, setAuth] = useState<UserDB | null>(null);
+  interface UserDB {
+    email: { type: String; required: true; unique: true };
+    name: String;
+    avatar: String;
+    authProviders: [
+      {
+        provider: {
+          type: String;
+          enum: ["google", "github", "local"];
+          required: true;
+        };
+        providerId: String;
+      }
+    ];
+    passwordHash: String; // For local auth
+  }
 
   const API_URL =
     Constants.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
   const WEB_CLIENT_ID_GOOGLE =
     "305169218247-rd7peu927l4f43nhl6ecuj79rumi8ueu.apps.googleusercontent.com";
 
-  GoogleSignin.configure({
-    webClientId: WEB_CLIENT_ID_GOOGLE,
-    profileImageSize: 150,
-  });
-  const handleGoogleSign = async () => {
-    console.log(API_URL);
-    console.log(WEB_CLIENT_ID_GOOGLE);
-    try {
-      await GoogleSignin.hasPlayServices();
-      const response = await GoogleSignin.signIn();
-
-      console.log(response);
-      getGoogleUserInfo(response);
-    } catch (error) {
-      console.log("Error en autenticación ", error);
-    }
-  };
   useFocusEffect(
     useCallback(() => {
       CallCategories();
@@ -70,6 +69,19 @@ export default function HomeScreen() {
     }
   };
   // #region Google Auth
+  GoogleSignin.configure({
+    webClientId: WEB_CLIENT_ID_GOOGLE,
+    profileImageSize: 150,
+  });
+  const handleGoogleSign = async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      const response = await GoogleSignin.signIn();
+      getGoogleUserInfo(response);
+    } catch (error) {
+      console.log("Error en autenticación ", error);
+    }
+  };
   // Paso 3: Obtenemos perfil desde Google y lo enviamos al backend
   const getGoogleUserInfo = async (response: User) => {
     // if (!accessToken) return;
@@ -88,7 +100,7 @@ export default function HomeScreen() {
       });
 
       await AsyncStorage.setItem("token", data.token);
-      setAuth(response);
+      setAuth(data.user);
     } catch (error) {
       console.log("error google data", error);
     }
@@ -97,16 +109,19 @@ export default function HomeScreen() {
   // Paso 4: Comprobar token si ya está guardado (autologin)
   const getCurrentUser = async () => {
     const token = await AsyncStorage.getItem("token");
+    console.log(token);
     if (!token) return;
 
     try {
       const { data } = await axios.get(`${API_URL}/currentUser`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { authorization: `Bearer ${token}` },
       });
+      console.log("current user index.tsx: " + data.user);
+      console.log(data.user.name);
       setAuth(data.user);
     } catch (error) {
       console.log("error current user", error);
-      await AsyncStorage.removeItem("token");
+      // await AsyncStorage.removeItem("token");
     }
   };
 
@@ -249,8 +264,8 @@ export default function HomeScreen() {
           ))}
           {auth ? (
             <>
-              <Text>Bienvenido, {auth.user.name}</Text>
-              <Image source={{ uri: auth.user.photo as string }} />
+              <Text>Bienvenido, {auth.name}</Text>
+              <Image source={{ uri: auth.avatar as string }} />
               <Button title="Cerrar sesión" onPress={logout} />
             </>
           ) : (
@@ -273,7 +288,7 @@ export default function HomeScreen() {
           <TouchableOpacity
             activeOpacity={0.7}
             className="p-10"
-            onPress={() => router.push("/AddCategory")}
+            onPress={() => router.push("../AddCategory")}
           >
             <View
               className={`w-16 h-16 rounded-full bg-yellow-500 shadow-lg justify-center items-center`}
