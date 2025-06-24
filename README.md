@@ -1,50 +1,138 @@
-# Welcome to your Expo app 👋
+# GLHF Inventory App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Aplicación móvil para gestión de inventario con backend en Node.js y MongoDB. Desarrollado con React Native y Expo.
 
-## Get started
+---
 
-1. Install dependencies
+## 📦 Versiones y Cambios
 
-   ```bash
-   npm install
-   ```
+### ✅ v1.0
 
-2. Start the app
+- a. Editar/eliminar categoría y producto manteniendo presionado (con confirmación)
+- b. Vista de productos disponibles en detalle de producto (DIV)
 
-   ```bash
-    npx expo start
-   ```
+### 🔄 v1.0.1 (pequeñas mejoras a la v1)
 
-In the output, you'll find options to open the app in a
+- a. Cambiar DownPicker por modal para seleccionar formato de productos
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+### 🚀 v1.1
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+- a. Cambio de color en botones de categoría al mantener presionado
+- b. Buscador de productos por categoría 👷 _[En desarrollo]_
+- c. Pull to refresh de productos
+- d. Botón de recarga en vista de categorías
+- e. Mejora en suma/resta de unidades (guardar tras unos segundos, no en cada incremento) 🔜 _[Planeado]_
+- f. Fix: evitar cierre al hacer long click en dos productos consecutivamente
 
-## Get a fresh project
+---
 
-When you're ready, run:
+## 🧪 Convenciones de Commits
 
-```bash
-npm run reset-project
+Se siguen las convenciones de commits propuestas en este artículo:
+
+🔗 [Conventional Git Commits - Best Practices](https://dev.to/anikakash/conventional-git-commits-with-best-practices-4d2)
+
+---
+
+## 🌐 Despliegue Backend (Render)
+
+Archivo principal del servidor: `~/Desktop/INVS/glhf/api/server.mjs`
+
+### Estructura del proyecto:
+
+```
+INVS/
+└── glhf/
+    └── api/
+        └── server.mjs
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### Configuración en Render:
 
-## Learn more
+- **Root Directory:** `glhf/api`
+- **Build Command:** `npm install` _(si hay `package.json`)_
+- **Start Command:** `node server.mjs`
 
-To learn more about developing your project with Expo, look at the following resources:
+---
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## 📱 Generar APK / AAB para Android (Expo + EAS)
 
-## Join the community
+### 1. Instalar EAS CLI
 
-Join our community of developers creating universal apps.
+```bash
+npm install -g eas-cli
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+### 2. Iniciar sesión en Expo
+
+```bash
+eas login
+```
+
+### 3. Configurar EAS en el proyecto
+
+```bash
+eas build:configure
+```
+
+### 4. Generar build
+
+- **APK:**
+
+```bash
+eas build -p android --profile preview
+```
+
+- **AAB (Play Store):**
+
+```bash
+eas build --platform android --profile preview
+```
+
+---
+
+## Configuración de Debug (VS Code / Cursor)
+
+### Pasos para debuggear:
+
+1. Iniciar app:
+
+```bash
+npx expo start
+```
+
+2. Iniciar backend:
+
+```bash
+node server.mjs
+```
+
+3. Configurar `launch.json` en `.vscode`:
+
+```json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Node Server",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/api/server.mjs",
+      "cwd": "${workspaceFolder}/api",
+      "runtimeArgs": ["--experimental-modules"]
+    },
+    {
+      "name": "Attach to Hermes application",
+      "request": "attach",
+      "type": "reactnativedirect",
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}
+```
+
+---
+
+## 🧾 Licencia
+
+Este proyecto es privado y de uso interno. No redistribuir sin permiso.

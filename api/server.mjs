@@ -79,9 +79,11 @@ app.get("/currentUser", requireAuth, async (req, res) => {
 app.post("/addCategory", requireAuth, async (req, res) => {
   try {
     const { Name } = req.body;
+    const userId = req.res.user._id.toString();
+
     const newCategory = new Category({
       Name,
-      UserID: req.user._id,
+      UserID: userId,
     });
     await newCategory.save();
     res.status(201).json({ message: "Category saved successfully" });
@@ -92,10 +94,16 @@ app.post("/addCategory", requireAuth, async (req, res) => {
 });
 app.get("/categories", requireAuth, async (req, res) => {
   try {
-    const categories = await Category.find({ UserId: req.user._id });
+    if (!req.res.user) {
+      return res.status(401).json({ message: "User not found" });
+    }
+    const userId = req.res.user._id.toString();
+    const categories = await Category.find({
+      UserID: userId,
+    });
     res.status(200).json(categories);
   } catch (error) {
-    console.log(error);
+    console.error("Error fetching categories:", error);
     res.status(500).json({ message: "Error al cargar las categorías" });
   }
 });
@@ -168,6 +176,52 @@ app.get("/productsByIDCategory", async (req, res) => {
     res.status(500).json({ message: "Error al cargar los productos" });
   }
 });
+app.delete("/deleteProduct/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    // Busca el producto por ID y elimínalo
+    const result = await Producto.findByIdAndDelete(id);
+
+    if (!result) {
+      return res.status(404).json({ message: "Producto no encontrado" });
+    }
+
+    // Envía una respuesta exitosa
+    res.status(200).json({ message: "Producto eliminado exitosamente" });
+  } catch (error) {
+    console.error("Error al eliminar el producto:", error);
+    res.status(500).json({ message: "Error interno del servidor" });
+  }
+});
+
+app.patch("/updateProductName/:id", async (req, res) => {
+  const { id } = req.params;
+  const { newName } = req.body;
+
+  try {
+    // Find the product by ID and update its name
+    const updatedProduct = await Producto.findByIdAndUpdate(
+      id,
+      { Name: newName },
+      { new: true } // Return the updated document
+    );
+
+    if (!updatedProduct) {
+      return res.status(404).json({ message: "Producto no encontrado" });
+    }
+
+    res.status(200).json({
+      message: "Nombre del producto actualizado exitosamente",
+      product: updatedProduct,
+    });
+  } catch (error) {
+    console.error("Error al actualizar el nombre del producto:", error);
+    res.status(500).json({ message: "Error interno del servidor" });
+  }
+});
+// #endregion
+// #region ProductDetail funcs
 app.get("/productDetailSummaryByOperationAdd", async (req, res) => {
   try {
     const ProductID = req.query.ProductKey;
@@ -208,7 +262,7 @@ app.get("/productDetailSummaryByOperationAdd", async (req, res) => {
         : 0;
 
     // Devolver como texto plano
-    console.log(totalQuantity);
+
     res.status(200).json(ProductDetailSummary);
   } catch (error) {
     console.log(error);
@@ -256,7 +310,7 @@ app.get("/productDetailSummaryByOperationMinus", async (req, res) => {
         : 0;
 
     // Devolver como texto plano
-    console.log(totalQuantity);
+
     res.status(200).json(ProductDetailSummary);
   } catch (error) {
     console.log(error);
@@ -274,50 +328,7 @@ app.get("/productDetailByIDProduct", async (req, res) => {
     res.status(500).json({ message: "Error al cargar los productos" });
   }
 });
-app.delete("/deleteProduct/:id", async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    // Busca el producto por ID y elimínalo
-    const result = await Producto.findByIdAndDelete(id);
-
-    if (!result) {
-      return res.status(404).json({ message: "Producto no encontrado" });
-    }
-
-    // Envía una respuesta exitosa
-    res.status(200).json({ message: "Producto eliminado exitosamente" });
-  } catch (error) {
-    console.error("Error al eliminar el producto:", error);
-    res.status(500).json({ message: "Error interno del servidor" });
-  }
-});
-
-app.patch("/updateProductName/:id", async (req, res) => {
-  const { id } = req.params;
-  const { newName } = req.body;
-
-  try {
-    // Find the product by ID and update its name
-    const updatedProduct = await Producto.findByIdAndUpdate(
-      id,
-      { Name: newName },
-      { new: true } // Return the updated document
-    );
-
-    if (!updatedProduct) {
-      return res.status(404).json({ message: "Producto no encontrado" });
-    }
-
-    res.status(200).json({
-      message: "Nombre del producto actualizado exitosamente",
-      product: updatedProduct,
-    });
-  } catch (error) {
-    console.error("Error al actualizar el nombre del producto:", error);
-    res.status(500).json({ message: "Error interno del servidor" });
-  }
-});
+// #endregion
 
 app.get("/", async (req, res) => {
   try {

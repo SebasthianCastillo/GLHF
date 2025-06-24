@@ -14,6 +14,7 @@ import {
   FontAwesome6,
   Text,
 } from "./lib/shared"; // Centralized imports
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const API_URL =
   Constants.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
@@ -23,13 +24,19 @@ const AddCategory = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const router = useRouter();
 
-  const HandleRegister = () => {
+  const HandleRegister = async () => {
     const categoriesData = {
       Name: name,
     };
+    const token = await AsyncStorage.getItem("token");
+    if (!token) return;
 
     axios
-      .post(`${API_URL}/addCategory`, categoriesData)
+      .post(`${API_URL}/addCategory`, categoriesData, {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      })
       .then((response) => {
         setName("");
         setSuccessMessage("Categoría Agregada");
@@ -40,7 +47,7 @@ const AddCategory = () => {
       })
       .catch((error) => {
         console.log(categoriesData);
-        Alert.alert("Error");
+        Alert.alert("Error" + error);
         console.log("Error adding category", error);
         router.push("/");
       });

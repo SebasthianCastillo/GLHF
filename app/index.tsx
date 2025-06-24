@@ -31,6 +31,7 @@ export default function HomeScreen() {
   const [selectedCategoryId, setSelectedCategoryId] = useState(""); // Category ID for which color is being changed
   const [loading, setLoading] = useState(false);
   const [auth, setAuth] = useState<UserDB | null>(null);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   interface UserDB {
     email: { type: String; required: true; unique: true };
     name: String;
@@ -55,14 +56,20 @@ export default function HomeScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      CallCategories();
       getCurrentUser();
+      CallCategories();
     }, [])
   );
 
   const CallCategories = async () => {
     try {
-      const response = await axios.get(`${API_URL}/categories`);
+      const token = await AsyncStorage.getItem("token");
+      if (!token) return;
+      const response = await axios.get(`${API_URL}/categories`, {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      });
       setcategories(response.data);
     } catch (error) {
       console.log("error fetching categories data", error);
@@ -91,7 +98,6 @@ export default function HomeScreen() {
     // const profile = await res.json();
 
     try {
-      console.log(API_URL);
       const { data } = await axios.post(`${API_URL}/google`, {
         providerId: response.user.id,
         name: response.user.name,
@@ -109,15 +115,14 @@ export default function HomeScreen() {
   // Paso 4: Comprobar token si ya está guardado (autologin)
   const getCurrentUser = async () => {
     const token = await AsyncStorage.getItem("token");
-    console.log(token);
+
     if (!token) return;
 
     try {
       const { data } = await axios.get(`${API_URL}/currentUser`, {
         headers: { authorization: `Bearer ${token}` },
       });
-      console.log("current user index.tsx: " + data.user);
-      console.log(data.user.name);
+
       setAuth(data.user);
     } catch (error) {
       console.log("error current user", error);
@@ -228,14 +233,36 @@ export default function HomeScreen() {
   };
 
   return (
-    <SafeAreaView className="bg-primary h-full">
-      <Pressable onPress={onRefreshingProducts} className="pt-2 pl-4">
-        {loading ? (
-          <ActivityIndicator size="large" color="white" />
-        ) : (
-          <Ionicons name="reload" size={34} color="white" />
+    <SafeAreaView className="bg-primary flex-1">
+      <View className="flex-row justify-between items-start pt-3 px-4">
+        <Pressable onPress={onRefreshingProducts} className="p-2 -ml-2">
+          {loading ? (
+            <ActivityIndicator size="large" color="white" />
+          ) : (
+            <Ionicons name="reload" size={28} color="white" />
+          )}
+        </Pressable>
+        {auth && (
+          <View className="items-end">
+            <View className="flex-row items-center">
+              <Pressable
+                onPress={() => setShowProfileModal(true)}
+                className="w-11 h-11 rounded-full bg-white overflow-hidden border-2 border-white"
+              >
+                <Image
+                  source={{
+                    uri:
+                      (auth.avatar as string) ||
+                      "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
+                  }}
+                  className="w-full h-full"
+                  resizeMode="cover"
+                />
+              </Pressable>
+            </View>
+          </View>
         )}
-      </Pressable>
+      </View>
 
       <ScrollView>
         <TouchableOpacity className="w-full flex justify-center items-center h-full px-5">
@@ -262,13 +289,7 @@ export default function HomeScreen() {
               containerStylesText="pl-8"
             />
           ))}
-          {auth ? (
-            <>
-              <Text>Bienvenido, {auth.name}</Text>
-              <Image source={{ uri: auth.avatar as string }} />
-              <Button title="Cerrar sesión" onPress={logout} />
-            </>
-          ) : (
+          {!auth && (
             <TouchableOpacity
               className="flex-row items-center justify-center bg-white border border-gray-300 rounded-3xl py-4 px-6  mb-4 shadow-sm"
               activeOpacity={0.7}
@@ -285,6 +306,7 @@ export default function HomeScreen() {
               </Text>
             </TouchableOpacity>
           )}
+          <View className="h-8" />
           <TouchableOpacity
             activeOpacity={0.7}
             className="p-10"
@@ -328,6 +350,46 @@ export default function HomeScreen() {
           </Modal>
         </TouchableOpacity>
       </ScrollView>
+      {/* Profile Modal */}
+      <Modal
+        visible={showProfileModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowProfileModal(false)}
+      >
+        <Pressable
+          className="flex-1 justify-end"
+          onPress={() => setShowProfileModal(false)}
+        >
+          <View className="bg-slate-950 rounded-t-3xl p-6 pb-10">
+            <View className="items-center mb-6">
+              <View className="w-20 h-20 rounded-full bg-gray-200 overflow-hidden border-2 border-primary">
+                <Image
+                  source={{
+                    uri:
+                      (auth?.avatar as string) ||
+                      "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
+                  }}
+                  className="w-full h-full"
+                  resizeMode="cover"
+                />
+              </View>
+              <Text className="text-lg font-bold mt-3 text-white">
+                {auth?.name.split(" ")[0]}
+              </Text>
+            </View>
+            <Pressable
+              onPress={() => {
+                setShowProfileModal(false);
+                logout();
+              }}
+              className="bg-red-500 py-3 rounded-lg items-center"
+            >
+              <Text className="text-white font-medium">Cerrar sesión</Text>
+            </Pressable>
+          </View>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 }
