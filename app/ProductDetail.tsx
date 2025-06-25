@@ -12,8 +12,8 @@ import {
   React,
   FontAwesome6,
 } from "./lib/shared"; // Centralized imports
-import { MonthSelector } from "@/components/product/MonthSelector";
-import { TransactionDayItem } from "@/components/product/TransactionDayItem";
+import { MonthSelector } from "@/components/ProductDetail/MonthSelector";
+import { TransactionDayItem } from "@/components/ProductDetail/TransactionDayItem";
 const API_URL =
   Constants.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
 
@@ -319,7 +319,7 @@ const ProductDetail = () => {
       </View>
     );
   };
-
+  // #region renderday
   // const renderDayItem = ({ item }: { item: (typeof dailySummaries)[0] }) => {
   //   const day = item.dateObj.getDate();
   //   const month = item.dateObj.toLocaleString("default", { month: "short" });
@@ -396,6 +396,7 @@ const ProductDetail = () => {
   //       )}
   //     </View>
   //   );
+  // #endregion
   const renderDayItem = ({ item }: { item: (typeof dailySummaries)[0] }) => (
     <TransactionDayItem
       item={{
@@ -412,9 +413,7 @@ const ProductDetail = () => {
 
   const renderEmptyComponent = () => (
     <View className="flex-1 items-center justify-center p-4">
-      <Text className="text-gray-400 text-lg">
-        No hay transacciones este mes
-      </Text>
+      <Text className="text-gray-400 text-lg">No hay movimientos este mes</Text>
     </View>
   );
 
