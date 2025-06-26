@@ -6,6 +6,7 @@ type MonthSelectorProps = {
   onPrevMonth: () => void;
   onNextMonth: () => void;
   formatMonthYear: (month: number, year: string) => string;
+  viewMode?: "days" | "months";
 };
 
 export const MonthSelector = ({
@@ -14,6 +15,7 @@ export const MonthSelector = ({
   onPrevMonth,
   onNextMonth,
   formatMonthYear,
+  viewMode = "days",
 }: MonthSelectorProps) => {
   return (
     <View className="flex-row items-center justify-between px-4 py-3 bg-primary">
@@ -21,7 +23,9 @@ export const MonthSelector = ({
         <Text className="text-2xl text-yellow-500">&lt;</Text>
       </TouchableOpacity>
       <Text className="text-lg font-semibold text-white">
-        {formatMonthYear(currentMonth, currentYear.toString())}
+        {viewMode === "days"
+          ? formatMonthYear(currentMonth, currentYear.toString())
+          : currentYear.toString()}
       </Text>
       <TouchableOpacity onPress={onNextMonth} className="px-3 py-1">
         <Text className="text-2xl text-yellow-500">&gt;</Text>

@@ -33,6 +33,114 @@ mongoose
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+app.get("/getMonthlySummaries", async (req, res) => {
+  try {
+    const result = await ProductDetail.aggregate([
+      // Extract year and month from date
+      {
+        $addFields: {
+          year: { $year: "$date" },
+          month: { $month: "$date" },
+        },
+      },
+
+      // Group by year and month, compute added and removed
+      {
+        $group: {
+          _id: { year: "$year", month: "$month" },
+          added: {
+            $sum: {
+              $cond: [
+                { $eq: [{ $toLower: "$operation" }, "add"] },
+                "$quantity",
+                0,
+              ],
+            },
+          },
+          removed: {
+            $sum: {
+              $cond: [
+                { $eq: [{ $toLower: "$operation" }, "minus"] },
+                "$quantity",
+                0,
+              ],
+            },
+          },
+          transactions: { $push: "$$ROOT" },
+        },
+      },
+
+      // Add month name for formatting
+      {
+        $addFields: {
+          monthName: {
+            $switch: {
+              branches: [
+                { case: { $eq: ["$_id.month", 1] }, then: "January" },
+                { case: { $eq: ["$_id.month", 2] }, then: "February" },
+                { case: { $eq: ["$_id.month", 3] }, then: "March" },
+                { case: { $eq: ["$_id.month", 4] }, then: "April" },
+                { case: { $eq: ["$_id.month", 5] }, then: "May" },
+                { case: { $eq: ["$_id.month", 6] }, then: "June" },
+                { case: { $eq: ["$_id.month", 7] }, then: "July" },
+                { case: { $eq: ["$_id.month", 8] }, then: "August" },
+                { case: { $eq: ["$_id.month", 9] }, then: "September" },
+                { case: { $eq: ["$_id.month", 10] }, then: "October" },
+                { case: { $eq: ["$_id.month", 11] }, then: "November" },
+                { case: { $eq: ["$_id.month", 12] }, then: "December" },
+              ],
+              default: "Unknown",
+            },
+          },
+        },
+      },
+
+      // Create key-value pair: { k: "June 2025", v: { ... } }
+      {
+        $project: {
+          key: {
+            $concat: ["$monthName", " ", { $toString: "$_id.year" }],
+          },
+          value: {
+            year: "$_id.year",
+            month: "$_id.month",
+            added: "$added",
+            removed: "$removed",
+            transactions: "$transactions",
+          },
+        },
+      },
+
+      // Group all into a single object using $arrayToObject
+      {
+        $group: {
+          _id: null,
+          keyValuePairs: {
+            $push: {
+              k: "$key",
+              v: "$value",
+            },
+          },
+        },
+      },
+
+      {
+        $project: {
+          _id: 0,
+          result: {
+            $arrayToObject: "$keyValuePairs",
+          },
+        },
+      },
+    ]);
+    res.status(200).json(result[0]?.result || {});
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ message: "Error al cargar product detail monthly summaries" });
+  }
+});
 
 //#region auth google
 /*---------------------- Google Auth---------------------- */
