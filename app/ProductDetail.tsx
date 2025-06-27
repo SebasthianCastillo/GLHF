@@ -63,7 +63,7 @@ const ProductDetail = () => {
   const productObject = Array.isArray(product)
     ? JSON.parse(product[0])
     : JSON.parse(product || "{}");
-
+  // #region Functions
   // carga lista de historial de productos
   useFocusEffect(
     useCallback(() => {
@@ -339,7 +339,7 @@ const ProductDetail = () => {
       <Text className="text-gray-400 text-lg">No hay movimientos este mes</Text>
     </View>
   );
-
+  // #endregion
   return (
     <SafeAreaView className="bg-primary h-full">
       <View className="flex-row items-center justify-between p-4 bg-primary">
