@@ -14,6 +14,8 @@ import {
 } from "./lib/shared"; // Centralized imports
 import { MonthSelector } from "@/components/ProductDetail/MonthSelector";
 import { TransactionDayItem } from "@/components/ProductDetail/TransactionDayItem";
+import SummarySquare from "@/components/ProductDetail/SummarySquare";
+import { useSummaryStore } from "@/store/useSummaryStore";
 const API_URL =
   Constants.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
 
@@ -38,10 +40,12 @@ const ProductDetail = () => {
       transactions: ProductDetail[];
     }>
   >([]);
-  const [ProductDetailSummaryAdd, setProductDetailSummaryAdd] =
-    useState<number>(0);
-  const [ProductDetailSummaryMinus, setProductDetailSummaryMinus] =
-    useState<number>(0);
+  const {
+    productDetailSummaryAdd: ProductDetailSummaryAdd,
+    setProductDetailSummaryAdd,
+    productDetailSummaryMinus: ProductDetailSummaryMinus,
+    setProductDetailSummaryMinus,
+  } = useSummaryStore();
   const [currentMonth, setCurrentMonth] = useState<number>(
     new Date().getMonth()
   );
@@ -90,7 +94,16 @@ const ProductDetail = () => {
       productDetailFunction();
     }, [currentMonth, currentYear])
   );
-
+  const getMonthlySummaries = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/getMonthlySummaries`, {
+        params: { ProductKey: productObject._id },
+      });
+      console.log(response.data);
+    } catch (error) {
+      console.log("error fetching monthly summaries data", error);
+    }
+  };
   // Cuenta cuantos productos fueron agregados y quitados por mes
   const fetchSummaryData = async (currentMonth: Date) => {
     try {
@@ -390,30 +403,7 @@ const ProductDetail = () => {
           />
         )}
       </View>
-      <View className="flex-row justify-between mt-4">
-        <View className="h-16 w-32">
-          <View className="flex-1 items-center justify-center bg-emerald-600 rounded-lg shadow-lg p-4">
-            <Text className="text-3xl font-bold text-white">
-              {ProductDetailSummaryAdd}
-            </Text>
-          </View>
-        </View>
-        {/* <View className="h-24 w-32">
-          <View className="flex-1 items-center justify-center bg-yellow-500 rounded-lg shadow-lg p-4">
-            <Text className="text-3xl font-bold text-white pt-5">
-              {ProductDetailSummaryAdd - ProductDetailSummaryMinus}
-            </Text>
-            <Text className="text-center pt-1 ">Disponible</Text>
-          </View>
-        </View> */}
-        <View className="h-16 w-32">
-          <View className="flex-1 items-center justify-center bg-red-500 rounded-lg shadow-lg p-4">
-            <Text className="text-3xl font-bold text-white">
-              {ProductDetailSummaryMinus}
-            </Text>
-          </View>
-        </View>
-      </View>
+      <SummarySquare />
     </SafeAreaView>
   );
 };

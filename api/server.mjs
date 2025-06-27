@@ -34,8 +34,15 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 app.get("/getMonthlySummaries", async (req, res) => {
+  const productID = req.query.ProductKey;
   try {
     const result = await ProductDetail.aggregate([
+      // Filter by ProductID
+      {
+        $match: {
+          ProductID: productID,
+        },
+      },
       // Extract year and month from date
       {
         $addFields: {
@@ -66,7 +73,6 @@ app.get("/getMonthlySummaries", async (req, res) => {
               ],
             },
           },
-          transactions: { $push: "$$ROOT" },
         },
       },
 
@@ -106,7 +112,6 @@ app.get("/getMonthlySummaries", async (req, res) => {
             month: "$_id.month",
             added: "$added",
             removed: "$removed",
-            transactions: "$transactions",
           },
         },
       },
