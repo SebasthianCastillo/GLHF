@@ -43,6 +43,7 @@ app.get("/getMonthlySummaries", async (req, res) => {
           ProductID: productID,
         },
       },
+
       // Extract year and month from date
       {
         $addFields: {
@@ -76,9 +77,11 @@ app.get("/getMonthlySummaries", async (req, res) => {
         },
       },
 
-      // Add month name for formatting
+      // Add month name
       {
         $addFields: {
+          year: "$_id.year",
+          month: "$_id.month",
           monthName: {
             $switch: {
               branches: [
@@ -101,44 +104,170 @@ app.get("/getMonthlySummaries", async (req, res) => {
         },
       },
 
-      // Create key-value pair: { k: "June 2025", v: { ... } }
-      {
-        $project: {
-          key: {
-            $concat: ["$monthName", " ", { $toString: "$_id.year" }],
-          },
-          value: {
-            year: "$_id.year",
-            month: "$_id.month",
-            added: "$added",
-            removed: "$removed",
-          },
-        },
-      },
-
-      // Group all into a single object using $arrayToObject
+      // Group months under each year
       {
         $group: {
-          _id: null,
-          keyValuePairs: {
+          _id: "$year",
+          months: {
             $push: {
-              k: "$key",
-              v: "$value",
+              year: "$year",
+              month: "$month",
+              monthName: "$monthName",
+              added: "$added",
+              removed: "$removed",
             },
           },
         },
       },
 
+      // Sort years descending
+      {
+        $sort: {
+          _id: -1,
+        },
+      },
+
+      // Sort months inside each year descending
+      {
+        $addFields: {
+          months: {
+            $sortArray: {
+              input: "$months",
+              sortBy: { month: -1 },
+            },
+          },
+        },
+      },
+
+      // Group everything into one doc
+      {
+        $group: {
+          _id: null,
+          years: { $push: "$_id" },
+          dataByYear: {
+            $push: {
+              k: { $toString: "$_id" },
+              v: "$months",
+            },
+          },
+        },
+      },
+
+      // Convert dataByYear into object
       {
         $project: {
           _id: 0,
-          result: {
-            $arrayToObject: "$keyValuePairs",
+          years: 1,
+          dataByYear: {
+            $arrayToObject: "$dataByYear",
           },
         },
       },
     ]);
-    res.status(200).json(result[0]?.result || {});
+    // const result = await ProductDetail.aggregate([
+    //   // Filter by ProductID
+    //   {
+    //     $match: {
+    //       ProductID: productID,
+    //     },
+    //   },
+    //   // Extract year and month from date
+    //   {
+    //     $addFields: {
+    //       year: { $year: "$date" },
+    //       month: { $month: "$date" },
+    //     },
+    //   },
+
+    //   // Group by year and month, compute added and removed
+    //   {
+    //     $group: {
+    //       _id: { year: "$year", month: "$month" },
+    //       added: {
+    //         $sum: {
+    //           $cond: [
+    //             { $eq: [{ $toLower: "$operation" }, "add"] },
+    //             "$quantity",
+    //             0,
+    //           ],
+    //         },
+    //       },
+    //       removed: {
+    //         $sum: {
+    //           $cond: [
+    //             { $eq: [{ $toLower: "$operation" }, "minus"] },
+    //             "$quantity",
+    //             0,
+    //           ],
+    //         },
+    //       },
+    //     },
+    //   },
+
+    //   // Add month name for formatting
+    //   {
+    //     $addFields: {
+    //       monthName: {
+    //         $switch: {
+    //           branches: [
+    //             { case: { $eq: ["$_id.month", 1] }, then: "January" },
+    //             { case: { $eq: ["$_id.month", 2] }, then: "February" },
+    //             { case: { $eq: ["$_id.month", 3] }, then: "March" },
+    //             { case: { $eq: ["$_id.month", 4] }, then: "April" },
+    //             { case: { $eq: ["$_id.month", 5] }, then: "May" },
+    //             { case: { $eq: ["$_id.month", 6] }, then: "June" },
+    //             { case: { $eq: ["$_id.month", 7] }, then: "July" },
+    //             { case: { $eq: ["$_id.month", 8] }, then: "August" },
+    //             { case: { $eq: ["$_id.month", 9] }, then: "September" },
+    //             { case: { $eq: ["$_id.month", 10] }, then: "October" },
+    //             { case: { $eq: ["$_id.month", 11] }, then: "November" },
+    //             { case: { $eq: ["$_id.month", 12] }, then: "December" },
+    //           ],
+    //           default: "Unknown",
+    //         },
+    //       },
+    //     },
+    //   },
+
+    //   // Create key-value pair: { k: "June 2025", v: { ... } }
+    //   {
+    //     $project: {
+    //       key: {
+    //         $concat: ["$monthName", " ", { $toString: "$_id.year" }],
+    //       },
+    //       value: {
+    //         year: "$_id.year",
+    //         month: "$_id.month",
+    //         added: "$added",
+    //         removed: "$removed",
+    //       },
+    //     },
+    //   },
+
+    //   // Group all into a single object using $arrayToObject
+    //   {
+    //     $group: {
+    //       _id: null,
+    //       keyValuePairs: {
+    //         $push: {
+    //           k: "$key",
+    //           v: "$value",
+    //         },
+    //       },
+    //     },
+    //   },
+
+    //   {
+    //     $project: {
+    //       _id: 0,
+    //       result: {
+    //         $arrayToObject: "$keyValuePairs",
+    //       },
+    //     },
+    //   },
+    // ]);
+
+    res.status(200).json(result[0] || {});
   } catch (error) {
     console.log(error);
     res
@@ -213,7 +342,7 @@ app.get("/categories", requireAuth, async (req, res) => {
     const userId = req.res.user._id.toString();
     const categories = await Category.find({
       UserID: userId,
-    });
+    }).sort("-Name");
     res.status(200).json(categories);
   } catch (error) {
     console.error("Error fetching categories:", error);
@@ -282,7 +411,9 @@ app.patch("/quantityUpdateProduct", async (req, res) => {
 app.get("/productsByIDCategory", async (req, res) => {
   try {
     const CategoryID = req.query.CategoryKey;
-    const products = await Producto.find({ CategoryID: CategoryID });
+    const products = await Producto.find({ CategoryID: CategoryID }).sort(
+      "Name"
+    );
     res.status(200).json(products);
   } catch (error) {
     console.log(error);

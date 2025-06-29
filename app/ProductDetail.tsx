@@ -16,6 +16,7 @@ import { MonthSelector } from "@/components/ProductDetail/MonthSelector";
 import { TransactionDayItem } from "@/components/ProductDetail/TransactionDayItem";
 import SummarySquare from "@/components/ProductDetail/SummarySquare";
 import { useSummaryStore } from "@/store/useSummaryStore";
+import { AggregationResult } from "./lib/types";
 const API_URL =
   Constants.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
 
@@ -54,15 +55,10 @@ const ProductDetail = () => {
   );
   const [expandedDays, setExpandedDays] = useState<Record<string, boolean>>({});
   const [viewMode, setViewMode] = useState<"days" | "months">("days");
-  const [monthlySummaries, setMonthlySummaries] = useState<
-    Array<{
-      month: number;
-      year: number;
-      added: number;
-      removed: number;
-      transactions: ProductDetail[];
-    }>
-  >([]);
+  const [monthlySummaries, setMonthlySummaries] = useState<AggregationResult>({
+    years: [],
+    dataByYear: {},
+  });
 
   const productObject = Array.isArray(product)
     ? JSON.parse(product[0])
@@ -99,11 +95,35 @@ const ProductDetail = () => {
       const response = await axios.get(`${API_URL}/getMonthlySummaries`, {
         params: { ProductKey: productObject._id },
       });
-      console.log(response.data);
+      // const dataTranform = transformedData(response.data);
+
+      setMonthlySummaries(response.data);
+
+      // // Sort years in descending order
+      // groupedByYear.years.sort((a, b) => b - a);
+
+      // // Sort months within each year in descending order
+      // Object.values(groupedByYear.dataByYear).forEach((months) => {
+      //   months.sort((a, b) => b.month - a.month);
+      // });
+
+      // setMonthlyData(groupedByYear);
     } catch (error) {
       console.log("error fetching monthly summaries data", error);
     }
   };
+  // const transformedData = (response: AggregationResult) => {
+  //   return response.years.flatMap((year) => {
+  //     const monthsArray = response.dataByYear[year];
+  //     return monthsArray.map((item) => ({
+  //       month: item.month - 1,
+  //       year: item.year,
+  //       added: item.added,
+  //       removed: item.removed,
+  //       monthName: item.monthName,
+  //     }));
+  //   });
+  // };
   // Cuenta cuantos productos fueron agregados y quitados por mes
   const fetchSummaryData = async (currentMonth: Date) => {
     try {
@@ -141,50 +161,6 @@ const ProductDetail = () => {
     } catch (error) {
       console.log("error fetching products detail summary data", error);
     }
-  };
-
-  // Function to group transactions by month and calculate monthly summaries
-  const groupTransactionsByMonth = (transactions: ProductDetail[]) => {
-    const groups: Record<
-      string,
-      {
-        month: number;
-        year: number;
-        added: number;
-        removed: number;
-        transactions: ProductDetail[];
-      }
-    > = {};
-
-    transactions.forEach((item) => {
-      const date = new Date(item.date);
-      const month = date.getMonth();
-      const year = date.getFullYear();
-      const monthKey = `${year}-${month}`;
-
-      if (!groups[monthKey]) {
-        groups[monthKey] = {
-          month,
-          year,
-          added: 0,
-          removed: 0,
-          transactions: [],
-        };
-      }
-
-      if (item.operation === "add") {
-        groups[monthKey].added += item.quantity;
-      } else {
-        groups[monthKey].removed += item.quantity;
-      }
-
-      groups[monthKey].transactions.push(item);
-    });
-
-    return Object.values(groups).sort((a, b) => {
-      if (a.year !== b.year) return b.year - a.year;
-      return b.month - a.month;
-    });
   };
 
   // Function to group transactions by day and calculate daily summaries
@@ -234,9 +210,12 @@ const ProductDetail = () => {
     }));
   };
 
-  const toggleViewMode = () => {
+  const toggleViewMode = useCallback(() => {
+    if (viewMode === "days") {
+      getMonthlySummaries();
+    }
     setViewMode((prev) => (prev === "days" ? "months" : "days"));
-  };
+  }, [viewMode]);
 
   // Funcion que filtra la data por mes
   const filterByMonth = (
@@ -251,9 +230,9 @@ const ProductDetail = () => {
 
     setFilteredDetails(filtered);
     const daily = groupTransactionsByDay(filtered);
-    const monthly = groupTransactionsByMonth(filtered);
+    // const monthly = groupTransactionsByMonth(filtered);
     setDailySummaries(daily);
-    setMonthlySummaries(monthly);
+    // setMonthlySummaries(monthly);
 
     // Calculate monthly totals
     if (filtered.length > 0) {
@@ -301,32 +280,59 @@ const ProductDetail = () => {
   const renderMonthItem = ({
     item,
   }: {
-    item: (typeof monthlySummaries)[0];
+    item: {
+      month: number;
+      year: number;
+      added: number;
+      removed: number;
+      monthName: string;
+    };
   }) => {
-    const isCurrentMonth =
-      item.month === new Date().getMonth() &&
-      item.year === new Date().getFullYear();
-
+    const monthNames = [
+      "Enero",
+      "Febrero",
+      "Marzo",
+      "Abril",
+      "Mayo",
+      "Junio",
+      "Julio",
+      "Agosto",
+      "Septiembre",
+      "Octubre",
+      "Noviembre",
+      "Diciembre",
+    ];
+    const monthKey = `${monthNames[item.month - 1]}`;
+    const today = new Date();
+    const monthIndex = today.getMonth();
+    const isMonth =
+      item.month - 1 === monthIndex && item.year === today.getFullYear();
     return (
       <View className="mb-2">
-        <View className="flex-row justify-between items-center bg-gray-700 p-4 rounded-lg">
+        <View className="flex-row justify-between items-center bg-gray-700 p-3 pl-4 rounded-lg">
           <View className="flex-row items-center">
-            <Text className="text-white text-base font-bold">
-              {formatMonthYear(item.month, "")}
-            </Text>
-            {isCurrentMonth && (
+            <View>
+              <Text className="text-white text-lg font-bold">{monthKey}</Text>
+            </View>
+            {isMonth && (
               <Text className="ml-2 px-2 py-0.5 bg-yellow-500 text-xs text-white rounded-full">
                 Actual
               </Text>
             )}
           </View>
-          <View className="flex-row items-center space-x-20">
-            <Text className="text-emerald-400 font-bold text-xl">
-              {item.added}
-            </Text>
-            <Text className="text-red-400 font-bold text-xl">
-              {item.removed}
-            </Text>
+          <View className="flex-row items-center space-x-6">
+            <View className="items-center">
+              <Text className="text-emerald-400 font-bold text-xl">
+                {item.added}
+              </Text>
+              <Text className="text-gray-400 text-xs">Agregados</Text>
+            </View>
+            <View className="items-center">
+              <Text className="text-red-400 font-bold text-xl">
+                {item.removed}
+              </Text>
+              <Text className="text-gray-400 text-xs">Retirados</Text>
+            </View>
           </View>
         </View>
       </View>
@@ -349,7 +355,11 @@ const ProductDetail = () => {
 
   const renderEmptyComponent = () => (
     <View className="flex-1 items-center justify-center p-4">
-      <Text className="text-gray-400 text-lg">No hay movimientos este mes</Text>
+      <Text className="text-gray-400 text-lg">
+        {viewMode === "days"
+          ? "No hay movimientos este mes"
+          : "No hay datos mensuales disponibles"}
+      </Text>
     </View>
   );
   // #endregion
@@ -374,36 +384,55 @@ const ProductDetail = () => {
         </TouchableOpacity>
       </View>
 
-      <MonthSelector
-        currentMonth={currentMonth}
-        currentYear={currentYear}
-        onPrevMonth={handlePrevMonth}
-        onNextMonth={handleNextMonth}
-        formatMonthYear={formatMonthYear}
-      />
       <View className="flex-1 px-2 py-2">
-        <View className="flex-row justify-between items-center mb-2"></View>
         {viewMode === "days" ? (
-          <FlatList
-            data={dailySummaries}
-            renderItem={renderDayItem}
-            keyExtractor={(item) => item.date}
-            ListEmptyComponent={renderEmptyComponent}
-            contentContainerStyle={{ paddingBottom: 20 }}
-            showsVerticalScrollIndicator={false}
-          />
+          <View className="flex-1">
+            <View className="mb-2">
+              <MonthSelector
+                currentMonth={currentMonth}
+                currentYear={currentYear}
+                onPrevMonth={handlePrevMonth}
+                onNextMonth={handleNextMonth}
+                formatMonthYear={formatMonthYear}
+              />
+            </View>
+            <View className="flex-1">
+              <FlatList
+                data={dailySummaries}
+                renderItem={renderDayItem}
+                keyExtractor={(item) => item.date}
+                ListEmptyComponent={renderEmptyComponent}
+                contentContainerStyle={{ paddingBottom: 100 }}
+                showsVerticalScrollIndicator={false}
+              />
+            </View>
+            <View>
+              <SummarySquare />
+            </View>
+          </View>
         ) : (
           <FlatList
-            data={monthlySummaries}
-            renderItem={renderMonthItem}
-            keyExtractor={(item) => `${item.year}-${item.month}`}
+            data={monthlySummaries.years}
+            keyExtractor={(year) => year.toString()}
+            renderItem={({ item: year }) => (
+              <View key={year}>
+                <View className="bg-gray-800 py-2 px-2 mb-2 rounded-lg items-center justify-center">
+                  <Text className="text-white font-bold text-lg">{year}</Text>
+                </View>
+                <FlatList
+                  data={monthlySummaries.dataByYear[year]}
+                  renderItem={renderMonthItem}
+                  keyExtractor={(item) => `${item.year}-${item.month}`}
+                  scrollEnabled={true}
+                />
+              </View>
+            )}
             ListEmptyComponent={renderEmptyComponent}
             contentContainerStyle={{ paddingBottom: 20 }}
             showsVerticalScrollIndicator={false}
           />
         )}
       </View>
-      <SummarySquare />
     </SafeAreaView>
   );
 };

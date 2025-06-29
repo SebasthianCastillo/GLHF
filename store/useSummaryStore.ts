@@ -1,6 +1,5 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
-// Define the state structure and the actions
 interface SummaryState {
   productDetailSummaryAdd: number;
   productDetailSummaryMinus: number;
@@ -8,10 +7,11 @@ interface SummaryState {
   setProductDetailSummaryMinus: (value: number) => void;
 }
 
-// Create the store
 export const useSummaryStore = create<SummaryState>((set) => ({
   productDetailSummaryAdd: 0,
   productDetailSummaryMinus: 0,
-  setProductDetailSummaryAdd: (value) => set({ productDetailSummaryAdd: value }),
-  setProductDetailSummaryMinus: (value) => set({ productDetailSummaryMinus: value }),
+  setProductDetailSummaryAdd: (value) =>
+    set({ productDetailSummaryAdd: value }),
+  setProductDetailSummaryMinus: (value) =>
+    set({ productDetailSummaryMinus: value }),
 }));
