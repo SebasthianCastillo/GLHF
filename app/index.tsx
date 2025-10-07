@@ -23,6 +23,7 @@ import {
 import ColorPicker, { Swatches } from "reanimated-color-picker";
 import { GoogleSignin, User } from "@react-native-google-signin/google-signin";
 import ButtonLink from "@/components/ButtonLink";
+import SearchBar from "@/components/SearchBar";
 
 export default function HomeScreen() {
   const [categories, setcategories] = useState([]);
@@ -128,54 +129,7 @@ export default function HomeScreen() {
     await AsyncStorage.removeItem("token");
     setAuth(null);
   };
-  // #region auth2
-  //Paso 2: Verificamos si se recibió respuesta de Google
-  // useEffect(() => {
-  //   console.log("here");
-  //   if (response?.type === "success") {
-  //     const accessToken = response.authentication?.accessToken;
-  //     console.log("✅ accessToken:", accessToken);
-  //     // getGoogleUserInfo(accessToken);
-  //   }
-  // }, [response]);
-
-  // Paso 3: Obtenemos perfil desde Google y lo enviamos al backend
-  // const getGoogleUserInfo = async (accessToken?: string) => {
-  // if (!accessToken) return;
-  // const res = await fetch("https://www.googleapis.com/userinfo/v2/me", {
-  //   headers: { Authorization: `Bearer ${accessToken}` },
-  // });
-  // const profile = await res.json();
-  // const { data } = await axios.post(`${API_URL}/google`, {
-  //   providerId: profile.id,
-  //   name: profile.name,
-  //   email: profile.email,
-  // });
-  // await AsyncStorage.setItem("token", data.token);
-  // setUser(data.user);
-  // };
-
-  // Paso 4: Comprobar token si ya está guardado (autologin)
-  // const getCurrentUser = async () => {
-  //   const token = await AsyncStorage.getItem("token");
-  //   if (!token) return;
-
-  //   try {
-  //     const { data } = await axios.get(`${API_URL}/me`, {
-  //       headers: { Authorization: `Bearer ${token}` },
-  //     });
-  //     setUser(data.user);
-  //   } catch {
-  //     await AsyncStorage.removeItem("token");
-  //   }
-  // };
-
-  // const logout = async () => {
-  //   await AsyncStorage.removeItem("token");
-  //   setUser(null);
-  // };
   //#endregion
-  // #endregion
   const onRefreshingProducts = async () => {
     CallCategories();
     setLoading(true);
@@ -225,7 +179,11 @@ export default function HomeScreen() {
       }
     }
   };
-
+  //Simple nice and beatiful search bar filter
+  const [searchQuery, setSearchQuery] = useState("");
+  const filteredCategories = categories.filter((product: any) =>
+    product.Name.toString().toLowerCase().includes(searchQuery.toLowerCase())
+  );
   return (
     <SafeAreaView className="bg-primary flex-1">
       <View className="flex-row justify-between items-start pt-3 px-4">
@@ -268,8 +226,11 @@ export default function HomeScreen() {
               source={require("../assets/images/CaptainChefPNG.png")} // Logo
               style={{ width: 180, height: 180 }}
             />
+            <View className="flex-end pt-2">
+              <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
+            </View>
           </View>
-          {categories.map((category: any) => (
+          {filteredCategories.map((category: any) => (
             <CustomButton
               containerStyles="w-full m-2"
               text={category.Name}
@@ -301,17 +262,7 @@ export default function HomeScreen() {
             </TouchableOpacity>
           )}
           <View className="h-8" />
-          {/* <TouchableOpacity
-            activeOpacity={0.7}
-            className="p-10"
-            onPress={() => router.push("../AddCategory")}
-          >
-            <View
-              className={`w-16 h-16 rounded-full bg-yellow-500 shadow-lg justify-center items-center`}
-            >
-              <FontAwesome6 name="add" size={40} color="white" />
-            </View>
-          </TouchableOpacity> */}
+
           <ButtonLink
             logotype={"add"}
             backgroundColor={"bg-yellow-500"}
