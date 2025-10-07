@@ -91,12 +91,6 @@ export default function HomeScreen() {
   };
   // Paso 3: Obtenemos perfil desde Google y lo enviamos al backend
   const getGoogleUserInfo = async (response: User) => {
-    // if (!accessToken) return;
-    // const res = await fetch("https://www.googleapis.com/userinfo/v2/me", {
-    //   headers: { Authorization: `Bearer ${accessToken}` },
-    // });
-    // const profile = await res.json();
-
     try {
       const { data } = await axios.post(`${API_URL}/google`, {
         providerId: response.user.id,
