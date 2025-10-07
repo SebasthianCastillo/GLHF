@@ -1,115 +1,93 @@
 # GLHF Inventory App
 
-Aplicación móvil para gestión de inventario con backend en Node.js y MongoDB. Desarrollado con React Native y Expo.
+Mobile application for personal chef usage to control inventory management with a Node.js and MongoDB backend. Developed using React Native and Expo.
 
 ---
 
-## 📦 Versiones y Cambios
+## 📦 Versions and Changes
 
-### ✅ v1.0
+### ✅ v1.0 DONE
 
-- a. Editar/eliminar categoría y producto manteniendo presionado (con confirmación)
-- b. Vista de productos disponibles en detalle de producto (DIV)
+- a. Edit/Delete category or product by holding down (with confirmation)
+- b. Display available products in the product detail view (DIV)
 
-### 🔄 v1.0.1 (pequeñas mejoras a la v1)
+### ✅ v1.0.1 (minor improvements to v1) DONE
 
-- a. Cambiar DownPicker por modal para seleccionar formato de productos
+- a. Replaced DownPicker with a modal for selecting product formats
 
-### 🚀 v1.1
+### 🚀👷 v1.1 (in development c:)
 
-- a. Cambio de color en botones de categoría al mantener presionado
-- b. Buscador de productos por categoría 👷 _[En desarrollo]_
-- c. Pull to refresh de productos
-- d. Botón de recarga en vista de categorías
-- e. Mejora en suma/resta de unidades (guardar tras unos segundos, no en cada incremento) 🔜 _[Planeado]_
-- f. Fix: evitar cierre al hacer long click en dos productos consecutivamente
+- a. Category button color change when long-pressed ✅
+- b. Product search by category 👷 _[In progress]_
+- c. Pull to refresh products ✅
+- d. Performance: Improved add/subtract units (save after a few seconds, not on every increment) 🔜 _[Planned]_
+- e. Fix: prevent app from closing when long-clicking two products consecutively
+- f. Feat: PDF download by chef inventory quantity requirements
 
 ---
 
-## 🧪 Convenciones de Commits
+## 🧪 Commit Conventions
 
-Se siguen las convenciones de commits propuestas en este artículo:
+This project follows the commit conventions proposed in the following article:
 
 🔗 [Conventional Git Commits - Best Practices](https://dev.to/anikakash/conventional-git-commits-with-best-practices-4d2)
 
 ---
 
-## 🌐 Despliegue Backend (Render)
+## 🌐 Backend Deployment (Render)
 
-Archivo principal del servidor: `~/Desktop/INVS/glhf/api/server.mjs`
+Main server file: `~/Desktop/INVS/glhf/api/server.mjs`
 
-### Estructura del proyecto:
+### Project structure:
 
-```
 INVS/
 └── glhf/
-    └── api/
-        └── server.mjs
-```
+└── api/
+└── server.mjs
 
-### Configuración en Render:
+yaml
+Copy code
+
+### Render configuration:
 
 - **Root Directory:** `glhf/api`
-- **Build Command:** `npm install` _(si hay `package.json`)_
+- **Build Command:** `npm install` _(if there's a `package.json`)_
 - **Start Command:** `node server.mjs`
 
 ---
 
-## 📱 Generar APK / AAB para Android (Expo + EAS)
+## 📱 Generate APK / AAB for Android (Expo + EAS)
 
-### 1. Instalar EAS CLI
+### 1. Install EAS CLI
 
 ```bash
 npm install -g eas-cli
-```
+2. Log in to Expo
 
-### 2. Iniciar sesión en Expo
 
-```bash
 eas login
-```
+3. Configure EAS in the project
 
-### 3. Configurar EAS en el proyecto
 
-```bash
 eas build:configure
-```
+4. Generate build
+APK:
 
-### 4. Generar build
 
-- **APK:**
 
-```bash
 eas build -p android --profile preview
-```
+AAB (Play Store):
 
-- **AAB (Play Store):**
 
-```bash
 eas build --platform android --profile preview
-```
-
----
-
-## Configuración de Debug (VS Code / Cursor)
-
-### Pasos para debuggear:
-
-1. Iniciar app:
-
-```bash
+Debug Configuration (VS Code / Cursor)
 npx expo start
-```
 
-2. Iniciar backend:
-
-```bash
+Start the backend:
 node server.mjs
-```
+Configure launch.json inside .vscode:
 
-3. Configurar `launch.json` en `.vscode`:
 
-```json
 {
   "version": "0.2.0",
   "configurations": [
@@ -130,9 +108,3 @@ node server.mjs
   ]
 }
 ```
-
----
-
-## 🧾 Licencia
-
-Este proyecto es privado y de uso interno. No redistribuir sin permiso.
