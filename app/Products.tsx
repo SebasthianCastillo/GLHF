@@ -1,7 +1,6 @@
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import CustomField from "@/components/Field";
 import ModalProducts from "@/components/OptionModal";
-
 import {
   View,
   ScrollView,
@@ -26,6 +25,9 @@ import {
   Modal,
   FontAwesome6,
 } from "./lib/shared"; // Centralized imports
+import ButtonLink from "@/components/ButtonLink";
+import { TextInput } from "react-native";
+import SearchBar from "@/components/SearchBar";
 
 const API_URL =
   Constants.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
@@ -285,6 +287,11 @@ const Products = () => {
     }));
   };
 
+  //Simple nice and beatiful search bar filter
+  const [searchQuery, setSearchQuery] = useState("");
+  const filteredProducts = products.filter((product: any) =>
+    product.Name.toString().toLowerCase().includes(searchQuery.toLowerCase())
+  );
   return (
     <TouchableWithoutFeedback onPress={handlePressOutside}>
       <SafeAreaView className="bg-primary h-full">
@@ -304,8 +311,12 @@ const Products = () => {
             />
           }
         >
+          <SearchBar
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          ></SearchBar>
           <View className="p-4 space-y-3 bg-slate-950">
-            {products.map((item: any) => (
+            {filteredProducts.map((item: any) => (
               <View className="flex-row justify-between items-center">
                 <View className="w-20">
                   <Pressable
@@ -442,10 +453,9 @@ const Products = () => {
             />
           )}
         </ScrollView>
-
-        <TouchableOpacity
-          activeOpacity={0.7}
-          className="p-10 items-center"
+        <ButtonLink
+          logotype={"add"}
+          backgroundColor={"bg-yellow-500"}
           onPress={() =>
             router.push({
               pathname: "../AddProduct",
@@ -455,12 +465,7 @@ const Products = () => {
               },
             })
           }
-        >
-          <View className="w-16 h-16 bg-yellow-500 rounded-full shadow-lg items-center justify-center">
-            <FontAwesome6 name="add" size={40} color="white" />
-          </View>
-        </TouchableOpacity>
-
+        ></ButtonLink>
         <Modal
           visible={showFormatPicker}
           transparent={true}

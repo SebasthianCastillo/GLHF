@@ -1,5 +1,4 @@
 import CustomButton from "@/components/Button";
-import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import {
@@ -23,6 +22,7 @@ import {
 } from "./lib/shared"; // Centralized imports
 import ColorPicker, { Swatches } from "reanimated-color-picker";
 import { GoogleSignin, User } from "@react-native-google-signin/google-signin";
+import ButtonLink from "@/components/ButtonLink";
 
 export default function HomeScreen() {
   const [categories, setcategories] = useState([]);
@@ -301,7 +301,7 @@ export default function HomeScreen() {
             </TouchableOpacity>
           )}
           <View className="h-8" />
-          <TouchableOpacity
+          {/* <TouchableOpacity
             activeOpacity={0.7}
             className="p-10"
             onPress={() => router.push("../AddCategory")}
@@ -311,7 +311,12 @@ export default function HomeScreen() {
             >
               <FontAwesome6 name="add" size={40} color="white" />
             </View>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
+          <ButtonLink
+            logotype={"add"}
+            backgroundColor={"bg-yellow-500"}
+            onPress={() => router.push("../AddCategory")}
+          ></ButtonLink>
 
           {/* Modal for color picker */}
           <Modal

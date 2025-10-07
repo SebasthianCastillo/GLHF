@@ -63,6 +63,7 @@ const ProductDetail = () => {
   const productObject = Array.isArray(product)
     ? JSON.parse(product[0])
     : JSON.parse(product || "{}");
+
   // #region Functions
   // carga lista de historial de productos
   useFocusEffect(
@@ -124,6 +125,7 @@ const ProductDetail = () => {
   //     }));
   //   });
   // };
+
   // Cuenta cuantos productos fueron agregados y quitados por mes
   const fetchSummaryData = async (currentMonth: Date) => {
     try {
@@ -289,18 +291,18 @@ const ProductDetail = () => {
     };
   }) => {
     const monthNames = [
-      "Enero",
-      "Febrero",
-      "Marzo",
-      "Abril",
-      "Mayo",
-      "Junio",
-      "Julio",
-      "Agosto",
-      "Septiembre",
-      "Octubre",
-      "Noviembre",
-      "Diciembre",
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
     ];
     const monthKey = `${monthNames[item.month - 1]}`;
     const today = new Date();
