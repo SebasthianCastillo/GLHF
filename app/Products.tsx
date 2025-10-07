@@ -1,6 +1,8 @@
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import CustomField from "@/components/Field";
 import ModalProducts from "@/components/OptionModal";
+import * as FileSystem from "expo-file-system";
+import { shareAsync } from "expo-sharing";
 import {
   View,
   ScrollView,
@@ -24,6 +26,7 @@ import {
   React,
   Modal,
   FontAwesome6,
+  Platform,
 } from "./lib/shared"; // Centralized imports
 import ButtonLink from "@/components/ButtonLink";
 import SearchBar from "@/components/SearchBar";
@@ -291,6 +294,61 @@ const Products = () => {
   const filteredProducts = products.filter((product: any) =>
     product.Name.toString().toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Function to download PDF
+  const downloadPdf = async (id: string) => {
+    try {
+      const uri = await FileSystem.downloadAsync(
+        `${API_URL}/generate-pdf/${id}`,
+        FileSystem.documentDirectory + `report-${id}.pdf`,
+        {
+          headers: {
+            MyHeader: "MyValue",
+          },
+        }
+      );
+      saveFile(uri, `report-${id}.pdf`, uri.headers["Content-Type"]);
+      Alert.alert("Success", `report-${id}.pdf Downloaded`);
+    } catch (err) {
+      console.error(err);
+      Alert.alert("Error", "Failed to download PDF");
+    }
+  };
+  const saveFile = async (
+    uri: FileSystem.FileSystemDownloadResult,
+    filename: string,
+    mimetype: string
+  ) => {
+    try {
+      if (Platform.OS === "android") {
+        const permissions =
+          await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+        if (permissions.granted) {
+          const base64 = await FileSystem.readAsStringAsync(uri.uri, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
+          await FileSystem.StorageAccessFramework.createFileAsync(
+            permissions.directoryUri,
+            filename,
+            mimetype
+          )
+            .then(async (uri) => {
+              await FileSystem.writeAsStringAsync(uri, base64, {
+                encoding: FileSystem.EncodingType.Base64,
+              });
+            })
+            .catch((e) => console.log(e));
+        } else {
+          await shareAsync(uri.uri);
+        }
+      } else {
+        await shareAsync(uri.uri);
+      }
+    } catch (err) {
+      console.error(err);
+      Alert.alert("Error", "Failed to save file");
+    }
+  };
   return (
     <TouchableWithoutFeedback onPress={handlePressOutside}>
       <SafeAreaView className="bg-primary h-full">
@@ -465,6 +523,11 @@ const Products = () => {
               },
             })
           }
+        ></ButtonLink>
+        <ButtonLink
+          logotype={"list"}
+          backgroundColor={"bg-green-500"}
+          onPress={() => downloadPdf(selectedItemId)}
         ></ButtonLink>
         <Modal
           visible={showFormatPicker}

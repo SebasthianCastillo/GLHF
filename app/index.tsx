@@ -18,7 +18,6 @@ import {
   useFocusEffect,
   Pressable,
   ActivityIndicator,
-  Button,
 } from "./lib/shared"; // Centralized imports
 import ColorPicker, { Swatches } from "reanimated-color-picker";
 import { GoogleSignin, User } from "@react-native-google-signin/google-signin";

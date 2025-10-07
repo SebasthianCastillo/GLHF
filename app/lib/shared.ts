@@ -14,6 +14,7 @@ export {
   Dimensions,
   Modal,
   ActivityIndicator,
+  Platform,
 } from "react-native";
 export {
   SafeAreaView,

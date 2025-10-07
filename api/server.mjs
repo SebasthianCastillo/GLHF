@@ -164,108 +164,6 @@ app.get("/getMonthlySummaries", async (req, res) => {
         },
       },
     ]);
-    // const result = await ProductDetail.aggregate([
-    //   // Filter by ProductID
-    //   {
-    //     $match: {
-    //       ProductID: productID,
-    //     },
-    //   },
-    //   // Extract year and month from date
-    //   {
-    //     $addFields: {
-    //       year: { $year: "$date" },
-    //       month: { $month: "$date" },
-    //     },
-    //   },
-
-    //   // Group by year and month, compute added and removed
-    //   {
-    //     $group: {
-    //       _id: { year: "$year", month: "$month" },
-    //       added: {
-    //         $sum: {
-    //           $cond: [
-    //             { $eq: [{ $toLower: "$operation" }, "add"] },
-    //             "$quantity",
-    //             0,
-    //           ],
-    //         },
-    //       },
-    //       removed: {
-    //         $sum: {
-    //           $cond: [
-    //             { $eq: [{ $toLower: "$operation" }, "minus"] },
-    //             "$quantity",
-    //             0,
-    //           ],
-    //         },
-    //       },
-    //     },
-    //   },
-
-    //   // Add month name for formatting
-    //   {
-    //     $addFields: {
-    //       monthName: {
-    //         $switch: {
-    //           branches: [
-    //             { case: { $eq: ["$_id.month", 1] }, then: "January" },
-    //             { case: { $eq: ["$_id.month", 2] }, then: "February" },
-    //             { case: { $eq: ["$_id.month", 3] }, then: "March" },
-    //             { case: { $eq: ["$_id.month", 4] }, then: "April" },
-    //             { case: { $eq: ["$_id.month", 5] }, then: "May" },
-    //             { case: { $eq: ["$_id.month", 6] }, then: "June" },
-    //             { case: { $eq: ["$_id.month", 7] }, then: "July" },
-    //             { case: { $eq: ["$_id.month", 8] }, then: "August" },
-    //             { case: { $eq: ["$_id.month", 9] }, then: "September" },
-    //             { case: { $eq: ["$_id.month", 10] }, then: "October" },
-    //             { case: { $eq: ["$_id.month", 11] }, then: "November" },
-    //             { case: { $eq: ["$_id.month", 12] }, then: "December" },
-    //           ],
-    //           default: "Unknown",
-    //         },
-    //       },
-    //     },
-    //   },
-
-    //   // Create key-value pair: { k: "June 2025", v: { ... } }
-    //   {
-    //     $project: {
-    //       key: {
-    //         $concat: ["$monthName", " ", { $toString: "$_id.year" }],
-    //       },
-    //       value: {
-    //         year: "$_id.year",
-    //         month: "$_id.month",
-    //         added: "$added",
-    //         removed: "$removed",
-    //       },
-    //     },
-    //   },
-
-    //   // Group all into a single object using $arrayToObject
-    //   {
-    //     $group: {
-    //       _id: null,
-    //       keyValuePairs: {
-    //         $push: {
-    //           k: "$key",
-    //           v: "$value",
-    //         },
-    //       },
-    //     },
-    //   },
-
-    //   {
-    //     $project: {
-    //       _id: 0,
-    //       result: {
-    //         $arrayToObject: "$keyValuePairs",
-    //       },
-    //     },
-    //   },
-    // ]);
 
     res.status(200).json(result[0] || {});
   } catch (error) {
@@ -573,7 +471,124 @@ app.get("/productDetailByIDProduct", async (req, res) => {
   }
 });
 // #endregion
+// #region PDF export products
+app.get("/generate-pdf/:id", async (req, res) => {
+  try {
+    const json = fs.readFileSync(dataPath, "utf8");
+    const result = await Producto.findById(id);
+    // const { result } = JSON.parse(json);
+    // const report = reports.find((r) => r.id === req.params.id);
 
+    if (!report) {
+      return res.status(404).send("Report not found");
+    }
+
+    const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8" />
+      <style>
+        body {
+          font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+          margin: 0;
+          padding: 40px;
+          background-color: #ffffff;
+          color: #2c3e50;
+        }
+        .container {
+          max-width: 800px;
+          margin: 0 auto;
+          border: 1px solid #e0e0e0;
+          padding: 30px;
+          border-radius: 8px;
+        }
+        .date {
+          text-align: right;
+          font-size: 14px;
+          color: #888;
+          margin-bottom: 10px;
+        }
+        .title {
+          font-size: 28px;
+          font-weight: 600;
+          margin-bottom: 30px;
+          border-bottom: 2px solid #f0f0f0;
+          padding-bottom: 10px;
+          color: #1a1a1a;
+        }
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 20px;
+        }
+        th {
+          text-align: left;
+          font-size: 14px;
+          color: #777;
+          background-color: #f8f8f8;
+          padding: 12px 8px;
+          border-bottom: 1px solid #ddd;
+        }
+        td {
+          font-size: 16px;
+          padding: 10px 8px;
+          border-bottom: 1px solid #f0f0f0;
+        }
+        tr:last-child td {
+          border-bottom: none;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="date">17/05/2025</div>
+        <div class="title">Pedido Consolidado (Proteinas)</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Format</th>
+              <th>Quantity</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>${result.name}</td>
+                <td>${result.format}</td>
+                <td>${result.quantity}</td>
+              </tr>
+           
+          </tbody>
+        </table>
+      </div>
+    </body>
+    </html>
+    `;
+
+    const browser = await puppeteer.launch({ headless: "new" });
+    const page = await browser.newPage();
+    await page.setContent(html, { waitUntil: "networkidle0" });
+
+    const pdf = await page.pdf({
+      format: "A4",
+      printBackground: true,
+    });
+
+    await browser.close();
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", "attachment; filename=report.pdf");
+    res.setHeader("Content-Length", pdf.length);
+
+    res.send(pdf);
+  } catch (err) {
+    console.error("PDF error:", err);
+    res.status(500).send("Failed to generate PDF");
+  }
+});
+// #endregion
 app.get("/", async (req, res) => {
   try {
     res.send("hello");

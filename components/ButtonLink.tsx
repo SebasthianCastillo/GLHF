@@ -13,7 +13,11 @@ export default function ButtonLink({
   onPress,
 }: ButtonLinkProps) {
   return (
-    <TouchableOpacity activeOpacity={0.7} className="p-10" onPress={onPress}>
+    <TouchableOpacity
+      activeOpacity={0.7}
+      className="p-10 justify-center items-center"
+      onPress={onPress}
+    >
       <View
         className={`w-16 h-16 rounded-full ${backgroundColor} shadow-lg justify-center items-center`}
       >
