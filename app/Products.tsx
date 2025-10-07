@@ -26,7 +26,6 @@ import {
   FontAwesome6,
 } from "./lib/shared"; // Centralized imports
 import ButtonLink from "@/components/ButtonLink";
-import { TextInput } from "react-native";
 import SearchBar from "@/components/SearchBar";
 
 const API_URL =
@@ -296,10 +295,15 @@ const Products = () => {
     <TouchableWithoutFeedback onPress={handlePressOutside}>
       <SafeAreaView className="bg-primary h-full">
         <View className="flex-row items-center p-4 bg-slate-950">
-          <TouchableOpacity onPress={() => router.back()} className="mr-4">
+          <TouchableOpacity onPress={() => router.back()} className="mr-3">
             <FontAwesome6 name="arrow-left" size={24} color="white" />
           </TouchableOpacity>
-          <Text className="text-white text-xl font-bold">{CategoryName}</Text>
+          <Text className="text-white text-xl font-bold flex-1">
+            {CategoryName}
+          </Text>
+          <View className="flex-end pt-2">
+            <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
+          </View>
         </View>
         <ScrollView
           refreshControl={
@@ -311,10 +315,6 @@ const Products = () => {
             />
           }
         >
-          <SearchBar
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          ></SearchBar>
           <View className="p-4 space-y-3 bg-slate-950">
             {filteredProducts.map((item: any) => (
               <View className="flex-row justify-between items-center">
