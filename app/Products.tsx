@@ -27,9 +27,12 @@ import {
   Modal,
   FontAwesome6,
   Platform,
+  ActivityIndicator,
 } from "./lib/shared"; // Centralized imports
 import ButtonLink from "@/components/ButtonLink";
 import SearchBar from "@/components/SearchBar";
+import { useProducts } from "@/hooks/useProducts";
+import { useFilePdfDownload } from "@/hooks/useFilePdfDownload";
 
 const API_URL =
   Constants.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
@@ -39,7 +42,6 @@ const Products = () => {
   const categoryObject = Array.isArray(category)
     ? JSON.parse(category[0])
     : JSON.parse(category || "{}");
-  const [products, setProducts] = useState([]);
   const [CantidadProducto, setCantidadProducto] = useState(0);
   const [selectedItemId, setSelectedItemId] = useState("");
   const [selectedProductName, setSelectedProductName] = useState("");
@@ -51,7 +53,6 @@ const Products = () => {
     { label: "GR", value: "GR" },
   ]);
 
-  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const [selectedValues, setSelectedValues] = useState<SelectedValuesType>({});
   const [showOptionsModal, setShowOptionsModal] = useState(false); // Para mostrar el menú de opciones
   const [IsRefreshing, setIsRefreshing] = useState(false);
@@ -70,24 +71,25 @@ const Products = () => {
   const [selectedProductId, setSelectedProductId] = useState<string | null>(
     null
   );
+  const {
+    products, // Funcion que trae los productos segun categoria
+    isRefreshing,
+    fetchProducts,
+    refreshProducts,
+    addProductDetail,
+    modifyProduct,
+    deleteProduct, //funcion para eliminar producto
+  } = useProducts(categoryObject._id);
+
+  // hook to download Product list PDF
+  const { downloadProductListPdf, isLoadingPdfDownload } = useFilePdfDownload();
 
   // Funcion que trae los productos segun categoria
   useFocusEffect(
     useCallback(() => {
-      productsFunction();
+      fetchProducts();
     }, [])
   );
-  // Funcion que trae los productos segun categoria
-  const productsFunction = async () => {
-    try {
-      const response = await axios.get(`${API_URL}/productsByIDCategory`, {
-        params: { CategoryKey: categoryObject._id },
-      });
-      setProducts(response.data);
-    } catch (error) {
-      console.log("error fetching products data", error);
-    }
-  };
 
   // Funcion Sumar cantidad de producto
   const handlePressAdd = (
@@ -97,29 +99,10 @@ const Products = () => {
     const quantityProduct =
       fromWhatQuantityCallfunction === "single" ? 1 : CantidadProducto;
     let operation = "add";
-    const addProductDetail = {
-      quantity: quantityProduct,
-      date: new Date(),
-      format: formatValue,
-      operation: operation,
-      ProductID: idProducto,
-    };
-
-    axios
-      .post(`${API_URL}/addProductDetail`, addProductDetail)
-      .then((response: any) => {
-        quantityUpdateProduct(idProducto, quantityProduct, operation);
-        productsFunction();
-        handlePressOutside();
-      })
-      .catch((error: Error) => {
-        console.log(addProductDetail);
-        console.log("Error AddProductDetail", error);
-      });
+    addProductDetail(idProducto, quantityProduct, formatValue, operation);
   };
 
   // Funcion Resta cantidad de producto
-
   const handlePressMinus = (
     idProducto: any,
     fromWhatQuantityCallfunction: string
@@ -127,50 +110,7 @@ const Products = () => {
     const quantityProduct =
       fromWhatQuantityCallfunction === "single" ? 1 : CantidadProducto;
     let operation = "minus";
-    const addProductDetail = {
-      quantity: quantityProduct,
-      date: new Date(),
-      format: formatValue,
-      operation: operation,
-      ProductID: idProducto,
-    };
-
-    axios
-      .post(`${API_URL}/addProductDetail`, addProductDetail)
-      .then((response: any) => {
-        console.log(response);
-        quantityUpdateProduct(idProducto, quantityProduct, operation);
-        productsFunction();
-        handlePressOutside();
-      })
-      .catch((error: Error) => {
-        console.log(addProductDetail);
-        console.log("Error AddProductDetail minus", error);
-      });
-  };
-
-  //Funcion para actualizar cantidad de producto
-
-  const quantityUpdateProduct = (
-    idProducto: any,
-    quantityProduct: number,
-    operation: string
-  ) => {
-    const UpdateQuantityData = {
-      _id: idProducto,
-      quantity: quantityProduct,
-      operation: operation,
-    };
-
-    axios
-      .patch(`${API_URL}/quantityUpdateProduct`, UpdateQuantityData)
-      .then((response: any) => {
-        productsFunction();
-      })
-      .catch((error: Error) => {
-        console.log(UpdateQuantityData);
-        console.log("Error quantity update product", error);
-      });
+    addProductDetail(idProducto, quantityProduct, formatValue, operation);
   };
 
   // Verifica si el toque está fuera del área del dropdown
@@ -186,9 +126,6 @@ const Products = () => {
     });
     setCantidadProducto(0);
     setPressedItemId("");
-  };
-  const handleDropdownOpen = (id: string) => {
-    setOpenDropdownId(openDropdownId === id ? null : id);
   };
 
   type SelectedValuesType = {
@@ -223,27 +160,10 @@ const Products = () => {
       ]
     );
   };
-  const ModifyProduct = async (idProducto: any, newName?: string) => {
-    try {
-      if (newName) {
-        // Update product name
-        await axios.patch(`${API_URL}/updateProductName/${idProducto}`, {
-          newName: newName,
-        });
-      }
-      // Refrescar la lista de productos después de eliminar
-      const response = await axios.get(`${API_URL}/productsByIDCategory`, {
-        params: { CategoryKey: categoryObject._id },
-      });
-      setProducts(response.data);
-    } catch (error) {
-      console.log("Error updating product", error);
-    }
-  };
 
   const handleNameChange = (newName: string) => {
     if (selectedItemId) {
-      ModifyProduct(selectedItemId, newName);
+      modifyProduct(selectedItemId, newName);
     }
   };
 
@@ -254,28 +174,16 @@ const Products = () => {
     setShowOptionsModal(true);
   };
 
-  //funcion para eliminar producto
-  const deleteProduct = async (idProducto: any) => {
-    try {
-      await axios.delete(`${API_URL}/deleteProduct/${idProducto}`);
-      // Refrescar la lista de productos después de eliminar
-      const response = await axios.get(`${API_URL}/productsByIDCategory`, {
-        params: { CategoryKey: categoryObject._id },
-      });
-      setProducts(response.data);
-    } catch (error) {
-      console.log("Error deleting product", error);
-    }
-  };
-
   //funcion que se activa cuando se hace pull to refresh
   const onRefreshingProducts = async () => {
-    productsFunction();
+    fetchProducts();
     setIsRefreshing(true);
     setTimeout(() => {
       setIsRefreshing(false);
     }, 2000);
   };
+
+  //funcion que maneja el comportamiento visual de los signos + y - al hacer long press
   const toggleSignVisibility = (id: string, isAdd: boolean) => {
     handlePressOutside();
     setSelectedItemId(id);
@@ -295,60 +203,6 @@ const Products = () => {
     product.Name.toString().toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Function to download Product list PDF
-  const downloadProductListPdf = async (id: string) => {
-    try {
-      const uri = await FileSystem.downloadAsync(
-        `${API_URL}/generate-pdf/${id}`,
-        FileSystem.documentDirectory + `report-${id}.pdf`,
-        {
-          headers: {
-            MyHeader: "MyValue",
-          },
-        }
-      );
-      saveFile(uri, `report-${id}.pdf`, uri.headers["Content-Type"]);
-      Alert.alert("Success", `report-${id}.pdf Downloaded`);
-    } catch (err) {
-      console.error(err);
-      Alert.alert("Error", "Failed to download PDF");
-    }
-  };
-  const saveFile = async (
-    uri: FileSystem.FileSystemDownloadResult,
-    filename: string,
-    mimetype: string
-  ) => {
-    try {
-      if (Platform.OS === "android") {
-        const permissions =
-          await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
-        if (permissions.granted) {
-          const base64 = await FileSystem.readAsStringAsync(uri.uri, {
-            encoding: FileSystem.EncodingType.Base64,
-          });
-          await FileSystem.StorageAccessFramework.createFileAsync(
-            permissions.directoryUri,
-            filename,
-            mimetype
-          )
-            .then(async (uri) => {
-              await FileSystem.writeAsStringAsync(uri, base64, {
-                encoding: FileSystem.EncodingType.Base64,
-              });
-            })
-            .catch((e) => console.log(e));
-        } else {
-          await shareAsync(uri.uri);
-        }
-      } else {
-        await shareAsync(uri.uri);
-      }
-    } catch (err) {
-      console.error(err);
-      Alert.alert("Error", "Failed to save file");
-    }
-  };
   return (
     <TouchableWithoutFeedback onPress={handlePressOutside}>
       <SafeAreaView className="bg-primary h-full">
@@ -505,7 +359,7 @@ const Products = () => {
               showOptionsModal={showOptionsModal}
               setShowOptionsModal={setShowOptionsModal}
               onDelete={confirmDelete}
-              onModify={() => ModifyProduct(selectedItemId)}
+              onModify={() => modifyProduct(selectedItemId)}
               productName={selectedProductName}
               onNameChange={handleNameChange} //funcion con el nuevo nombre del producto por parametro
             />
@@ -524,11 +378,19 @@ const Products = () => {
             })
           }
         ></ButtonLink>
-        <ButtonLink
-          logotype={"list"}
-          backgroundColor={"bg-green-500"}
-          onPress={() => downloadProductListPdf(categoryObject._id)}
-        ></ButtonLink>
+        {isLoadingPdfDownload ? (
+          <View className="p-10 justify-center items-center">
+            <View className="bg-green-500 w-16 h-16 rounded-full shadow-lg justify-center items-center">
+              <ActivityIndicator size="large" color="#ffffff" />
+            </View>
+          </View>
+        ) : (
+          <ButtonLink
+            logotype={"file-pdf"}
+            backgroundColor={"bg-green-500"}
+            onPress={() => downloadProductListPdf(categoryObject._id)}
+          />
+        )}
         <Modal
           visible={showFormatPicker}
           transparent={true}
