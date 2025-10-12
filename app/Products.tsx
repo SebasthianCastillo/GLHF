@@ -295,8 +295,8 @@ const Products = () => {
     product.Name.toString().toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Function to download PDF
-  const downloadPdf = async (id: string) => {
+  // Function to download Product list PDF
+  const downloadProductListPdf = async (id: string) => {
     try {
       const uri = await FileSystem.downloadAsync(
         `${API_URL}/generate-pdf/${id}`,
@@ -527,7 +527,7 @@ const Products = () => {
         <ButtonLink
           logotype={"list"}
           backgroundColor={"bg-green-500"}
-          onPress={() => downloadPdf(selectedItemId)}
+          onPress={() => downloadProductListPdf(categoryObject._id)}
         ></ButtonLink>
         <Modal
           visible={showFormatPicker}

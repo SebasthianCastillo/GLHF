@@ -11,6 +11,8 @@ import User from "./model/User.js";
 import { ObjectId } from "mongodb";
 import jwt from "jsonwebtoken";
 import requireAuth from "./middleware/auth.js";
+import { chromium } from "playwright";
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 app.use(cors());
@@ -474,115 +476,157 @@ app.get("/productDetailByIDProduct", async (req, res) => {
 // #region PDF export products
 app.get("/generate-pdf/:id", async (req, res) => {
   try {
-    const json = fs.readFileSync(dataPath, "utf8");
-    const result = await Producto.findById(id);
-    // const { result } = JSON.parse(json);
-    // const report = reports.find((r) => r.id === req.params.id);
+    const productsByCategory = await Producto.find({
+      CategoryID: req.params.id,
+    });
+    const { Name: CategoryName } = await Category.findById(req.params.id);
 
-    if (!report) {
-      return res.status(404).send("Report not found");
+    if (!productsByCategory?.length) {
+      return res.status(404).send("No products found for this category");
     }
+    const rowsHtml = productsByCategory
+      .map(
+        (p) => `
+        <tr>
+          <td>${p.Name ?? ""}</td>
+          <td>${p.quantity ?? ""}</td>
+        </tr>`
+      )
+      .join("");
 
     const html = `
     <!DOCTYPE html>
     <html>
     <head>
       <meta charset="utf-8" />
-      <style>
-        body {
-          font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-          margin: 0;
-          padding: 40px;
-          background-color: #ffffff;
-          color: #2c3e50;
-        }
-        .container {
-          max-width: 800px;
-          margin: 0 auto;
-          border: 1px solid #e0e0e0;
-          padding: 30px;
-          border-radius: 8px;
-        }
-        .date {
-          text-align: right;
-          font-size: 14px;
-          color: #888;
-          margin-bottom: 10px;
-        }
-        .title {
-          font-size: 28px;
-          font-weight: 600;
-          margin-bottom: 30px;
-          border-bottom: 2px solid #f0f0f0;
-          padding-bottom: 10px;
-          color: #1a1a1a;
-        }
-        table {
-          width: 100%;
-          border-collapse: collapse;
-          margin-top: 20px;
-        }
-        th {
-          text-align: left;
-          font-size: 14px;
-          color: #777;
-          background-color: #f8f8f8;
-          padding: 12px 8px;
-          border-bottom: 1px solid #ddd;
-        }
-        td {
-          font-size: 16px;
-          padding: 10px 8px;
-          border-bottom: 1px solid #f0f0f0;
-        }
-        tr:last-child td {
-          border-bottom: none;
-        }
-      </style>
+     <style>
+  body {
+    font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: #1f2937;
+    background: #ffffff;
+    margin: 0;
+    padding: 60px;
+    line-height: 1.6;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    padding: 50px 60px;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+  }
+
+  .date {
+    text-align: right;
+    font-size: 14px;
+    color: #6b7280;
+    margin-bottom: 20px;
+  }
+
+  .title {
+    font-size: 32px;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #e5e7eb;
+    padding-bottom: 8px;
+    letter-spacing: -0.02em;
+  }
+
+  .accent-bar {
+    height: 5px;
+    width: 60px;
+    background: linear-gradient(90deg, #2563eb, #3b82f6);
+    border-radius: 4px;
+    margin: 20px 0 40px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 30px;
+    font-size: 15px;
+  }
+
+  th, td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  th {
+    background-color: #f3f4f6;
+    color: #374151;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 13px;
+    text-align: left;
+  }
+
+  th:nth-child(2) {
+    text-align: center;
+  }
+
+  td {
+    color: #374151;
+    text-align: left;
+  }
+
+  td:nth-child(2) {
+    text-align: center;
+  }
+
+  tr:nth-child(even) td {
+    background-color: #f9fafb;
+  }
+
+  tr:hover td {
+    background-color: #f3f4f6;
+  }
+
+  /* Headings and subtle structure */
+  h2, h3 {
+    margin-top: 40px;
+    color: #111827;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 12px 0;
+    font-size: 15px;
+  }
+
+  
+  }
+</style>
     </head>
     <body>
       <div class="container">
-        <div class="date">17/05/2025</div>
-        <div class="title">Pedido Consolidado (Proteinas)</div>
+        <div class="date">${new Date().toLocaleDateString()}</div>
+        <div class="title">${CategoryName}</div>
         <table>
           <thead>
-            <tr>
-              <th>Name</th>
-              <th>Format</th>
-              <th>Quantity</th>
-            </tr>
+            <tr><th>Name</th><th>Quantity</th></tr>
           </thead>
-          <tbody>
-            
-              <tr>
-                <td>${result.name}</td>
-                <td>${result.format}</td>
-                <td>${result.quantity}</td>
-              </tr>
-           
-          </tbody>
+          <tbody>${rowsHtml}</tbody>
         </table>
       </div>
     </body>
-    </html>
-    `;
+    </html>`;
 
-    const browser = await puppeteer.launch({ headless: "new" });
+    const browser = await chromium.launch({ headless: true });
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "networkidle0" });
-
-    const pdf = await page.pdf({
-      format: "A4",
-      printBackground: true,
-    });
-
+    await page.setContent(html, { waitUntil: "networkidle" });
+    const pdf = await page.pdf({ format: "A4", printBackground: true });
     await browser.close();
 
     res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", "attachment; filename=report.pdf");
-    res.setHeader("Content-Length", pdf.length);
-
+    res.setHeader("Content-Disposition", 'attachment; filename="report.pdf"');
     res.send(pdf);
+    // res.send(pdf);
   } catch (err) {
     console.error("PDF error:", err);
     res.status(500).send("Failed to generate PDF");

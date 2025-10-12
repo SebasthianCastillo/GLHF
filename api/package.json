@@ -5,7 +5,8 @@
   "main": "server.mjs",
   "scripts": {
     "start": "nodemon server.mjs",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon server.mjs"
   },
   "author": "",
   "license": "ISC",
@@ -16,10 +17,11 @@
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.5.2",
-    "nodemon": "^3.1.4"
+    "playwright": "^1.56.0"
   },
   "devDependencies": {
     "@types/node": "^24.0.3",
+    "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   }
