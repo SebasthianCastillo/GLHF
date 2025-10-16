@@ -1,8 +1,7 @@
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import CustomField from "@/components/Field";
 import ModalProducts from "@/components/OptionModal";
-import * as FileSystem from "expo-file-system";
-import { shareAsync } from "expo-sharing";
+
 import {
   View,
   ScrollView,
@@ -19,23 +18,17 @@ import {
   useState,
   useCallback,
   router,
-  axios,
-  Constants,
   useLocalSearchParams,
   useFocusEffect,
   React,
   Modal,
   FontAwesome6,
-  Platform,
   ActivityIndicator,
 } from "./lib/shared"; // Centralized imports
 import ButtonLink from "@/components/ButtonLink";
 import SearchBar from "@/components/SearchBar";
 import { useProducts } from "@/hooks/useProducts";
 import { useFilePdfDownload } from "@/hooks/useFilePdfDownload";
-
-const API_URL =
-  Constants.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
 
 const Products = () => {
   const { category } = useLocalSearchParams();

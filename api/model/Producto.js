@@ -10,8 +10,8 @@ const ProductoSchema = new mongoose.Schema({
     required: true,
   },
   CategoryID: {
-    type: String,
-    required: true,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Category",
   },
 });
 
