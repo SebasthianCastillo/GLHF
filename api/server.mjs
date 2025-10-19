@@ -12,7 +12,8 @@ import { ObjectId } from "mongodb";
 import jwt from "jsonwebtoken";
 import requireAuth from "./middleware/auth.js";
 import { chromium } from "playwright";
-
+import cron from "node-cron";
+import axios from "axios";
 const app = express();
 const PORT = process.env.PORT || 5000;
 app.use(cors());
@@ -32,6 +33,79 @@ mongoose
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error("Error connecting to MongoDB:", err));
 
+cron.schedule("*/2 * * * *", async () => {
+  const lowStockProducts = await Producto.find({ quantity: { $lt: 2 } });
+
+  for (const product of lowStockProducts) {
+    // Check if we already reminded in the last hour
+    const lastNotified = product.lastNotifiedAt;
+    const now = new Date();
+    if (!lastNotified || now - lastNotified > 10 * 1000) {
+      // Find the user who owns this product
+      const productPopulated = await Producto.findById(product._id).populate({
+        path: "CategoryID", // Step 1: replace CategoryID with actual Category document
+        populate: { path: "UserID", model: "User" }, // Step 2: inside Category, populate UserID
+      });
+      const user = productPopulated.CategoryID.UserID;
+      if (user.expoPushToken) {
+        // Send notification
+        await sendPushNotification(user.expoPushToken, {
+          title: "Low Stock Reminder 🛒",
+          body: `${product.name} is running low. Check your inventory.`,
+        });
+
+        // Update last notified time
+        product.lastNotifiedAt = now;
+        await product.save();
+      }
+    }
+  }
+});
+async function sendPushNotification(expoPushToken, message) {
+  try {
+    await axios.post(
+      "https://exp.host/--/api/v2/push/send",
+      {
+        to: expoPushToken,
+        sound: "default",
+        title: message.title,
+        body: message.body,
+      },
+      {
+        headers: {
+          Accept: "application/json",
+          "Accept-encoding": "gzip, deflate",
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    console.log("Notification sent!");
+  } catch (error) {
+    console.error(
+      "Failed to send push notification:",
+      error.response?.data || error.message
+    );
+  }
+}
+// notification save token
+app.post("/saveTokenUserNotification", async (req, res) => {
+  try {
+    const { userEmail, expoPushToken } = req.body;
+    if (!userEmail || !expoPushToken) {
+      return res
+        .status(400)
+        .json({ message: "Missing userEmail or expoPushToken" });
+    }
+    await User.findOneAndUpdate(
+      { email: userEmail }, // find condition
+      { expoPushToken: expoPushToken } // fields to update
+    );
+    res.status(200).json({ message: "Push token saved successfully" });
+  } catch (error) {
+    console.error("Error saving push token:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
@@ -311,9 +385,11 @@ app.patch("/quantityUpdateProduct", async (req, res) => {
 app.get("/productsByIDCategory", async (req, res) => {
   try {
     const CategoryID = req.query.CategoryKey;
-    const products = await Producto.find({ CategoryID: CategoryID }).sort(
-      "Name"
-    );
+
+    const products = await Producto.find({
+      CategoryID: CategoryID,
+    }).sort("Name");
+
     res.status(200).json(products);
   } catch (error) {
     console.log(error);

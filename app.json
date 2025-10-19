@@ -21,7 +21,9 @@
         "foregroundImage": "./assets/images/CaptainChef.jpg",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.sebb21glhf"
+      "package": "com.sebb21glhf",
+      "googleServicesFile": "./google-services.json",
+      "useNextNotificationsApi": true
     },
     "web": {
       "bundler": "metro",
@@ -35,7 +37,16 @@
         {
           "iosUrlScheme": "com.googleusercontent.apps.YOUR_IOS_CLIENT_ID"
         }
-      ]
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/icon.png",
+          "color": "#ffffff",
+          "sounds": []
+        }
+      ],
+      "@react-native-firebase/app"
     ],
 
     "experiments": {
@@ -48,7 +59,7 @@
       "eas": {
         "projectId": "c69b3306-b872-4414-a490-dedbd3b5cfb6"
       },
-      "API_URL": "http://192.168.68.108:5000"
+      "API_URL": "http://192.168.68.106:5000"
     }
   }
 }

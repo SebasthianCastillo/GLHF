@@ -13,6 +13,7 @@ const ProductoSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Category",
   },
+  lastNotifiedAt: Date,
 });
 
 const Producto = mongoose.model("Producto", ProductoSchema);

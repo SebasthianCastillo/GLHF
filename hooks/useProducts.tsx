@@ -13,6 +13,7 @@ export const useProducts = (categoryId: string) => {
       const { data } = await axios.get(`${API_URL}/productsByIDCategory`, {
         params: { CategoryKey: categoryId },
       });
+
       setProducts(data);
     } catch (e) {
       console.log("❌ Error fetching products:", e);

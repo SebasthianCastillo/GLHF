@@ -15,7 +15,8 @@ const userSchema = new mongoose.Schema(
         providerId: String,
       },
     ],
-    passwordHash: String, // For local auth
+    passwordHash: String,
+    expoPushToken: String, // For local auth
   },
   { timestamps: true }
 );

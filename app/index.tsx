@@ -23,6 +23,8 @@ import ColorPicker, { Swatches } from "reanimated-color-picker";
 import { GoogleSignin, User } from "@react-native-google-signin/google-signin";
 import ButtonLink from "@/components/ButtonLink";
 import SearchBar from "@/components/SearchBar";
+import { useUserStore } from "@/store/useUserStore";
+import { usePushNotifications } from "@/services/notification";
 
 export default function HomeScreen() {
   const [categories, setcategories] = useState([]);
@@ -30,36 +32,51 @@ export default function HomeScreen() {
   const [colors, setColors] = useState<{ [key: string]: string }>({}); // Object to hold colors for each category
   const [selectedCategoryId, setSelectedCategoryId] = useState(""); // Category ID for which color is being changed
   const [loading, setLoading] = useState(false);
-  const [auth, setAuth] = useState<UserDB | null>(null);
+  // const [auth, setAuth] = useState<UserDB | null>(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
-  interface UserDB {
-    email: { type: String; required: true; unique: true };
-    name: String;
-    avatar: String;
-    authProviders: [
-      {
-        provider: {
-          type: String;
-          enum: ["google", "github", "local"];
-          required: true;
-        };
-        providerId: String;
-      }
-    ];
-    passwordHash: String; // For local auth
-  }
-
+  // interface UserDB {
+  //   email: { type: String; required: true; unique: true };
+  //   name: String;
+  //   avatar: String;
+  //   authProviders: [
+  //     {
+  //       provider: {
+  //         type: String;
+  //         enum: ["google", "github", "local"];
+  //         required: true;
+  //       };
+  //       providerId: String;
+  //     }
+  //   ];
+  //   passwordHash: String; // For local auth
+  // }
+  const user = useUserStore((state) => state.user);
   const API_URL =
     Constants.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
   const WEB_CLIENT_ID_GOOGLE =
     "305169218247-rd7peu927l4f43nhl6ecuj79rumi8ueu.apps.googleusercontent.com";
-
+  // const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
+  const { expoPushToken, notification } = usePushNotifications();
+  const data = JSON.stringify(notification, undefined, 2);
   useFocusEffect(
     useCallback(() => {
       getCurrentUser();
       CallCategories();
+      // if (!user) return;
     }, [])
   );
+  // Optional: log or show notifications when received
+  useEffect(() => {
+    if (notification) {
+      console.log("📩 Notification received:", notification.request.content);
+    }
+  }, [notification]);
+
+  useEffect(() => {
+    if (expoPushToken) {
+      console.log("✅ Expo Push Token:", expoPushToken.data);
+    }
+  }, [expoPushToken]);
 
   const CallCategories = async () => {
     try {
@@ -100,9 +117,10 @@ export default function HomeScreen() {
       });
 
       await AsyncStorage.setItem("token", data.token);
-      setAuth(data.user);
+      useUserStore.getState().setUser(data.user);
     } catch (error) {
       console.log("error google data", error);
+      // await AsyncStorage.removeItem("token");
     }
   };
 
@@ -117,7 +135,7 @@ export default function HomeScreen() {
         headers: { authorization: `Bearer ${token}` },
       });
 
-      setAuth(data.user);
+      useUserStore.getState().setUser(data.user);
     } catch (error) {
       console.log("error current user", error);
       // await AsyncStorage.removeItem("token");
@@ -126,7 +144,8 @@ export default function HomeScreen() {
 
   const logout = async () => {
     await AsyncStorage.removeItem("token");
-    setAuth(null);
+    // setAuth(null);
+    useUserStore.getState().clearUser();
   };
   //#endregion
   const onRefreshingProducts = async () => {
@@ -186,6 +205,8 @@ export default function HomeScreen() {
   return (
     <SafeAreaView className="bg-primary flex-1">
       <View className="flex-row justify-between items-start pt-3 px-4">
+        <Text>{expoPushToken?.data ?? ""}</Text>
+        <Text>{data}</Text>
         <Pressable onPress={onRefreshingProducts} className="p-2 -ml-2">
           {loading ? (
             <ActivityIndicator size="large" color="white" />
@@ -193,7 +214,7 @@ export default function HomeScreen() {
             <Ionicons name="reload" size={28} color="white" />
           )}
         </Pressable>
-        {auth && (
+        {user && (
           <View className="items-end">
             <View className="flex-row items-center">
               <Pressable
@@ -203,7 +224,7 @@ export default function HomeScreen() {
                 <Image
                   source={{
                     uri:
-                      (auth.avatar as string) ||
+                      (user.avatar as string) ||
                       "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
                   }}
                   className="w-full h-full"
@@ -243,7 +264,7 @@ export default function HomeScreen() {
               containerStylesText="pl-8"
             />
           ))}
-          {!auth && (
+          {!user && (
             <TouchableOpacity
               className="flex-row items-center justify-center bg-white border border-gray-300 rounded-3xl py-4 px-6  mb-4 shadow-sm"
               activeOpacity={0.7}
@@ -316,7 +337,7 @@ export default function HomeScreen() {
                 <Image
                   source={{
                     uri:
-                      (auth?.avatar as string) ||
+                      (user?.avatar as string) ||
                       "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
                   }}
                   className="w-full h-full"
@@ -324,7 +345,7 @@ export default function HomeScreen() {
                 />
               </View>
               <Text className="text-lg font-bold mt-3 text-white">
-                {auth?.name.split(" ")[0]}
+                {user?.name.split(" ")[0]}
               </Text>
             </View>
             <Pressable
