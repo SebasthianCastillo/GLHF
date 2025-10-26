@@ -17,6 +17,7 @@ import { TransactionDayItem } from "@/components/ProductDetail/TransactionDayIte
 import SummarySquare from "@/components/ProductDetail/SummarySquare";
 import { useSummaryStore } from "@/store/useSummaryStore";
 import { AggregationResult } from "./lib/types";
+import RouterBackArrow from "@/components/RouterBackArrow";
 const API_URL =
   Constants.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
 
@@ -369,9 +370,7 @@ const ProductDetail = () => {
     <SafeAreaView className="bg-primary h-full">
       <View className="flex-row items-center justify-between p-4 bg-primary">
         <View className="flex-row items-center flex-1">
-          <TouchableOpacity onPress={() => router.back()} className="mr-4">
-            <FontAwesome6 name="arrow-left" size={24} color="white" />
-          </TouchableOpacity>
+          <RouterBackArrow />
           <Text className="text-white text-xl font-bold">
             {productObject.Name}
           </Text>

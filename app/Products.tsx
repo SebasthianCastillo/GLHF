@@ -29,6 +29,7 @@ import ButtonLink from "@/components/ButtonLink";
 import SearchBar from "@/components/SearchBar";
 import { useProducts } from "@/hooks/useProducts";
 import { useFilePdfDownload } from "@/hooks/useFilePdfDownload";
+import RouterBackArrow from "@/components/RouterBackArrow";
 
 const Products = () => {
   const { category } = useLocalSearchParams();
@@ -200,9 +201,7 @@ const Products = () => {
     <TouchableWithoutFeedback onPress={handlePressOutside}>
       <SafeAreaView className="bg-primary h-full">
         <View className="flex-row items-center p-4 bg-slate-950">
-          <TouchableOpacity onPress={() => router.back()} className="mr-3">
-            <FontAwesome6 name="arrow-left" size={24} color="white" />
-          </TouchableOpacity>
+          <RouterBackArrow />
           <Text className="text-white text-xl font-bold flex-1">
             {CategoryName}
           </Text>

@@ -232,6 +232,12 @@ export default function HomeScreen() {
             </View>
           </View>
         )}
+        <Pressable
+          onPress={() => router.push("/SettingScreen")}
+          className="p-2"
+        >
+          <Ionicons name="settings-outline" size={26} color="white" />
+        </Pressable>
       </View>
 
       <ScrollView>

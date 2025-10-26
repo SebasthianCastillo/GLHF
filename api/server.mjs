@@ -33,7 +33,7 @@ mongoose
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error("Error connecting to MongoDB:", err));
 
-cron.schedule("*/20 * * * *", async () => {
+cron.schedule("*/59 * * * *", async () => {
   const lowStockProducts = await Producto.find({ quantity: { $lt: 2 } });
 
   for (const product of lowStockProducts) {

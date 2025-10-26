@@ -10,11 +10,10 @@ import {
   Constants,
   Dimensions,
   useRouter,
-  TouchableOpacity,
-  FontAwesome6,
   Text,
 } from "./lib/shared"; // Centralized imports
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import RouterBackArrow from "@/components/RouterBackArrow";
 
 const API_URL =
   Constants.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
@@ -56,9 +55,7 @@ const AddCategory = () => {
   return (
     <SafeAreaView className="bg-primary h-full">
       <View className="flex-row items-center p-4 bg-primary">
-        <TouchableOpacity onPress={() => router.back()} className="mr-4">
-          <FontAwesome6 name="arrow-left" size={24} color="white" />
-        </TouchableOpacity>
+        <RouterBackArrow />
       </View>
       <ScrollView>
         <View
