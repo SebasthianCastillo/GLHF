@@ -205,8 +205,6 @@ export default function HomeScreen() {
   return (
     <SafeAreaView className="bg-primary flex-1">
       <View className="flex-row justify-between items-start pt-3 px-4">
-        <Text>{expoPushToken?.data ?? ""}</Text>
-        <Text>{data}</Text>
         <Pressable onPress={onRefreshingProducts} className="p-2 -ml-2">
           {loading ? (
             <ActivityIndicator size="large" color="white" />
