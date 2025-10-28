@@ -33,17 +33,28 @@ mongoose
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error("Error connecting to MongoDB:", err));
 
-app.post("/updateReminderSettings", async (req, res) => {
-  const { userEmail, enabled, intervalDays, lowStockThreshold } = req.body;
-
+app.post("/updateUserSettings", async (req, res) => {
   try {
-    await User.findAndUpdate(userEmail, {
-      reminderSettings: { enabled, intervalDays, lowStockThreshold },
-    });
-    res.sendStatus(200);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Failed to update settings");
+    const { group, userEmail, ...updates } = req.body;
+
+    // Check user existence
+    const existingUser = await User.findOne({ email: userEmail });
+    if (!existingUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Update only provided fields
+    const mappedUpdates = {};
+    for (const key in updates) {
+      mappedUpdates[`settings.${group}.${key}`] = updates[key];
+    }
+    await User.updateOne({ email: userEmail }, { $set: mappedUpdates });
+    console.log(`✅ Updated settings for: ${existingUser.name}`);
+
+    res.status(200).json({ message: "Settings updated successfully" });
+  } catch (error) {
+    console.error("❌ Error updating user settings:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 // cron.schedule("*/59 * * * *", async () => {

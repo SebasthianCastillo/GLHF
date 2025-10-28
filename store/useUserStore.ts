@@ -1,6 +1,6 @@
 import { create } from "zustand";
 interface User {
-  email: { type: String; required: true; unique: true };
+  email: string;
   name: String;
   avatar: String;
   authProviders: [
@@ -13,10 +13,12 @@ interface User {
       providerId: String;
     }
   ];
-  reminderSettings: {
-    enabled: boolean;
-    intervalDays: { type: Number; default: 7 };
-    lowStockThreshold: { type: Number; default: 5 };
+  settings: {
+    reminderSettings: {
+      enabled: boolean;
+      intervalDays: { type: Number; default: 7 };
+      lowStockThreshold: { type: Number; default: 5 };
+    };
   };
   passwordHash: String; // For local auth
   expoPushToken: String;

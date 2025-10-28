@@ -204,12 +204,18 @@ export default function HomeScreen() {
   return (
     <SafeAreaView className="bg-primary flex-1">
       <View className="flex-row justify-between items-start pt-3 px-4">
-        <Pressable onPress={onRefreshingProducts} className="p-2 -ml-2">
+        {/* <Pressable onPress={onRefreshingProducts} className="p-2 -ml-2">
           {loading ? (
             <ActivityIndicator size="large" color="white" />
           ) : (
             <Ionicons name="reload" size={28} color="white" />
           )}
+        </Pressable> */}
+        <Pressable
+          onPress={() => router.push("/SettingScreen")}
+          className="p-2"
+        >
+          <Ionicons name="settings-outline" size={26} color="white" />
         </Pressable>
         {user && (
           <View className="items-end">
@@ -231,12 +237,6 @@ export default function HomeScreen() {
             </View>
           </View>
         )}
-        <Pressable
-          onPress={() => router.push("/SettingScreen")}
-          className="p-2"
-        >
-          <Ionicons name="settings-outline" size={26} color="white" />
-        </Pressable>
       </View>
 
       <ScrollView>

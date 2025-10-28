@@ -102,10 +102,14 @@ const SettingsScreen = () => {
                     <View className="flex-1 items-end">
                       <Switch
                         value={enabled}
-                        onValueChange={(value) =>
+                        onValueChange={(value) => {
                           // updateNotificationSetting({ [section.id]: value })
-                          console.log(value)
-                        }
+                          // console.log(user?.email!)
+                          setEnabled(value);
+                          updateUserSettings("reminderSettings", user?.email!, {
+                            [item.id]: value,
+                          });
+                        }}
                       />
                     </View>
                   </View>
@@ -140,13 +144,14 @@ const SettingsScreen = () => {
 export default SettingsScreen;
 
 export const updateUserSettings = async <T extends Record<string, any>>(
-  endpoint: string,
+  group: string,
   userEmail: string,
   updates: Partial<T>
 ): Promise<void> => {
   try {
-    await axios.post(`${API_URL}/${endpoint}`, {
-      user: userEmail,
+    await axios.post(`${API_URL}/updateUserSettings`, {
+      group,
+      userEmail: userEmail,
       ...updates,
     });
   } catch (err) {

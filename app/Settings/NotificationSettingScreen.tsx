@@ -7,11 +7,14 @@ import { ScrollView } from "react-native";
 import axios from "axios";
 import { useUserStore } from "@/store/useUserStore";
 import Constants from "expo-constants";
+import { updateUserSettings } from "@/app/SettingScreen";
+
 const NotificationSettingScreen = () => {
   const API_URL = Constants.expoConfig?.extra?.API_URL;
   const [enabled, setEnabled] = useState(true);
   const [intervalDays, setIntervalDays] = useState("7");
   const [lowStockThreshold, setLowStockThreshold] = useState("5");
+
   const user = useUserStore((state) => state.user);
 
   interface NotificationSettings {
@@ -39,18 +42,6 @@ const NotificationSettingScreen = () => {
     },
   ];
 
-  const updateNotificationSetting = async (
-    updates: Partial<NotificationSettings>
-  ) => {
-    try {
-      await axios.post(`${API_URL}/updateReminderSettings`, {
-        user: user?.email,
-        ...updates,
-      });
-    } catch (err) {
-      console.error(Error, err);
-    }
-  };
   return (
     <SafeAreaView className="flex-1 bg-neutral-900">
       {/* Header */}
@@ -75,16 +66,20 @@ const NotificationSettingScreen = () => {
                 {section.type === "toggle" ? (
                   <Switch
                     value={enabled}
-                    onValueChange={(value) =>
-                      updateNotificationSetting({ [section.id]: value })
-                    }
+                    onValueChange={(value) => {
+                      updateUserSettings("updateUserSettings", user?.email!, {
+                        [section.id]: value,
+                      });
+                    }}
                   />
                 ) : (
                   <View className="">
                     <TextInput
                       value={section.value.toString()}
                       onChangeText={(value) =>
-                        updateNotificationSetting({ [section.id]: value })
+                        updateUserSettings("updateUserSettings", user?.email!, {
+                          [section.id]: value,
+                        })
                       }
                       className="text-white text-lg text-center"
                       keyboardType="numeric"
