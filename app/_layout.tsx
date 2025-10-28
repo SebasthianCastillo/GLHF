@@ -30,6 +30,10 @@ export default function RootLayout() {
       <Stack.Screen name="AddProduct" options={{ headerShown: false }} />
       <Stack.Screen name="ProductDetail" options={{ headerShown: false }} />
       <Stack.Screen name="SettingScreen" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="Settings/NotificationSettingScreen"
+        options={{ headerShown: false }}
+      />
     </Stack>
   );
 }

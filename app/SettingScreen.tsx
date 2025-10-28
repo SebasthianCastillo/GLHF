@@ -1,32 +1,21 @@
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  Switch,
-  TextInput,
-  Pressable,
-  Alert,
-  ScrollView,
-} from "react-native";
+import { useState, useEffect } from "react";
+import { View, Text, Switch, Pressable, ScrollView } from "react-native";
 import axios from "axios";
 import Constants from "expo-constants";
 import { useUserStore } from "@/store/useUserStore";
 import RouterBackArrow from "@/components/RouterBackArrow";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { router } from "expo-router";
 const API_URL = Constants.expoConfig?.extra?.API_URL;
-
-export default function SettingsScreen() {
+const SettingsScreen = () => {
   const user = useUserStore((state) => state.user);
-
   const [enabled, setEnabled] = useState(true);
-  const [intervalDays, setIntervalDays] = useState("7");
-  const [lowStockThreshold, setLowStockThreshold] = useState("5");
   interface SettingItem {
     id: string;
     label: string;
     icon: React.ReactNode;
-    type: "navigation" | "toggle" | "info";
+    type: "navigation" | "toggle" | "info" | "toggleManScreen";
     value?: boolean;
     description?: string;
     badge?: string;
@@ -41,11 +30,18 @@ export default function SettingsScreen() {
       title: "Notifications",
       items: [
         {
-          id: "reminderSetting",
-          label: "Reminder Setting",
+          id: "enabled",
+          label: "Enable Notifications",
+          icon: "",
+          type: "toggleManScreen",
+          description: "toggle for enable or disable general notifications",
+        },
+        {
+          id: "NotificationSettingScreen",
+          label: "Reminder Notification",
           icon: <FontAwesome6 name="bell" size={24} color="white" />,
           type: "navigation",
-          description: "Manage your account settings",
+          description: "Manage your notification reminder settings",
         },
       ],
     },
@@ -60,55 +56,26 @@ export default function SettingsScreen() {
   //     }
   //   }, [user]);
 
-  const saveSettings = async () => {
-    try {
-      await axios.post(`${API_URL}/updateReminderSettings`, {
-        user: user?.email,
-        enabled,
-        intervalDays: Number(intervalDays),
-        lowStockThreshold: Number(lowStockThreshold),
-      });
-    } catch (err) {
-      console.error(err);
-      Alert.alert("Error", "Could not save settings");
-    }
-  };
+  // const saveSettings = async () => {
+  //   try {
+  //     await axios.post(`${API_URL}/updateReminderSettings`, {
+  //       user: user?.email,
+  //       enabled,
+  //       intervalDays: Number(intervalDays),
+  //       lowStockThreshold: Number(lowStockThreshold),
+  //     });
+  //   } catch (err) {
+  //     console.error(err);
+  //     Alert.alert("Error", "Could not save settings");
+  //   }
+  // };
 
   return (
-    // <View className="flex-1 bg-primary items-center justify-center px-6">
-    //   <RouterBackArrow />
-    //   <Text className="text-white text-2xl font-bold mb-6">
-    //     Reminder Settings
-    //   </Text>
-
-    //   <View className="w-full bg-slate-800 rounded-2xl p-5 mb-4">
-    //     <View className="flex-row justify-between items-center mb-4">
-    //       <Text className="text-white text-lg">Enable Reminders</Text>
-    //       <Switch value={enabled} onValueChange={setEnabled} />
-    //     </View>
-
-    //     <Text className="text-white mb-1">Reminder Interval (days)</Text>
-    //     <TextInput
-    //       className="bg-white rounded-xl p-3 mb-4"
-    //       keyboardType="numeric"
-    //       value={intervalDays}
-    //       onChangeText={setIntervalDays}
-    //     />
-
-    //     <Text className="text-white mb-1">Low Stock Threshold</Text>
-    //     <TextInput
-    //       className="bg-white rounded-xl p-3 mb-4"
-    //       keyboardType="numeric"
-    //       value={lowStockThreshold}
-    //       onChangeText={setLowStockThreshold}
-    //     />
-    //   </View>
-    // </View>
     <SafeAreaView className="flex-1 bg-neutral-900">
       {/* Header */}
-      <View className="px-5 py-4 border-b border-neutral-800 bg-neutral-900 flex-row">
+      <View className="px-5 py-4 border-b border-neutral-800 bg-neutral-900 flex-row items-center">
         <RouterBackArrow />
-        <Text className="text-2xl font-semibold text-white">Settings</Text>
+        <Text className="text-2xl font-semibold text-white ml-3">Settings</Text>
       </View>
 
       {/* Scrollable Content */}
@@ -119,25 +86,70 @@ export default function SettingsScreen() {
       >
         {sections.map((section, sectionIndex) => (
           <View key={sectionIndex}>
+            {/* Section Title */}
             <View className="px-5 py-3 bg-neutral-800/40">
               <Text className="text-sm font-medium text-gray-400 uppercase tracking-wide">
                 {section.title}
               </Text>
             </View>
 
-            <View className="px-4 pt-2">
-              {section.items.map((item, itemIndex) => (
-                <View
-                  key={item.id || itemIndex}
-                  className="bg-neutral-800 rounded-2xl p-5 mb-4"
-                >
-                  <Text className="text-white">{item.label}</Text>
-                </View>
-              ))}
-            </View>
+            {/* Section Items */}
+            {section.items.map((item, itemIndex) => (
+              <View className="bg-neutral-800/40 p-6 flex-row justify-between items-center">
+                {item.type === "toggleManScreen" ? (
+                  <View className="flex-row items-center ">
+                    <Text className="text-white text-base">{item.label}</Text>
+                    <View className="flex-1 items-end">
+                      <Switch
+                        value={enabled}
+                        onValueChange={(value) =>
+                          // updateNotificationSetting({ [section.id]: value })
+                          console.log(value)
+                        }
+                      />
+                    </View>
+                  </View>
+                ) : (
+                  <View className="flex-row items-center">
+                    <Pressable
+                      key={item.id || itemIndex}
+                      className="w-full flex-row justify-between items-center py-4 pr-2"
+                      onPress={() => {
+                        if (item.type === "navigation") {
+                          router.push(`../Settings/${item.id}`);
+                        }
+                      }}
+                    >
+                      <Text className="text-white text-base">{item.label}</Text>
+                      <FontAwesome6
+                        name="chevron-right"
+                        size={18}
+                        color="white"
+                      />
+                    </Pressable>
+                  </View>
+                )}
+              </View>
+            ))}
           </View>
         ))}
       </ScrollView>
     </SafeAreaView>
   );
-}
+};
+export default SettingsScreen;
+
+export const updateUserSettings = async <T extends Record<string, any>>(
+  endpoint: string,
+  userEmail: string,
+  updates: Partial<T>
+): Promise<void> => {
+  try {
+    await axios.post(`${API_URL}/${endpoint}`, {
+      user: userEmail,
+      ...updates,
+    });
+  } catch (err) {
+    console.error(err);
+  }
+};

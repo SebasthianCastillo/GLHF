@@ -15,6 +15,11 @@ const userSchema = new mongoose.Schema(
         providerId: String,
       },
     ],
+    reminderSettings: {
+      enabled: { type: Boolean },
+      intervalDays: { type: Number, default: 7 },
+      lowStockThreshold: { type: Number, default: 5 },
+    },
     passwordHash: String,
     expoPushToken: String, // For local auth
   },

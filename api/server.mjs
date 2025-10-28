@@ -33,34 +33,47 @@ mongoose
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error("Error connecting to MongoDB:", err));
 
-cron.schedule("*/59 * * * *", async () => {
-  const lowStockProducts = await Producto.find({ quantity: { $lt: 2 } });
+app.post("/updateReminderSettings", async (req, res) => {
+  const { userEmail, enabled, intervalDays, lowStockThreshold } = req.body;
 
-  for (const product of lowStockProducts) {
-    // Check if we already reminded in the last hour
-    const lastNotified = product.lastNotifiedAt;
-    const now = new Date();
-    if (!lastNotified || now - lastNotified > 10 * 1000) {
-      // Find the user who owns this product
-      const productPopulated = await Producto.findById(product._id).populate({
-        path: "CategoryID", // Step 1: replace CategoryID with actual Category document
-        populate: { path: "UserID", model: "User" }, // Step 2: inside Category, populate UserID
-      });
-      const user = productPopulated.CategoryID.UserID;
-      if (user.expoPushToken) {
-        // Send notification
-        await sendPushNotification(user.expoPushToken, {
-          title: "Low Stock Reminder 🛒",
-          body: `${product.name} is running low. Check your inventory.`,
-        });
-
-        // Update last notified time
-        product.lastNotifiedAt = now;
-        await product.save();
-      }
-    }
+  try {
+    await User.findAndUpdate(userEmail, {
+      reminderSettings: { enabled, intervalDays, lowStockThreshold },
+    });
+    res.sendStatus(200);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Failed to update settings");
   }
 });
+// cron.schedule("*/59 * * * *", async () => {
+//   const lowStockProducts = await Producto.find({ quantity: { $lt: 2 } });
+
+//   for (const product of lowStockProducts) {
+//     // Check if we already reminded in the last hour
+//     const lastNotified = product.lastNotifiedAt;
+//     const now = new Date();
+//     if (!lastNotified || now - lastNotified > 10 * 1000) {
+//       // Find the user who owns this product
+//       const productPopulated = await Producto.findById(product._id).populate({
+//         path: "CategoryID", // Step 1: replace CategoryID with actual Category document
+//         populate: { path: "UserID", model: "User" }, // Step 2: inside Category, populate UserID
+//       });
+//       const user = productPopulated.CategoryID.UserID;
+//       if (user.expoPushToken) {
+//         // Send notification
+//         await sendPushNotification(user.expoPushToken, {
+//           title: "Low Stock Reminder 🛒",
+//           body: `${product.name} is running low. Check your inventory.`,
+//         });
+
+//         // Update last notified time
+//         product.lastNotifiedAt = now;
+//         await product.save();
+//       }
+//     }
+//   }
+// });
 async function sendPushNotification(expoPushToken, message) {
   try {
     await axios.post(

@@ -13,6 +13,11 @@ interface User {
       providerId: String;
     }
   ];
+  reminderSettings: {
+    enabled: boolean;
+    intervalDays: { type: Number; default: 7 };
+    lowStockThreshold: { type: Number; default: 5 };
+  };
   passwordHash: String; // For local auth
   expoPushToken: String;
 }

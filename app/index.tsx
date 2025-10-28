@@ -62,7 +62,6 @@ export default function HomeScreen() {
     useCallback(() => {
       getCurrentUser();
       CallCategories();
-      // if (!user) return;
     }, [])
   );
   // Optional: log or show notifications when received
