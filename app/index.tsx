@@ -17,14 +17,13 @@ import {
   Text,
   useFocusEffect,
   Pressable,
-  ActivityIndicator,
 } from "./lib/shared"; // Centralized imports
 import ColorPicker, { Swatches } from "reanimated-color-picker";
 import { GoogleSignin, User } from "@react-native-google-signin/google-signin";
 import ButtonLink from "@/components/ButtonLink";
 import SearchBar from "@/components/SearchBar";
 import { useUserStore } from "@/store/useUserStore";
-import { usePushNotifications } from "@/services/notification";
+import { usePushNotifications } from "@/services/usePushNotifications";
 
 export default function HomeScreen() {
   const [categories, setcategories] = useState([]);
@@ -32,31 +31,14 @@ export default function HomeScreen() {
   const [colors, setColors] = useState<{ [key: string]: string }>({}); // Object to hold colors for each category
   const [selectedCategoryId, setSelectedCategoryId] = useState(""); // Category ID for which color is being changed
   const [loading, setLoading] = useState(false);
-  // const [auth, setAuth] = useState<UserDB | null>(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
-  // interface UserDB {
-  //   email: { type: String; required: true; unique: true };
-  //   name: String;
-  //   avatar: String;
-  //   authProviders: [
-  //     {
-  //       provider: {
-  //         type: String;
-  //         enum: ["google", "github", "local"];
-  //         required: true;
-  //       };
-  //       providerId: String;
-  //     }
-  //   ];
-  //   passwordHash: String; // For local auth
-  // }
-  const user = useUserStore((state) => state.user);
   const API_URL =
     Constants.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
   const WEB_CLIENT_ID_GOOGLE =
     "305169218247-rd7peu927l4f43nhl6ecuj79rumi8ueu.apps.googleusercontent.com";
-  // const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
+
   const { expoPushToken, notification } = usePushNotifications();
+  const user = useUserStore((state) => state.user);
   const data = JSON.stringify(notification, undefined, 2);
   useFocusEffect(
     useCallback(() => {
@@ -71,11 +53,11 @@ export default function HomeScreen() {
     }
   }, [notification]);
 
-  useEffect(() => {
-    if (expoPushToken) {
-      console.log("✅ Expo Push Token:", expoPushToken.data);
-    }
-  }, [expoPushToken]);
+  // useEffect(() => {
+  //   if (expoPushToken) {
+  //     console.log("✅ Expo Push Token:", expoPushToken.data);
+  //   }
+  // }, [expoPushToken]);
 
   const CallCategories = async () => {
     try {
@@ -255,6 +237,7 @@ export default function HomeScreen() {
           </View>
           {filteredCategories.map((category: any) => (
             <CustomButton
+              key={category._id}
               containerStyles="w-full m-2"
               text={category.Name}
               HandlePress={() => navigateToProductosFromCategory(category)}

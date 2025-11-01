@@ -4,7 +4,7 @@ Mobile application for personal chef usage to control inventory management with 
 
 ---
 
-## 📦 Versions and Changes
+## 📦 Versions and Tasks --------------------------------------------------------------------------------------------
 
 ### ✅ v1.0 DONE
 
@@ -23,6 +23,13 @@ Mobile application for personal chef usage to control inventory management with 
 - d. Performance: Improved add/subtract units (save after a few seconds, not on every increment) 🔜 _[Planned]_
 - e. Fix: prevent app from closing when long-clicking two products consecutively
 - f. Feat: PDF download by chef inventory quantity requirements
+
+## Development To do --------------------------------------------------------------------------------------------
+
+### 🚀👷 v1.1.4 (in development c:)
+
+- a. add settings states to context (zustand) to retrieve all setting at ones from backend use (React Query)
+- b.
 
 ---
 

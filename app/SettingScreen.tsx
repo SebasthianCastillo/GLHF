@@ -10,12 +10,14 @@ import { router } from "expo-router";
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 const SettingsScreen = () => {
   const user = useUserStore((state) => state.user);
-  const [enabled, setEnabled] = useState(true);
+  const [enabled, setEnabled] = useState(
+    user?.settings.reminderSettings.enabled
+  );
   interface SettingItem {
     id: string;
     label: string;
     icon: React.ReactNode;
-    type: "navigation" | "toggle" | "info" | "toggleManScreen";
+    type: "navigation" | "toggle" | "info" | "toggleMainScreen";
     value?: boolean;
     description?: string;
     badge?: string;
@@ -33,7 +35,7 @@ const SettingsScreen = () => {
           id: "enabled",
           label: "Enable Notifications",
           icon: "",
-          type: "toggleManScreen",
+          type: "toggleMainScreen",
           description: "toggle for enable or disable general notifications",
         },
         {
@@ -55,20 +57,6 @@ const SettingsScreen = () => {
   //       setLowStockThreshold(String(user.reminderSettings.lowStockThreshold));
   //     }
   //   }, [user]);
-
-  // const saveSettings = async () => {
-  //   try {
-  //     await axios.post(`${API_URL}/updateReminderSettings`, {
-  //       user: user?.email,
-  //       enabled,
-  //       intervalDays: Number(intervalDays),
-  //       lowStockThreshold: Number(lowStockThreshold),
-  //     });
-  //   } catch (err) {
-  //     console.error(err);
-  //     Alert.alert("Error", "Could not save settings");
-  //   }
-  // };
 
   return (
     <SafeAreaView className="flex-1 bg-neutral-900">
@@ -96,7 +84,7 @@ const SettingsScreen = () => {
             {/* Section Items */}
             {section.items.map((item, itemIndex) => (
               <View className="bg-neutral-800/40 p-6 flex-row justify-between items-center">
-                {item.type === "toggleManScreen" ? (
+                {item.type === "toggleMainScreen" ? (
                   <View className="flex-row items-center ">
                     <Text className="text-white text-base">{item.label}</Text>
                     <View className="flex-1 items-end">

@@ -57,34 +57,44 @@ app.post("/updateUserSettings", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
-// cron.schedule("*/59 * * * *", async () => {
-//   const lowStockProducts = await Producto.find({ quantity: { $lt: 2 } });
+cron.schedule("*/20 * * * *", async () => {
+  // Get all users with notification enabled
+  const usersNotificationEnabled = await User.find({
+    "settings.reminderSettings.enabled": true,
+  });
+  for (const user of usersNotificationEnabled) {
+    const { intervalDays, lowStockThreshold } = user.settings.reminderSettings;
+    const lowStockProducts = await Producto.find({
+      quantity: { $lt: lowStockThreshold },
+    });
+    const intervalMs = intervalDays * 24 * 60 * 60 * 1000;
+    for (const product of lowStockProducts) {
+      // Check if we already reminded in the last hour
+      const lastNotified = product.lastNotifiedAt;
+      const now = new Date();
+      if (!lastNotified || now - lastNotified > intervalMs) {
+        // Find the user who owns this product
+        const productPopulated = await Producto.findById(product._id).populate({
+          path: "CategoryID", // Step 1: replace CategoryID with actual Category document
+          populate: { path: "UserID", model: "User" }, // Step 2: inside Category, populate UserID
+        });
+        const user = productPopulated.CategoryID.UserID;
 
-//   for (const product of lowStockProducts) {
-//     // Check if we already reminded in the last hour
-//     const lastNotified = product.lastNotifiedAt;
-//     const now = new Date();
-//     if (!lastNotified || now - lastNotified > 10 * 1000) {
-//       // Find the user who owns this product
-//       const productPopulated = await Producto.findById(product._id).populate({
-//         path: "CategoryID", // Step 1: replace CategoryID with actual Category document
-//         populate: { path: "UserID", model: "User" }, // Step 2: inside Category, populate UserID
-//       });
-//       const user = productPopulated.CategoryID.UserID;
-//       if (user.expoPushToken) {
-//         // Send notification
-//         await sendPushNotification(user.expoPushToken, {
-//           title: "Low Stock Reminder 🛒",
-//           body: `${product.name} is running low. Check your inventory.`,
-//         });
+        if (user.expoPushToken && user.settings.reminderSettings.enabled) {
+          // Send notification
+          await sendPushNotification(user.expoPushToken, {
+            title: "Low Stock Reminder 🛒",
+            body: `${product.Name} is low (${product.quantity} left)!`,
+          });
 
-//         // Update last notified time
-//         product.lastNotifiedAt = now;
-//         await product.save();
-//       }
-//     }
-//   }
-// });
+          // Update last notified time
+          product.lastNotifiedAt = now;
+          await product.save();
+        }
+      }
+    }
+  }
+});
 async function sendPushNotification(expoPushToken, message) {
   try {
     await axios.post(

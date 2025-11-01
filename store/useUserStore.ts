@@ -27,10 +27,27 @@ interface UserStore {
   user: User | null;
   setUser: (user: User) => void;
   clearUser: () => void;
+  updateUserSettingsContext: <T extends object>(newSetting: Partial<T>) => void;
 }
 
 export const useUserStore = create<UserStore>((set) => ({
   user: null,
   setUser: (user) => set({ user }),
   clearUser: () => set({ user: null }),
+  updateUserSettingsContext: (newSetting) =>
+    set((state) => {
+      if (!state.user) return state; // ✅ skip if no user
+      return {
+        user: {
+          ...state.user,
+          settings: {
+            ...state.user.settings,
+            reminderSettings: {
+              ...state.user.settings.reminderSettings,
+              ...newSetting,
+            },
+          },
+        },
+      };
+    }),
 }));

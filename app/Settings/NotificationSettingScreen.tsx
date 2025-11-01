@@ -1,25 +1,36 @@
 import { View, Text, Switch, TextInput } from "react-native";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import RouterBackArrow from "@/components/RouterBackArrow";
-import { Pressable } from "react-native";
 import { ScrollView } from "react-native";
-import axios from "axios";
 import { useUserStore } from "@/store/useUserStore";
-import Constants from "expo-constants";
 import { updateUserSettings } from "@/app/SettingScreen";
 
 const NotificationSettingScreen = () => {
-  const API_URL = Constants.expoConfig?.extra?.API_URL;
-  const [enabled, setEnabled] = useState(true);
-  const [intervalDays, setIntervalDays] = useState("7");
-  const [lowStockThreshold, setLowStockThreshold] = useState("5");
-
   const user = useUserStore((state) => state.user);
+  const updateUserSettingsContext = useUserStore(
+    (state) => state.updateUserSettingsContext
+  );
+  const [intervalDays, setIntervalDays] = useState(
+    user?.settings.reminderSettings.intervalDays.toString()
+  );
+
+  const [lowStockThreshold, setLowStockThreshold] = useState(
+    user?.settings.reminderSettings.lowStockThreshold.toString()
+  );
 
   interface NotificationSettings {
     intervalDays: number;
     lowStockThreshold: number;
+  }
+
+  interface SettingConfig {
+    id: string;
+    label: string;
+    type: "navigation" | "toggle" | "info" | "input";
+    value?: any;
+    description?: string;
+    badge?: string;
   }
 
   const notificationSettings: NotificationSettings = {
@@ -27,17 +38,17 @@ const NotificationSettingScreen = () => {
     lowStockThreshold: Number(lowStockThreshold),
   };
 
-  const configNotificationList = [
+  const configNotificationList: SettingConfig[] = [
     {
       id: "intervalDays",
       label: "Remind Every (Days)",
-      type: "number",
+      type: "input",
       value: notificationSettings.intervalDays,
     },
     {
       id: "lowStockThreshold",
       label: "Low Stock Threshold",
-      type: "number",
+      type: "input",
       value: notificationSettings.lowStockThreshold,
     },
   ];
@@ -56,8 +67,8 @@ const NotificationSettingScreen = () => {
         contentContainerStyle={{ paddingBottom: 24 }}
         showsVerticalScrollIndicator={false}
       >
-        {configNotificationList.map((section, sectionIndex) => (
-          <View key={sectionIndex}>
+        {configNotificationList.map((section) => (
+          <View key={section.id}>
             <View className="px-5 py-5 bg-neutral-800/40 flex-row">
               <Text className="text-sm font-medium text-gray-400 uppercase tracking-wide ">
                 {section.label}
@@ -65,22 +76,41 @@ const NotificationSettingScreen = () => {
               <View className="flex-1 items-end">
                 {section.type === "toggle" ? (
                   <Switch
-                    value={enabled}
-                    onValueChange={(value) => {
-                      updateUserSettings("updateUserSettings", user?.email!, {
-                        [section.id]: value,
-                      });
-                    }}
+                  // value={enabled}
+                  // onValueChange={(value) => {
+                  //   updateUserSettings("updateUserSettings", user?.email!, {
+                  //     [section.id]: value,
+                  //   });
+                  // }}
                   />
                 ) : (
                   <View className="">
                     <TextInput
-                      value={section.value.toString()}
-                      onChangeText={(value) =>
-                        updateUserSettings("updateUserSettings", user?.email!, {
-                          [section.id]: value,
-                        })
+                      value={
+                        section.id === "intervalDays"
+                          ? intervalDays === "0"
+                            ? ""
+                            : intervalDays
+                          : lowStockThreshold === "0"
+                          ? ""
+                          : lowStockThreshold
                       }
+                      onChangeText={(value) => {
+                        {
+                          if (section.id === "intervalDays") {
+                            setIntervalDays(value);
+                          } else if (section.id === "lowStockThreshold") {
+                            setLowStockThreshold(value);
+                          }
+                        }
+                        updateUserSettingsContext({
+                          [section.id]: value,
+                        });
+
+                        updateUserSettings("reminderSettings", user?.email!, {
+                          [section.id]: value,
+                        });
+                      }}
                       className="text-white text-lg text-center"
                       keyboardType="numeric"
                     />

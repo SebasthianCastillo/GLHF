@@ -1,11 +1,9 @@
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import CustomField from "@/components/Field";
 import ModalProducts from "@/components/OptionModal";
-
 import {
   View,
   ScrollView,
-  TouchableOpacity,
   Pressable,
   Text,
   Button,
@@ -94,6 +92,7 @@ const Products = () => {
       fromWhatQuantityCallfunction === "single" ? 1 : CantidadProducto;
     let operation = "add";
     addProductDetail(idProducto, quantityProduct, formatValue, operation);
+    handlePressOutside();
   };
 
   // Funcion Resta cantidad de producto
