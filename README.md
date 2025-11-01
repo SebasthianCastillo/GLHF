@@ -28,8 +28,8 @@ Mobile application for personal chef usage to control inventory management with 
 
 ### 🚀👷 v1.1.4 (in development c:)
 
-- a. add settings states to context (zustand) to retrieve all setting at ones from backend use (React Query)
-- b.
+- a. add settings states to context (zustand) to match local state with backend state ✅
+- b. implement react query to category list/screen and product list/screen 👷 _[In progress]_
 
 ---
 
