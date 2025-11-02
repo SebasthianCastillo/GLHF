@@ -4,25 +4,25 @@ Mobile application for personal chef usage to control inventory management with 
 
 ---
 
-## 📦 Versions and Tasks --------------------------------------------------------------------------------------------
+## 📦 Versions and Tasks requirements --------------------------------------------------------------------------------------------
 
 ### ✅ v1.0 DONE
 
 - a. Edit/Delete category or product by holding down (with confirmation)
 - b. Display available products in the product detail view (DIV)
 
-### ✅ v1.0.1 (minor improvements to v1) DONE
+### ✅ v1.1.1 (minor improvements to v1) DONE
 
-- a. Replaced DownPicker with a modal for selecting product formats
+- a. Replaced DownPicker with a modal for selecting product formats ✅
 
-### 🚀👷 v1.1 (in development c:)
+### 🚀👷 v1.1.2 (in development c:)
 
 - a. Category button color change when long-pressed ✅
-- b. Product search by category 👷 _[In progress]_
+- b. Product search by category ✅
 - c. Pull to refresh products ✅
 - d. Performance: Improved add/subtract units (save after a few seconds, not on every increment) 🔜 _[Planned]_
 - e. Fix: prevent app from closing when long-clicking two products consecutively
-- f. Feat: PDF download by chef inventory quantity requirements
+- f. Feat: PDF download by chef inventory quantity requirements ✅
 
 ## Development To do --------------------------------------------------------------------------------------------
 
