@@ -73,6 +73,8 @@ export default {
         projectId: "c69b3306-b872-4414-a490-dedbd3b5cfb6",
       },
       API_URL: `http://${getLocalIP()}:5000`,
+      WEB_CLIENT_ID_GOOGLE:
+        "305169218247-rd7peu927l4f43nhl6ecuj79rumi8ueu.apps.googleusercontent.com",
     },
   },
 };

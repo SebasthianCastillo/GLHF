@@ -8,6 +8,7 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 const API_URL = Constants.expoConfig?.extra?.API_URL;
+
 const SettingsScreen = () => {
   const user = useUserStore((state) => state.user);
   const [enabled, setEnabled] = useState(
@@ -49,15 +50,6 @@ const SettingsScreen = () => {
     },
   ];
 
-  //   useEffect(() => {
-  //     // Load user's current settings (if available)
-  //     if (user?.reminderSettings) {
-  //       setEnabled(user.reminderSettings.enabled);
-  //       setIntervalDays(String(user.reminderSettings.intervalDays));
-  //       setLowStockThreshold(String(user.reminderSettings.lowStockThreshold));
-  //     }
-  //   }, [user]);
-
   return (
     <SafeAreaView className="flex-1 bg-neutral-900">
       {/* Header */}
@@ -82,10 +74,10 @@ const SettingsScreen = () => {
             </View>
 
             {/* Section Items */}
-            {section.items.map((item, itemIndex) => (
+            {section.items.map((item) => (
               <View className="bg-neutral-800/40 p-6 flex-row justify-between items-center">
                 {item.type === "toggleMainScreen" ? (
-                  <View className="flex-row items-center ">
+                  <View className="flex-row items-center " key={item.id}>
                     <Text className="text-white text-base">{item.label}</Text>
                     <View className="flex-1 items-end">
                       <Switch
@@ -104,7 +96,7 @@ const SettingsScreen = () => {
                 ) : (
                   <View className="flex-row items-center">
                     <Pressable
-                      key={item.id || itemIndex}
+                      key={item.id}
                       className="w-full flex-row justify-between items-center py-4 pr-2"
                       onPress={() => {
                         if (item.type === "navigation") {

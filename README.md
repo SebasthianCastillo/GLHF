@@ -114,4 +114,43 @@ Configure launch.json inside .vscode:
     }
   ]
 }
+
+## Deseable Architecture
+
+project-root/
+├── mobile/                  # 📱 React Native app (frontend)
+│   └── src/
+│       ├── api/
+│       ├── hooks/
+│       ├── store/
+│       ├── screens/
+│       ├── components/
+│       ├── config/
+│       └── types/
+│
+└── server/                  # 🌐 Express backend (backend)
+    ├── server.mjs
+    ├── config/
+    │   ├── db.js
+    │   └── env.js
+    ├── middleware/
+    │   ├── authMiddleware.js
+    │   └── errorHandler.js
+    ├── routes/
+    │   ├── authRoutes.js
+    │   ├── categoryRoutes.js
+    │   └── productRoutes.js
+    ├── controllers/
+    │   ├── authController.js
+    │   ├── categoryController.js
+    │   └── productController.js
+    ├── models/
+    │   ├── User.js
+    │   ├── Category.js
+    │   └── Product.js
+    └── utils/
+        ├── jwt.js
+        ├── response.js
+        └── logger.js
+
 ```

@@ -5,6 +5,7 @@ import { useUserStore } from "../store/useUserStore";
 import Constants from "expo-constants";
 import { Platform } from "react-native";
 import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export interface PushNotificationState {
   expoPushToken?: Notifications.ExpoPushToken;
@@ -83,14 +84,17 @@ export const usePushNotifications = (): PushNotificationState => {
 
     // 🔹 Save token to backend (only if user exists)
     if (user?.email && token?.data) {
-      try {
-        await axios.post(`${API_URL}/saveTokenUserNotification`, {
-          userEmail: user.email,
-          expoPushToken: token.data,
-        });
-        console.log("✅ Token saved successfully");
-      } catch (err) {
-        console.error("❌ Error saving token:", err);
+      if (user.expoPushToken !== token.data) {
+        try {
+          await axios.post(`${API_URL}/saveTokenUserNotification`, {
+            userEmail: user.email,
+            expoPushToken: token.data,
+          });
+
+          console.log("✅ Token saved successfully");
+        } catch (err) {
+          console.error("❌ Error saving token:", err);
+        }
       }
     }
 

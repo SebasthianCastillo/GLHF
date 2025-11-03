@@ -221,7 +221,7 @@ const Products = () => {
           <View className="p-4 space-y-3 bg-slate-950">
             {filteredProducts.map((item: any) => (
               <View className="flex-row justify-between items-center">
-                <View className="w-20">
+                <View className="w-20" key={item._id}>
                   <Pressable
                     key={item._id}
                     onLongPress={() =>

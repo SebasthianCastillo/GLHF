@@ -1,78 +1,47 @@
-import CustomButton from "@/components/Button";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import Ionicons from "@expo/vector-icons/Ionicons";
 import {
   View,
   ScrollView,
   TouchableOpacity,
   SafeAreaView,
-  useState,
   useCallback,
   router,
   axios,
   Constants,
   Image,
-  useEffect,
-  Modal,
-  Text,
   useFocusEffect,
   Pressable,
 } from "./lib/shared"; // Centralized imports
-import ColorPicker, { Swatches } from "reanimated-color-picker";
 import { GoogleSignin, User } from "@react-native-google-signin/google-signin";
 import ButtonLink from "@/components/ButtonLink";
-import SearchBar from "@/components/SearchBar";
 import { useUserStore } from "@/store/useUserStore";
 import { usePushNotifications } from "@/services/usePushNotifications";
+import FilteredCategoriesList from "@/components/categoriesScreen/FilteredCategoriesList";
+import ProfileModal from "@/components/ProfileModal";
+import React, { useState } from "react";
+import SettingButton from "@/components/Settings/SettingButton";
+import Logo from "@/components/Logo";
+import GoogleLoginButton from "@/components/GoogleLogin/GoogleLoginButton";
 
 export default function HomeScreen() {
-  const [categories, setcategories] = useState([]);
-  const [IsPickerVisible, setIsPickerVisible] = useState(false); // To toggle color picker modal
-  const [colors, setColors] = useState<{ [key: string]: string }>({}); // Object to hold colors for each category
-  const [selectedCategoryId, setSelectedCategoryId] = useState(""); // Category ID for which color is being changed
-  const [loading, setLoading] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const { expoPushToken, notification } = usePushNotifications();
+  const user = useUserStore((state) => state.user);
+
   const API_URL =
     Constants.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
   const WEB_CLIENT_ID_GOOGLE =
-    "305169218247-rd7peu927l4f43nhl6ecuj79rumi8ueu.apps.googleusercontent.com";
+    Constants.extra?.WEB_CLIENT_ID_GOOGLE ||
+    Constants.expoConfig?.extra?.WEB_CLIENT_ID_GOOGLE;
 
-  const { expoPushToken, notification } = usePushNotifications();
-  const user = useUserStore((state) => state.user);
-  const data = JSON.stringify(notification, undefined, 2);
   useFocusEffect(
     useCallback(() => {
       getCurrentUser();
-      CallCategories();
     }, [])
   );
-  // Optional: log or show notifications when received
-  useEffect(() => {
-    if (notification) {
-      console.log("📩 Notification received:", notification.request.content);
-    }
-  }, [notification]);
 
-  // useEffect(() => {
-  //   if (expoPushToken) {
-  //     console.log("✅ Expo Push Token:", expoPushToken.data);
-  //   }
-  // }, [expoPushToken]);
+  const data = JSON.stringify(notification, undefined, 2);
 
-  const CallCategories = async () => {
-    try {
-      const token = await AsyncStorage.getItem("token");
-      if (!token) return;
-      const response = await axios.get(`${API_URL}/categories`, {
-        headers: {
-          authorization: `Bearer ${token}`,
-        },
-      });
-      setcategories(response.data);
-    } catch (error) {
-      console.log("error fetching categories data", error);
-    }
-  };
   // #region Google Auth
   GoogleSignin.configure({
     webClientId: WEB_CLIENT_ID_GOOGLE,
@@ -106,7 +75,7 @@ export default function HomeScreen() {
   };
 
   // Paso 4: Comprobar token si ya está guardado (autologin)
-  const getCurrentUser = async () => {
+  async function getCurrentUser() {
     const token = await AsyncStorage.getItem("token");
 
     if (!token) return;
@@ -121,84 +90,13 @@ export default function HomeScreen() {
       console.log("error current user", error);
       // await AsyncStorage.removeItem("token");
     }
-  };
-
-  const logout = async () => {
-    await AsyncStorage.removeItem("token");
-    // setAuth(null);
-    useUserStore.getState().clearUser();
-  };
+  }
   //#endregion
-  const onRefreshingProducts = async () => {
-    CallCategories();
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-    }, 2000);
-  };
 
-  const navigateToProductosFromCategory = (category: object) => {
-    router.push({
-      pathname: "/Products",
-      params: { category: JSON.stringify(category) },
-    });
-  };
-
-  const OnPressColorChange = (categoryId: any) => {
-    setSelectedCategoryId(categoryId); // Set the current category ID
-    setIsPickerVisible(true);
-  };
-
-  useEffect(() => {
-    const loadColors = async () => {
-      try {
-        const savedColors = await AsyncStorage.getItem("categoryColors");
-        if (savedColors) {
-          setColors(JSON.parse(savedColors)); // Set the saved colors
-        }
-      } catch (error) {
-        console.log("Error loading colors:", error);
-      }
-    };
-    loadColors();
-  }, []);
-
-  const handleColorChange = async (newColor: any) => {
-    if (selectedCategoryId !== null) {
-      const updatedColors = { ...colors, [selectedCategoryId]: newColor };
-      setColors(updatedColors);
-
-      try {
-        await AsyncStorage.setItem(
-          "categoryColors",
-          JSON.stringify(updatedColors)
-        ); // Save the new colors to AsyncStorage
-      } catch (error) {
-        console.log("Error saving colors:", error);
-      }
-    }
-  };
-  //Simple nice and beatiful search bar filter
-  const [searchQuery, setSearchQuery] = useState("");
-  const filteredCategories = categories.filter((product: any) =>
-    product.Name.toString().toLowerCase().includes(searchQuery.toLowerCase())
-  );
   return (
     <SafeAreaView className="bg-primary flex-1">
       <View className="flex-row justify-between items-start pt-3 px-4">
-        {/* <Pressable onPress={onRefreshingProducts} className="p-2 -ml-2">
-          {loading ? (
-            <ActivityIndicator size="large" color="white" />
-          ) : (
-            <Ionicons name="reload" size={28} color="white" />
-          )}
-        </Pressable> */}
-        <Pressable
-          onPress={() => router.push("/SettingScreen")}
-          className="p-2"
-        >
-          <Ionicons name="settings-outline" size={26} color="white" />
-        </Pressable>
+        <SettingButton />
         {user && (
           <View className="items-end">
             <View className="flex-row items-center">
@@ -220,132 +118,31 @@ export default function HomeScreen() {
           </View>
         )}
       </View>
-
       <ScrollView>
         <TouchableOpacity className="w-full flex justify-center items-center h-full px-5">
-          <View className="items-center pb-10">
-            <Text className="text-slate-300 font-bold text-2xl">
-              Captain Chef
-            </Text>
-            <Image
-              source={require("../assets/images/CaptainChefPNG.png")} // Logo
-              style={{ width: 180, height: 180 }}
-            />
-            <View className="flex-end pt-2">
-              <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
-            </View>
-          </View>
-          {filteredCategories.map((category: any) => (
-            <CustomButton
-              key={category._id}
-              containerStyles="w-full m-2"
-              text={category.Name}
-              HandlePress={() => navigateToProductosFromCategory(category)}
-              HandleOnLongPress={() => OnPressColorChange(category._id)} // Show color picker on long press
-              style={{
-                backgroundColor: colors[category._id] || "#F59E0B",
-              }}
-              size={"text-lg"}
-              showIcon={true}
-              containerStylesText="pl-8"
-            />
-          ))}
+          <Logo />
+          <FilteredCategoriesList />
           {!user && (
             <TouchableOpacity
               className="flex-row items-center justify-center bg-white border border-gray-300 rounded-3xl py-4 px-6  mb-4 shadow-sm"
               activeOpacity={0.7}
               onPress={() => handleGoogleSign()}
             >
-              <Image
-                source={{
-                  uri: "https://img.icons8.com/?size=500&id=17949&format=png&color=000000",
-                }}
-                className="w-5 h-5 mr-3"
-              />
-              <Text className="text-gray-700 font-medium">
-                Continuar con Google
-              </Text>
+              <GoogleLoginButton />
             </TouchableOpacity>
           )}
           <View className="h-8" />
-
           <ButtonLink
             logotype={"add"}
             backgroundColor={"bg-yellow-500"}
             onPress={() => router.push("../AddCategory")}
           ></ButtonLink>
-
-          {/* Modal for color picker */}
-          <Modal
-            visible={IsPickerVisible}
-            transparent={true}
-            animationType="slide"
-          >
-            <View className="flex-1 justify-center items-center bg-primary bg-opacity-50">
-              <View className="w-4/5 bg-primary p-5 rounded-lg items-center">
-                <ColorPicker
-                  style={{ width: "70%" }}
-                  value={colors[selectedCategoryId] || "red"}
-                  onComplete={({ hex }: { hex: string }) => {
-                    handleColorChange(hex);
-                    setIsPickerVisible(false);
-                  }}
-                >
-                  <Swatches />
-                </ColorPicker>
-                <View className="items-center p-4">
-                  <CustomButton
-                    containerStyles="w-32 m-2 items-center"
-                    text={"Volver"}
-                    HandlePress={() => setIsPickerVisible(false)}
-                    size={"text-lg"}
-                  />
-                </View>
-              </View>
-            </View>
-          </Modal>
         </TouchableOpacity>
       </ScrollView>
-      {/* Profile Modal */}
-      <Modal
-        visible={showProfileModal}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setShowProfileModal(false)}
-      >
-        <Pressable
-          className="flex-1 justify-end"
-          onPress={() => setShowProfileModal(false)}
-        >
-          <View className="bg-slate-950 rounded-t-3xl p-6 pb-10">
-            <View className="items-center mb-6">
-              <View className="w-20 h-20 rounded-full bg-gray-200 overflow-hidden border-2 border-primary">
-                <Image
-                  source={{
-                    uri:
-                      (user?.avatar as string) ||
-                      "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
-                  }}
-                  className="w-full h-full"
-                  resizeMode="cover"
-                />
-              </View>
-              <Text className="text-lg font-bold mt-3 text-white">
-                {user?.name.split(" ")[0]}
-              </Text>
-            </View>
-            <Pressable
-              onPress={() => {
-                setShowProfileModal(false);
-                logout();
-              }}
-              className="bg-red-500 py-3 rounded-lg items-center"
-            >
-              <Text className="text-white font-medium">Cerrar sesión</Text>
-            </Pressable>
-          </View>
-        </Pressable>
-      </Modal>
+      <ProfileModal
+        showProfileModal={showProfileModal}
+        setShowProfileModal={setShowProfileModal}
+      />
     </SafeAreaView>
   );
 }
