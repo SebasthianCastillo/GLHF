@@ -10,24 +10,21 @@ import {
   StyleSheet,
   TouchableWithoutFeedback,
   Alert,
-  RefreshControl,
   SafeAreaView,
-  useSafeAreaInsets,
   useState,
-  useCallback,
   router,
   useLocalSearchParams,
-  useFocusEffect,
   React,
-  Modal,
   FontAwesome6,
-  ActivityIndicator,
 } from "./lib/shared"; // Centralized imports
 import ButtonLink from "@/components/ButtonLink";
 import SearchBar from "@/components/SearchBar";
 import { useProducts } from "@/hooks/useProducts";
 import { useFilePdfDownload } from "@/hooks/useFilePdfDownload";
 import RouterBackArrow from "@/components/RouterBackArrow";
+import { useSelectedValuesFormatPicker } from "@/store/useSelectedIdProduct";
+import FormatPicker from "@/components/FormatPicker";
+import LoadingIndicator from "@/components/LoadingIndicator";
 
 const Products = () => {
   const { category } = useLocalSearchParams();
@@ -37,32 +34,18 @@ const Products = () => {
   const [CantidadProducto, setCantidadProducto] = useState(0);
   const [selectedItemId, setSelectedItemId] = useState("");
   const [selectedProductName, setSelectedProductName] = useState("");
-
-  const [formatValue, setFormatValue] = useState("P");
-  const [items, setItems] = useState([
-    { label: "P", value: "P" },
-    { label: "KG", value: "KG" },
-    { label: "GR", value: "GR" },
-  ]);
-
-  const [selectedValues, setSelectedValues] = useState<SelectedValuesType>({});
   const [showOptionsModal, setShowOptionsModal] = useState(false); // Para mostrar el menú de opciones
-  const [IsRefreshing, setIsRefreshing] = useState(false);
-  const { top } = useSafeAreaInsets();
   const [pressedItemId, setPressedItemId] = useState<string | null>(null);
-  let CategoryName = categoryObject.Name;
-
   const [inputVisibility, setInputVisibility] = useState({
     showCant: true,
     showCustomCant: false,
     showSecondCant: false,
     isOnAdd: false,
   });
+  let CategoryName = categoryObject.Name;
 
   const [showFormatPicker, setShowFormatPicker] = useState(false);
-  const [selectedProductId, setSelectedProductId] = useState<string | null>(
-    null
-  );
+
   const {
     getProducts, // Funcion que trae los productos segun categoria con react query
     updateQuantityProduct,
@@ -70,19 +53,16 @@ const Products = () => {
     deleteProduct, //funcion para eliminar producto
   } = useProducts(categoryObject._id);
 
+  //hook for selected value format picker and selected product id
+  const { selectedValuesFormatPicker, setSelectedProductId } =
+    useSelectedValuesFormatPicker();
   const { data: products, isLoading, isError } = getProducts();
+
+  // mutation for update quantity product
   const { mutate: mutateQuantity } = updateQuantityProduct();
 
   // hook to download Product list PDF
   const { downloadProductListPdf, isLoadingPdfDownload } = useFilePdfDownload();
-
-  // Funcion que trae los productos segun categoria
-  useFocusEffect(
-    useCallback(() => {
-      // fetchProducts();
-    }, [])
-  );
-
   // Funcion Sumar cantidad de producto
   const handlePressAdd = (
     idProducto: any,
@@ -94,7 +74,7 @@ const Products = () => {
     const ProductData = {
       id: idProducto,
       qty: quantityProduct,
-      format: formatValue,
+      format: selectedValuesFormatPicker?.[idProducto] || "P",
       operation,
     };
 
@@ -113,7 +93,7 @@ const Products = () => {
     const ProductData = {
       id: idProducto,
       qty: quantityProduct,
-      format: formatValue,
+      format: selectedValuesFormatPicker?.[idProducto] || "P",
       operation,
     };
 
@@ -134,19 +114,6 @@ const Products = () => {
     });
     setCantidadProducto(0);
     setPressedItemId("");
-  };
-
-  type SelectedValuesType = {
-    [key: string]: string; // Las claves son las ids de tipo string, y los valores también son strings
-  };
-
-  //maneja el comportamiento de los dropdown para elegir formato P, KG, GR
-  const handleDropdownChange = (id: string, newValue: string) => {
-    setSelectedValues((prevValues: SelectedValuesType) => ({
-      ...prevValues,
-      [id]: newValue,
-    }));
-    setFormatValue(newValue);
   };
 
   //modal para confirmar eliminacion
@@ -182,15 +149,6 @@ const Products = () => {
     setShowOptionsModal(true);
   };
 
-  //funcion que se activa cuando se hace pull to refresh
-  // const onRefreshingProducts = async () => {
-  //   fetchProducts();
-  //   setIsRefreshing(true);
-  //   setTimeout(() => {
-  //     setIsRefreshing(false);
-  //   }, 2000);
-  // };
-
   //funcion que maneja el comportamiento visual de los signos + y - al hacer long press
   const toggleSignVisibility = (id: string, isAdd: boolean) => {
     handlePressOutside();
@@ -223,16 +181,7 @@ const Products = () => {
             <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
           </View>
         </View>
-        <ScrollView
-        // refreshControl={
-        //   <RefreshControl
-        //     refreshing={IsRefreshing}
-        //     progressViewOffset={top}
-        //     onRefresh={onRefreshingProducts}
-        //     colors={["green", "orange"]}
-        //   />
-        // }
-        >
+        <ScrollView>
           <View className="p-4 space-y-3 bg-slate-950">
             {filteredProducts.map((item: any) => (
               <View className="flex-row justify-between items-center">
@@ -257,10 +206,13 @@ const Products = () => {
                   className="w-16 h-10 bg-slate-800 rounded-md justify-center items-center"
                 >
                   <Text className="text-white text-lg">
-                    {selectedValues[item._id] || "P"}
+                    {selectedValuesFormatPicker?.[item._id] || "P"}
                   </Text>
                 </Pressable>
-
+                <FormatPicker
+                  showFormatPicker={showFormatPicker}
+                  setShowFormatPicker={setShowFormatPicker}
+                />
                 {/* Minus button */}
                 <Pressable
                   onPress={() => handlePressMinus(item._id, "single")}
@@ -385,11 +337,7 @@ const Products = () => {
           }
         ></ButtonLink>
         {isLoadingPdfDownload ? (
-          <View className="p-10 justify-center items-center">
-            <View className="bg-green-500 w-16 h-16 rounded-full shadow-lg justify-center items-center">
-              <ActivityIndicator size="large" color="#ffffff" />
-            </View>
-          </View>
+          <LoadingIndicator />
         ) : (
           <ButtonLink
             logotype={"file-pdf"}
@@ -397,43 +345,6 @@ const Products = () => {
             onPress={() => downloadProductListPdf(categoryObject._id)}
           />
         )}
-        <Modal
-          visible={showFormatPicker}
-          transparent={true}
-          animationType="slide"
-          onRequestClose={() => setShowFormatPicker(false)}
-        >
-          <View className="flex-1 justify-end bg-black/50">
-            <View className="bg-slate-800 rounded-t-3xl p-4">
-              <View className="flex-row justify-between items-center mb-4">
-                <Text className="text-white text-lg font-bold">
-                  Seleccionar Formato
-                </Text>
-                <Pressable onPress={() => setShowFormatPicker(false)}>
-                  <Text className="text-white text-lg">✕</Text>
-                </Pressable>
-              </View>
-              <View className="space-y-2">
-                {items.map((item: any) => (
-                  <Pressable
-                    key={item.value}
-                    onPress={() => {
-                      if (selectedProductId) {
-                        handleDropdownChange(selectedProductId, item.value);
-                        setShowFormatPicker(false);
-                      }
-                    }}
-                    className="bg-slate-700 p-4 rounded-lg"
-                  >
-                    <Text className="text-white text-center text-lg">
-                      {item.label}
-                    </Text>
-                  </Pressable>
-                ))}
-              </View>
-            </View>
-          </View>
-        </Modal>
       </SafeAreaView>
     </TouchableWithoutFeedback>
   );

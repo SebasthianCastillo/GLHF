@@ -59,7 +59,7 @@ const FilteredCategoriesList = () => {
   }, []);
   return (
     <View>
-      <View className="pt-2">
+      <View className="items-center p-3">
         <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
       </View>
       {filteredCategories.map((category: any) => (

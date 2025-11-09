@@ -1,5 +1,5 @@
 import { useLocalSearchParams, router } from "expo-router";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, Suspense } from "react";
 import {
   View,
   Text,
@@ -18,6 +18,7 @@ import SummarySquare from "@/components/ProductDetail/SummarySquare";
 import { useSummaryStore } from "@/store/useSummaryStore";
 import { AggregationResult } from "./lib/types";
 import RouterBackArrow from "@/components/RouterBackArrow";
+import LoadingIndicator from "@/components/LoadingIndicator";
 const API_URL =
   Constants.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
 
@@ -60,7 +61,7 @@ const ProductDetail = () => {
     years: [],
     dataByYear: {},
   });
-
+  const [isLoading, setIsLoading] = useState(false);
   const productObject = Array.isArray(product)
     ? JSON.parse(product[0])
     : JSON.parse(product || "{}");
@@ -71,6 +72,7 @@ const ProductDetail = () => {
     useCallback(() => {
       const productDetailFunction = async () => {
         try {
+          setIsLoading(true);
           const response = await axios.get(
             `${API_URL}/productDetailByIDProduct`,
             {
@@ -86,6 +88,8 @@ const ProductDetail = () => {
           );
           setProductDetailSummaryAdd(0);
           setProductDetailSummaryMinus(0);
+        } finally {
+          setIsLoading(false);
         }
       };
 
@@ -97,35 +101,12 @@ const ProductDetail = () => {
       const response = await axios.get(`${API_URL}/getMonthlySummaries`, {
         params: { ProductKey: productObject._id },
       });
-      // const dataTranform = transformedData(response.data);
 
       setMonthlySummaries(response.data);
-
-      // // Sort years in descending order
-      // groupedByYear.years.sort((a, b) => b - a);
-
-      // // Sort months within each year in descending order
-      // Object.values(groupedByYear.dataByYear).forEach((months) => {
-      //   months.sort((a, b) => b.month - a.month);
-      // });
-
-      // setMonthlyData(groupedByYear);
     } catch (error) {
       console.log("error fetching monthly summaries data", error);
     }
   };
-  // const transformedData = (response: AggregationResult) => {
-  //   return response.years.flatMap((year) => {
-  //     const monthsArray = response.dataByYear[year];
-  //     return monthsArray.map((item) => ({
-  //       month: item.month - 1,
-  //       year: item.year,
-  //       added: item.added,
-  //       removed: item.removed,
-  //       monthName: item.monthName,
-  //     }));
-  //   });
-  // };
 
   // Cuenta cuantos productos fueron agregados y quitados por mes
   const fetchSummaryData = async (currentMonth: Date) => {
@@ -398,14 +379,18 @@ const ProductDetail = () => {
               />
             </View>
             <View className="flex-1">
-              <FlatList
-                data={dailySummaries}
-                renderItem={renderDayItem}
-                keyExtractor={(item) => item.date}
-                ListEmptyComponent={renderEmptyComponent}
-                contentContainerStyle={{ paddingBottom: 100 }}
-                showsVerticalScrollIndicator={false}
-              />
+              {isLoading ? (
+                <LoadingIndicator />
+              ) : (
+                <FlatList
+                  data={dailySummaries}
+                  renderItem={renderDayItem}
+                  keyExtractor={(item) => item.date}
+                  ListEmptyComponent={renderEmptyComponent}
+                  contentContainerStyle={{ paddingBottom: 100 }}
+                  showsVerticalScrollIndicator={false}
+                />
+              )}
             </View>
             <View>
               <SummarySquare />

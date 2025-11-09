@@ -11,7 +11,6 @@ interface productData {
   operation: string;
 }
 export const useProducts = (categoryId: string) => {
-  const [products, setProducts] = useState([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const queryClient = useQueryClient();
 
@@ -74,8 +73,8 @@ export const useProducts = (categoryId: string) => {
       const { data } = await axios.get(`${API_URL}/productsByIDCategory`, {
         params: { CategoryKey: categoryId },
       });
+      console.log("render products");
       return data;
-      // setProducts(data);
     } catch (e) {
       console.log("❌ Error fetching products:", e);
     }
