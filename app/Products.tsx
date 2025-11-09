@@ -64,14 +64,14 @@ const Products = () => {
     null
   );
   const {
-    products, // Funcion que trae los productos segun categoria
-    isRefreshing,
-    fetchProducts,
-    refreshProducts,
-    addProductDetail,
+    getProducts, // Funcion que trae los productos segun categoria con react query
+    updateQuantityProduct,
     modifyProduct,
     deleteProduct, //funcion para eliminar producto
   } = useProducts(categoryObject._id);
+
+  const { data: products, isLoading, isError } = getProducts();
+  const { mutate: mutateQuantity } = updateQuantityProduct();
 
   // hook to download Product list PDF
   const { downloadProductListPdf, isLoadingPdfDownload } = useFilePdfDownload();
@@ -79,7 +79,7 @@ const Products = () => {
   // Funcion que trae los productos segun categoria
   useFocusEffect(
     useCallback(() => {
-      fetchProducts();
+      // fetchProducts();
     }, [])
   );
 
@@ -91,7 +91,14 @@ const Products = () => {
     const quantityProduct =
       fromWhatQuantityCallfunction === "single" ? 1 : CantidadProducto;
     let operation = "add";
-    addProductDetail(idProducto, quantityProduct, formatValue, operation);
+    const ProductData = {
+      id: idProducto,
+      qty: quantityProduct,
+      format: formatValue,
+      operation,
+    };
+
+    mutateQuantity(ProductData);
     handlePressOutside();
   };
 
@@ -103,7 +110,15 @@ const Products = () => {
     const quantityProduct =
       fromWhatQuantityCallfunction === "single" ? 1 : CantidadProducto;
     let operation = "minus";
-    addProductDetail(idProducto, quantityProduct, formatValue, operation);
+    const ProductData = {
+      id: idProducto,
+      qty: quantityProduct,
+      format: formatValue,
+      operation,
+    };
+
+    mutateQuantity(ProductData);
+    handlePressOutside();
   };
 
   // Verifica si el toque está fuera del área del dropdown
@@ -168,13 +183,13 @@ const Products = () => {
   };
 
   //funcion que se activa cuando se hace pull to refresh
-  const onRefreshingProducts = async () => {
-    fetchProducts();
-    setIsRefreshing(true);
-    setTimeout(() => {
-      setIsRefreshing(false);
-    }, 2000);
-  };
+  // const onRefreshingProducts = async () => {
+  //   fetchProducts();
+  //   setIsRefreshing(true);
+  //   setTimeout(() => {
+  //     setIsRefreshing(false);
+  //   }, 2000);
+  // };
 
   //funcion que maneja el comportamiento visual de los signos + y - al hacer long press
   const toggleSignVisibility = (id: string, isAdd: boolean) => {
@@ -192,7 +207,7 @@ const Products = () => {
 
   //Simple nice and beatiful search bar filter
   const [searchQuery, setSearchQuery] = useState("");
-  const filteredProducts = products.filter((product: any) =>
+  const filteredProducts = (products ?? []).filter((product: any) =>
     product.Name.toString().toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -209,14 +224,14 @@ const Products = () => {
           </View>
         </View>
         <ScrollView
-          refreshControl={
-            <RefreshControl
-              refreshing={IsRefreshing}
-              progressViewOffset={top}
-              onRefresh={onRefreshingProducts}
-              colors={["green", "orange"]}
-            />
-          }
+        // refreshControl={
+        //   <RefreshControl
+        //     refreshing={IsRefreshing}
+        //     progressViewOffset={top}
+        //     onRefresh={onRefreshingProducts}
+        //     colors={["green", "orange"]}
+        //   />
+        // }
         >
           <View className="p-4 space-y-3 bg-slate-950">
             {filteredProducts.map((item: any) => (

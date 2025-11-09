@@ -10,11 +10,11 @@ import ColorPicker, { Swatches } from "reanimated-color-picker";
 
 const FilteredCategoriesList = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const { data: categoriesData, isLoading, isError } = useCategories();
   const [colors, setColors] = useState<{ [key: string]: string }>({}); // Object to hold colors for each category
   const [IsPickerVisible, setIsPickerVisible] = useState(false); // To toggle color picker modal
   const [selectedCategoryId, setSelectedCategoryId] = useState(""); // Category ID for which color is being changed
 
+  const { data: categoriesData, isLoading, isError } = useCategories();
   //Simple nice and beatiful search bar filter
   const filteredCategories = (categoriesData ?? []).filter((product: any) =>
     product.Name.toString().toLowerCase().includes(searchQuery.toLowerCase())
