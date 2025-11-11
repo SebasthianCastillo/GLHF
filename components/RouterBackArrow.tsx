@@ -5,7 +5,7 @@ import { router } from "expo-router";
 
 const RouterBackArrow = () => {
   return (
-    <TouchableOpacity onPress={() => router.back()} className="mr-3">
+    <TouchableOpacity onPress={() => router.back()} className="p-2 mr-2">
       <FontAwesome6 name="arrow-left" size={24} color="white" />
     </TouchableOpacity>
   );

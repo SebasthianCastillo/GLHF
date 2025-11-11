@@ -3,10 +3,8 @@ import CustomButton from "@/components/Button";
 import {
   View,
   ScrollView,
-  Alert,
   SafeAreaView,
   useState,
-  axios,
   Constants,
   Dimensions,
   useRouter,
@@ -14,6 +12,7 @@ import {
 } from "./lib/shared"; // Centralized imports
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import RouterBackArrow from "@/components/RouterBackArrow";
+import { useCategories } from "@/hooks/useCategories";
 
 const API_URL =
   Constants.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
@@ -22,34 +21,21 @@ const AddCategory = () => {
   const [name, setName] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const router = useRouter();
+  const { addCategory } = useCategories();
 
-  const HandleRegister = async () => {
-    const categoriesData = {
-      Name: name,
-    };
-    const token = await AsyncStorage.getItem("token");
-    if (!token) return;
-
-    axios
-      .post(`${API_URL}/addCategory`, categoriesData, {
-        headers: {
-          authorization: `Bearer ${token}`,
-        },
-      })
-      .then((response) => {
+  const HandleRegisterButton = () => {
+    addCategory.mutate(name, {
+      onSuccess: () => {
         setName("");
-        setSuccessMessage("Categoría Agregada");
-        // Clear the success message after 3 seconds
-        setTimeout(() => {
-          setSuccessMessage("");
-        }, 3000);
-      })
-      .catch((error) => {
-        console.log(categoriesData);
-        Alert.alert("Error" + error);
-        console.log("Error adding category", error);
-        router.push("/");
-      });
+        setSuccessMessage("Categoría agregada");
+        setTimeout(() => setSuccessMessage(""), 3000);
+      },
+      onError: (error: any) => {
+        console.log("Error adding category:", error);
+        setSuccessMessage("Error al agregar categoría");
+        setTimeout(() => setSuccessMessage(""), 3000);
+      },
+    });
   };
 
   return (
@@ -84,7 +70,7 @@ const AddCategory = () => {
             <CustomButton
               containerStyles="w-full"
               text="Agregar"
-              HandlePress={HandleRegister}
+              HandlePress={HandleRegisterButton}
               size="text-base"
             />
           </View>
