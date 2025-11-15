@@ -7,7 +7,7 @@ const API_URL = Constants.expoConfig?.extra?.API_URL;
 export const getCategories = async () => {
   const token = await AsyncStorage.getItem("token");
   if (!token) throw new Error("No token found");
-  console.log("render categories");
+  console.log("categories render");
   const { data } = await axios.get(`${API_URL}/categories`, {
     headers: { Authorization: `Bearer ${token}` },
   });

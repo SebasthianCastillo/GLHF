@@ -61,25 +61,66 @@ export const useProducts = (categoryId: string) => {
       },
     });
   };
-
+  // Function for fetching products
   const getProducts = () => {
     return useQuery({
       queryKey: ["getProducts", categoryId],
       queryFn: () => fetchProducts(),
     });
   };
-  const fetchProducts = useCallback(async () => {
+  // Mutation Function for adding a product
+  const addProduct = useMutation({
+    mutationFn: ({
+      ProductName,
+      quantityProduct,
+      CategoryKey,
+    }: {
+      ProductName: string;
+      quantityProduct: number;
+      CategoryKey: string;
+    }) => HandleRegister(ProductName, quantityProduct, CategoryKey),
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey: ["getProducts", categoryId],
+        refetchType: "inactive",
+      }),
+
+    onSettled: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["getProducts", categoryId],
+      });
+    },
+  });
+
+  //Handle Function for adding a product
+  const HandleRegister = async (
+    ProductName: string,
+    quantityProduct: number,
+    CategoryKey: string
+  ) => {
+    try {
+      const ProductData = {
+        Name: ProductName,
+        quantity: quantityProduct,
+        CategoryID: CategoryKey,
+      };
+      return axios.post(`${API_URL}/addProduct`, ProductData);
+    } catch (error) {
+      console.log("Error adding product", error);
+    }
+  };
+
+  const fetchProducts = async () => {
     try {
       const { data } = await axios.get(`${API_URL}/productsByIDCategory`, {
         params: { CategoryKey: categoryId },
       });
-      console.log("render products");
+      console.log("products render");
       return data;
     } catch (e) {
       console.log("❌ Error fetching products:", e);
     }
-  }, [categoryId]);
-
+  };
   const refreshProducts = useCallback(async () => {
     setIsRefreshing(true);
     await fetchProducts();
@@ -141,6 +182,7 @@ export const useProducts = (categoryId: string) => {
     fetchProducts,
     refreshProducts,
     updateQuantityProduct,
+    addProduct,
     modifyProduct,
     deleteProduct,
   };

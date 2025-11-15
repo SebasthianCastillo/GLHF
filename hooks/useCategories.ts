@@ -9,6 +9,7 @@ const API_URL = Constants.expoConfig?.extra?.API_URL;
 export const useCategories = () => {
   const queryClient = useQueryClient();
   const user = useUserStore((state) => state.user);
+
   const getCategory = useQuery({
     queryKey: ["categories", user?.email],
     queryFn: getCategories,
@@ -43,14 +44,7 @@ export const useCategories = () => {
           authorization: `Bearer ${token}`,
         },
       })
-      // .then((response) => {
-      //   setName("");
-      //   setSuccessMessage("Categoría Agregada");
-      //   // Clear the success message after 3 seconds
-      //   setTimeout(() => {
-      //     setSuccessMessage("");
-      //   }, 3000);
-      // })
+
       .catch((error) => {
         console.log("Error adding category", error);
       });

@@ -1,6 +1,5 @@
 import CustomField from "@/components/Field";
 import CustomButton from "@/components/Button";
-
 import {
   View,
   ScrollView,
@@ -12,11 +11,10 @@ import {
   Constants,
   useLocalSearchParams,
   Dimensions,
-  router,
-  FontAwesome6,
 } from "./lib/shared"; // Centralized imports
 import RouterBackArrow from "@/components/RouterBackArrow";
-
+import LoadingIndicator from "@/components/LoadingIndicator";
+import { useProducts } from "@/hooks/useProducts";
 const API_URL =
   Constants.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
 
@@ -25,42 +23,41 @@ const AddProduct = () => {
   const [quantityProduct, setquantityProduct] = useState(0);
   const { CategoryKey } = useLocalSearchParams();
   const { CategoryName } = useLocalSearchParams();
-  const [CategoryID, setCategoryID] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  //Funcion que añade nuevo producto
-  const HandleRegister = () => {
-    const ProductData = {
-      Name: ProductName,
-      quantity: quantityProduct,
-      CategoryID: CategoryKey,
-    };
-    axios
-      .post(`${API_URL}/addProduct`, ProductData)
-      .then((response) => {
-        setSuccessMessage("Producto Agregado");
-        // Clear the success message after 3 seconds
-        setTimeout(() => {
-          setSuccessMessage("");
-        }, 3000);
-        setProductName("");
-        setCategoryID("");
-      })
-      .catch((error) => {
-        console.log(ProductData);
-        Alert.alert("Error");
-        console.log("Error adding product", error);
-      });
+  const categoryId = CategoryKey.toString();
+  const { addProduct } = useProducts(categoryId);
+
+  // handle function for adding a product
+  const HandleRegisterButton = () => {
+    addProduct.mutate(
+      {
+        ProductName: ProductName,
+        quantityProduct: quantityProduct,
+        CategoryKey: CategoryKey.toString(),
+      },
+      {
+        onSuccess: () => {
+          setProductName("");
+          setSuccessMessage("Producto agregado");
+          setTimeout(() => setSuccessMessage(""), 3000);
+        },
+        onError: (error: any) => {
+          console.log("Error adding product:", error);
+          setSuccessMessage("Error al agregar producto");
+          setTimeout(() => setSuccessMessage(""), 3000);
+        },
+      }
+    );
   };
+
   return (
     <SafeAreaView className="bg-primary h-full">
       <View className="flex-row items-center p-4 bg-primary">
         <RouterBackArrow />
         <Text className="text-white text-xl font-bold">{CategoryName}</Text>
       </View>
-      {/* <View className="justify-center items-center">
-        <Text className="text-slate-50">{`Categoría: ${CategoryName}`}</Text>
-      </View> */}
       <ScrollView>
         <View
           className="w-full flex justify-center h-full px-4 my-6"
@@ -85,12 +82,16 @@ const AddProduct = () => {
             )}
           </View>
           <View className="pt-14 pl-28 pr-28 pb-16">
-            <CustomButton
-              containerStyles="w-full"
-              text="Agregar"
-              HandlePress={HandleRegister}
-              size="text-base"
-            />
+            {isLoading ? (
+              <LoadingIndicator />
+            ) : (
+              <CustomButton
+                containerStyles="w-full"
+                text="Agregar"
+                HandlePress={HandleRegisterButton}
+                size="text-base"
+              />
+            )}
           </View>
         </View>
       </ScrollView>

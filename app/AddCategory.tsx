@@ -5,22 +5,15 @@ import {
   ScrollView,
   SafeAreaView,
   useState,
-  Constants,
   Dimensions,
-  useRouter,
   Text,
 } from "./lib/shared"; // Centralized imports
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import RouterBackArrow from "@/components/RouterBackArrow";
 import { useCategories } from "@/hooks/useCategories";
-
-const API_URL =
-  Constants.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
 
 const AddCategory = () => {
   const [name, setName] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-  const router = useRouter();
   const { addCategory } = useCategories();
 
   const HandleRegisterButton = () => {

@@ -50,7 +50,8 @@ const Products = () => {
     getProducts, // Funcion que trae los productos segun categoria con react query
     updateQuantityProduct,
     modifyProduct,
-    deleteProduct, //funcion para eliminar producto
+    deleteProduct,
+    addProduct, //funcion para eliminar producto
   } = useProducts(categoryObject._id);
 
   //hook for selected value format picker and selected product id
@@ -323,28 +324,30 @@ const Products = () => {
             />
           )}
         </ScrollView>
-        <ButtonLink
-          logotype={"add"}
-          backgroundColor={"bg-yellow-500"}
-          onPress={() =>
-            router.push({
-              pathname: "../AddProduct",
-              params: {
-                CategoryKey: categoryObject._id,
-                CategoryName: CategoryName,
-              },
-            })
-          }
-        ></ButtonLink>
-        {isLoadingPdfDownload ? (
-          <LoadingIndicator />
-        ) : (
+        <View className="flex-row justify-between items-center">
           <ButtonLink
-            logotype={"file-pdf"}
-            backgroundColor={"bg-green-500"}
-            onPress={() => downloadProductListPdf(categoryObject._id)}
-          />
-        )}
+            logotype={"add"}
+            backgroundColor={"bg-yellow-500"}
+            onPress={() =>
+              router.push({
+                pathname: "../AddProduct",
+                params: {
+                  CategoryKey: categoryObject._id,
+                  CategoryName: CategoryName,
+                },
+              })
+            }
+          ></ButtonLink>
+          {isLoadingPdfDownload ? (
+            <LoadingIndicator />
+          ) : (
+            <ButtonLink
+              logotype={"file-pdf"}
+              backgroundColor={"bg-green-500"}
+              onPress={() => downloadProductListPdf(categoryObject._id)}
+            />
+          )}
+        </View>
       </SafeAreaView>
     </TouchableWithoutFeedback>
   );
