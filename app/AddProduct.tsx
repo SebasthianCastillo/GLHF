@@ -4,19 +4,14 @@ import {
   View,
   ScrollView,
   Text,
-  Alert,
   SafeAreaView,
   useState,
-  axios,
-  Constants,
   useLocalSearchParams,
   Dimensions,
 } from "./lib/shared"; // Centralized imports
 import RouterBackArrow from "@/components/RouterBackArrow";
 import LoadingIndicator from "@/components/LoadingIndicator";
 import { useProducts } from "@/hooks/useProducts";
-const API_URL =
-  Constants.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
 
 const AddProduct = () => {
   const [ProductName, setProductName] = useState("");

@@ -57,7 +57,7 @@ app.post("/updateUserSettings", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
-cron.schedule("*/20 * * * *", async () => {
+cron.schedule("0 0 * * *", async () => {
   // Get all users with notification enabled
   const usersNotificationEnabled = await User.find({
     "settings.reminderSettings.enabled": true,
