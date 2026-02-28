@@ -7,48 +7,14 @@ import RouterBackArrow from "@/components/RouterBackArrow";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
-const API_URL = Constants.expoConfig?.extra?.API_URL;
+import { sections } from "./features/settings/config/settingsConfig";
+import { updateUserSettings } from "./features/settings/api/settings";
 
 const SettingsScreen = () => {
   const user = useUserStore((state) => state.user);
   const [enabled, setEnabled] = useState(
-    user?.settings.reminderSettings.enabled
+    user?.settings.reminderSettings.enabled,
   );
-  interface SettingItem {
-    id: string;
-    label: string;
-    icon: React.ReactNode;
-    type: "navigation" | "toggle" | "info" | "toggleMainScreen";
-    value?: boolean;
-    description?: string;
-    badge?: string;
-  }
-
-  interface SettingSection {
-    title: string;
-    items: SettingItem[];
-  }
-  const sections: SettingSection[] = [
-    {
-      title: "Notifications",
-      items: [
-        {
-          id: "enabled",
-          label: "Enable Notifications",
-          icon: "",
-          type: "toggleMainScreen",
-          description: "toggle for enable or disable general notifications",
-        },
-        {
-          id: "NotificationSettingScreen",
-          label: "Reminder Notification",
-          icon: <FontAwesome6 name="bell" size={24} color="white" />,
-          type: "navigation",
-          description: "Manage your notification reminder settings",
-        },
-      ],
-    },
-  ];
 
   return (
     <SafeAreaView className="flex-1 bg-neutral-900">
@@ -122,19 +88,3 @@ const SettingsScreen = () => {
   );
 };
 export default SettingsScreen;
-
-export const updateUserSettings = async <T extends Record<string, any>>(
-  group: string,
-  userEmail: string,
-  updates: Partial<T>
-): Promise<void> => {
-  try {
-    await axios.post(`${API_URL}/updateUserSettings`, {
-      group,
-      userEmail: userEmail,
-      ...updates,
-    });
-  } catch (err) {
-    console.error(err);
-  }
-};

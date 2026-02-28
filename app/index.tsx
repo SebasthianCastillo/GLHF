@@ -18,8 +18,10 @@ import { useUserStore } from "@/store/useUserStore";
 import { usePushNotifications } from "@/services/usePushNotifications";
 import FilteredCategoriesList from "@/components/categoriesScreen/FilteredCategoriesList";
 import ProfileModal from "@/components/ProfileModal";
+
 import { useState } from "react";
-import SettingButton from "@/components/Settings/SettingButton";
+import SettingButton from "@/app/features/settings/components/SettingButton";
+
 import Logo from "@/components/Logo";
 import GoogleLoginButton from "@/components/GoogleLogin/GoogleLoginButton";
 
@@ -37,7 +39,7 @@ export default function HomeScreen() {
   useFocusEffect(
     useCallback(() => {
       getCurrentUser();
-    }, [])
+    }, []),
   );
 
   const data = JSON.stringify(notification, undefined, 2);
