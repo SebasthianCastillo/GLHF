@@ -1,5 +1,5 @@
-import { useLocalSearchParams, router } from "expo-router";
-import { useState, useCallback, useEffect, Suspense } from "react";
+import { useLocalSearchParams } from "expo-router";
+import { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -9,8 +9,6 @@ import {
   axios,
   Constants,
   useFocusEffect,
-  React,
-  FontAwesome6,
 } from "./lib/shared"; // Centralized imports
 import { MonthSelector } from "@/components/ProductDetail/MonthSelector";
 import { TransactionDayItem } from "@/components/ProductDetail/TransactionDayItem";

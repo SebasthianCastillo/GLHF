@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 import express from "express";
 import bodyParser from "body-parser";
-import mongoose from "mongoose";
+import connectDB from "./database/mongoClient.mjs";
 import cors from "cors";
 import Category from "./model/Category.js";
 import Producto from "./model/Producto.js";
@@ -23,16 +23,9 @@ app.use(
   cors({
     origin: "*", // or restrict to your app origin if needed
     allowedHeaders: ["Content-Type", "Authorization"], // VERY IMPORTANT
-  })
+  }),
 );
-// Connect to MongoDB
-const DB_URL = process.env.DB_URL;
-
-mongoose
-  .connect(DB_URL)
-  .then(() => console.log("Connected to MongoDB"))
-  .catch((err) => console.error("Error connecting to MongoDB:", err));
-
+await connectDB();
 app.post("/updateUserSettings", async (req, res) => {
   try {
     const { group, userEmail, ...updates } = req.body;
@@ -111,13 +104,13 @@ async function sendPushNotification(expoPushToken, message) {
           "Accept-encoding": "gzip, deflate",
           "Content-Type": "application/json",
         },
-      }
+      },
     );
     console.log("Notification sent!");
   } catch (error) {
     console.error(
       "Failed to send push notification:",
-      error.response?.data || error.message
+      error.response?.data || error.message,
     );
   }
 }
@@ -132,7 +125,7 @@ app.post("/saveTokenUserNotification", async (req, res) => {
     }
     await User.findOneAndUpdate(
       { email: userEmail }, // find condition
-      { expoPushToken: expoPushToken } // fields to update
+      { expoPushToken: expoPushToken }, // fields to update
     );
     res.status(200).json({ message: "Push token saved successfully" });
   } catch (error) {
@@ -301,7 +294,7 @@ app.post("/google", async (req, res) => {
     });
   } else {
     const alreadyLinked = user.authProviders.some(
-      (p) => p.provider === "google"
+      (p) => p.provider === "google",
     );
     if (!alreadyLinked) {
       user.authProviders.push({ provider: "google", providerId });
@@ -458,7 +451,7 @@ app.patch("/updateProductName/:id", async (req, res) => {
     const updatedProduct = await Producto.findByIdAndUpdate(
       id,
       { Name: newName },
-      { new: true } // Return the updated document
+      { new: true }, // Return the updated document
     );
 
     if (!updatedProduct) {
@@ -483,12 +476,12 @@ app.get("/productDetailSummaryByOperationAdd", async (req, res) => {
     const startOfMonth = new Date(
       currentMonth.getFullYear(),
       currentMonth.getMonth(),
-      1
+      1,
     );
     const endOfMonth = new Date(
       currentMonth.getFullYear(),
       currentMonth.getMonth() + 1,
-      0
+      0,
     );
 
     const ProductDetailSummary = await ProductDetail.aggregate([
@@ -531,12 +524,12 @@ app.get("/productDetailSummaryByOperationMinus", async (req, res) => {
     const startOfMonth = new Date(
       currentMonth.getFullYear(),
       currentMonth.getMonth(),
-      1
+      1,
     );
     const endOfMonth = new Date(
       currentMonth.getFullYear(),
       currentMonth.getMonth() + 1,
-      0
+      0,
     );
 
     const ProductDetailSummary = await ProductDetail.aggregate([
@@ -600,7 +593,7 @@ app.get("/generate-pdf/:id", async (req, res) => {
         <tr>
           <td>${p.Name ?? ""}</td>
           <td>${p.quantity ?? ""}</td>
-        </tr>`
+        </tr>`,
       )
       .join("");
 

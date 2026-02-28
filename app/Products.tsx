@@ -14,8 +14,8 @@ import {
   useState,
   router,
   useLocalSearchParams,
-  React,
   FontAwesome6,
+  React,
 } from "./lib/shared"; // Centralized imports
 import ButtonLink from "@/components/ButtonLink";
 import SearchBar from "@/components/SearchBar";
@@ -46,13 +46,8 @@ const Products = () => {
 
   const [showFormatPicker, setShowFormatPicker] = useState(false);
 
-  const {
-    getProducts, // Funcion que trae los productos segun categoria con react query
-    updateQuantityProduct,
-    modifyProduct,
-    deleteProduct,
-    addProduct, //funcion para eliminar producto
-  } = useProducts(categoryObject._id);
+  const { getProducts, updateQuantityProduct, modifyProduct, deleteProduct } =
+    useProducts(categoryObject._id);
 
   //hook for selected value format picker and selected product id
   const { selectedValuesFormatPicker, setSelectedProductId } =
@@ -60,14 +55,14 @@ const Products = () => {
   const { data: products, isLoading, isError } = getProducts();
 
   // mutation for update quantity product
-  const { mutate: mutateQuantity } = updateQuantityProduct();
+  const { mutate: mutateQuantity } = updateQuantityProduct;
 
   // hook to download Product list PDF
   const { downloadProductListPdf, isLoadingPdfDownload } = useFilePdfDownload();
   // Funcion Sumar cantidad de producto
   const handlePressAdd = (
     idProducto: any,
-    fromWhatQuantityCallfunction: string
+    fromWhatQuantityCallfunction: string,
   ) => {
     const quantityProduct =
       fromWhatQuantityCallfunction === "single" ? 1 : CantidadProducto;
@@ -86,7 +81,7 @@ const Products = () => {
   // Funcion Resta cantidad de producto
   const handlePressMinus = (
     idProducto: any,
-    fromWhatQuantityCallfunction: string
+    fromWhatQuantityCallfunction: string,
   ) => {
     const quantityProduct =
       fromWhatQuantityCallfunction === "single" ? 1 : CantidadProducto;
@@ -133,7 +128,7 @@ const Products = () => {
             deleteProduct(selectedItemId); // Llamar a la función de eliminación si se confirma
           },
         },
-      ]
+      ],
     );
   };
 
@@ -167,7 +162,7 @@ const Products = () => {
   //Simple nice and beatiful search bar filter
   const [searchQuery, setSearchQuery] = useState("");
   const filteredProducts = (products ?? []).filter((product: any) =>
-    product.Name.toString().toLowerCase().includes(searchQuery.toLowerCase())
+    product.Name.toString().toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   return (
@@ -192,13 +187,19 @@ const Products = () => {
                 <View className="w-20">
                   <Pressable
                     key={item._id}
-                    onLongPress={() =>
-                      handleLongPressProduct(item._id, item.Name)
-                    }
+                    onPress={() => handleLongPressProduct(item._id, item.Name)}
                   >
-                    <Text className="text-base text-white font-bold">
-                      {item.Name}
-                    </Text>
+                    <View className="flex-row items-center p-1">
+                      <Text className="text-base text-white font-bold">
+                        {item.Name}
+                      </Text>
+                      <FontAwesome6
+                        name="ellipsis-vertical"
+                        size={20}
+                        color="#999"
+                        className="ml-3"
+                      />
+                    </View>
                   </Pressable>
                 </View>
                 {/* button for modal format picker */}
