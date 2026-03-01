@@ -4,19 +4,19 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import RouterBackArrow from "@/components/RouterBackArrow";
 import { ScrollView } from "react-native";
 import { useUserStore } from "@/store/useUserStore";
-import { updateUserSettings } from "@/app/SettingScreen";
+import { updateUserSettings } from "../api/settings";
 
 const NotificationSettingScreen = () => {
   const user = useUserStore((state) => state.user);
   const updateUserSettingsContext = useUserStore(
-    (state) => state.updateUserSettingsContext
+    (state) => state.updateUserSettingsContext,
   );
   const [intervalDays, setIntervalDays] = useState(
-    user?.settings.reminderSettings.intervalDays.toString()
+    user?.settings.reminderSettings.intervalDays.toString(),
   );
 
   const [lowStockThreshold, setLowStockThreshold] = useState(
-    user?.settings.reminderSettings.lowStockThreshold.toString()
+    user?.settings.reminderSettings.lowStockThreshold.toString(),
   );
 
   interface NotificationSettings {
@@ -92,8 +92,8 @@ const NotificationSettingScreen = () => {
                             ? ""
                             : intervalDays
                           : lowStockThreshold === "0"
-                          ? ""
-                          : lowStockThreshold
+                            ? ""
+                            : lowStockThreshold
                       }
                       onChangeText={(value) => {
                         {

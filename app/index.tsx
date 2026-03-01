@@ -18,10 +18,8 @@ import { useUserStore } from "@/store/useUserStore";
 import { usePushNotifications } from "@/services/usePushNotifications";
 import FilteredCategoriesList from "@/components/categoriesScreen/FilteredCategoriesList";
 import ProfileModal from "@/components/ProfileModal";
-
 import { useState } from "react";
 import SettingButton from "@/app/features/settings/components/SettingButton";
-
 import Logo from "@/components/Logo";
 import GoogleLoginButton from "@/components/GoogleLogin/GoogleLoginButton";
 
