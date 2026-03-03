@@ -6,10 +6,18 @@ import {
   TouchableOpacity,
   FlatList,
   SafeAreaView,
-  axios,
-  Constants,
   useFocusEffect,
-} from "./lib/shared"; // Centralized imports
+} from "./lib/shared";
+import {
+  fetchProductDetailsById,
+  fetchMonthlySummaries,
+  formatMonthYear,
+  filterByMonth,
+  getPreviousMonth,
+  getNextMonth,
+  getMonthNames,
+} from "./api/productDetail";
+import type { ProductDetail, DailySummary } from "./api/productDetail";
 import { MonthSelector } from "@/components/ProductDetail/MonthSelector";
 import { TransactionDayItem } from "@/components/ProductDetail/TransactionDayItem";
 import SummarySquare from "@/components/ProductDetail/SummarySquare";
@@ -17,30 +25,13 @@ import { useSummaryStore } from "@/store/useSummaryStore";
 import { AggregationResult } from "./lib/types";
 import RouterBackArrow from "@/components/RouterBackArrow";
 import LoadingIndicator from "@/components/LoadingIndicator";
-const API_URL =
-  Constants.extra?.API_URL || Constants.expoConfig?.extra?.API_URL;
-
-interface ProductDetail {
-  _id: string;
-  quantity: number;
-  date: Date;
-  format: string;
-  operation: string;
-  ProductID: string;
-}
 
 const ProductDetail = () => {
   const { product } = useLocalSearchParams();
-  const [filteredDetails, setFilteredDetails] = useState<ProductDetail[]>([]);
-  const [dailySummaries, setDailySummaries] = useState<
-    Array<{
-      date: string;
-      dateObj: Date;
-      added: number;
-      removed: number;
-      transactions: ProductDetail[];
-    }>
+  const [filteredDetails, setFilteredDetails] = useState<
+    DailySummary["transactions"]
   >([]);
+  const [dailySummaries, setDailySummaries] = useState<DailySummary[]>([]);
   const {
     productDetailSummaryAdd: ProductDetailSummaryAdd,
     setProductDetailSummaryAdd,
@@ -48,10 +39,10 @@ const ProductDetail = () => {
     setProductDetailSummaryMinus,
   } = useSummaryStore();
   const [currentMonth, setCurrentMonth] = useState<number>(
-    new Date().getMonth()
+    new Date().getMonth(),
   );
   const [currentYear, setCurrentYear] = useState<number>(
-    new Date().getFullYear()
+    new Date().getFullYear(),
   );
   const [expandedDays, setExpandedDays] = useState<Record<string, boolean>>({});
   const [viewMode, setViewMode] = useState<"days" | "months">("days");
@@ -71,18 +62,18 @@ const ProductDetail = () => {
       const productDetailFunction = async () => {
         try {
           setIsLoading(true);
-          const response = await axios.get(
-            `${API_URL}/productDetailByIDProduct`,
-            {
-              params: { ProductKey: productObject._id },
-            }
-          );
+          const data = await fetchProductDetailsById(productObject._id);
 
-          filterByMonth(response.data, currentMonth, currentYear); // Filter data initially
+          filterByMonth(data, currentMonth, currentYear, productObject._id, {
+            setFilteredDetails,
+            setDailySummaries,
+            setProductDetailSummaryAdd,
+            setProductDetailSummaryMinus,
+          });
         } catch (error) {
           console.log(
             "error fetching products detail by id data or month dosent have products",
-            error
+            error,
           );
           setProductDetailSummaryAdd(0);
           setProductDetailSummaryMinus(0);
@@ -92,97 +83,17 @@ const ProductDetail = () => {
       };
 
       productDetailFunction();
-    }, [currentMonth, currentYear])
+    }, [currentMonth, currentYear]),
   );
+
   const getMonthlySummaries = async () => {
     try {
-      const response = await axios.get(`${API_URL}/getMonthlySummaries`, {
-        params: { ProductKey: productObject._id },
-      });
+      const data = await fetchMonthlySummaries(productObject._id);
 
-      setMonthlySummaries(response.data);
+      setMonthlySummaries(data);
     } catch (error) {
       console.log("error fetching monthly summaries data", error);
     }
-  };
-
-  // Cuenta cuantos productos fueron agregados y quitados por mes
-  const fetchSummaryData = async (currentMonth: Date) => {
-    try {
-      const addResponse = await axios.get(
-        `${API_URL}/productDetailSummaryByOperationAdd`,
-        {
-          params: {
-            ProductKey: productObject._id,
-            currentMonth: currentMonth,
-          },
-        }
-      );
-
-      const minusResponse = await axios.get(
-        `${API_URL}/productDetailSummaryByOperationMinus`,
-        {
-          params: {
-            ProductKey: productObject._id,
-            currentMonth: currentMonth,
-          },
-        }
-      );
-
-      if (Array.isArray(addResponse.data) && addResponse.data.length > 0) {
-        setProductDetailSummaryAdd(addResponse.data[0].totalQuantity);
-      } else {
-        setProductDetailSummaryAdd(0); // Establece un valor predeterminado si el array está vacío
-      }
-
-      if (Array.isArray(minusResponse.data) && minusResponse.data.length > 0) {
-        setProductDetailSummaryMinus(minusResponse.data[0].totalQuantity);
-      } else {
-        setProductDetailSummaryMinus(0); // Establece un valor predeterminado si el array está vacío
-      }
-    } catch (error) {
-      console.log("error fetching products detail summary data", error);
-    }
-  };
-
-  // Function to group transactions by day and calculate daily summaries
-  const groupTransactionsByDay = (transactions: ProductDetail[]) => {
-    const groups: Record<
-      string,
-      {
-        date: string;
-        dateObj: Date;
-        added: number;
-        removed: number;
-        transactions: ProductDetail[];
-      }
-    > = {};
-
-    transactions.forEach((item) => {
-      const date = new Date(item.date);
-      const dateKey = date.toISOString().split("T")[0]; // YYYY-MM-DD format
-
-      if (!groups[dateKey]) {
-        groups[dateKey] = {
-          date: dateKey,
-          dateObj: date,
-          added: 0,
-          removed: 0,
-          transactions: [],
-        };
-      }
-
-      if (item.operation === "add") {
-        groups[dateKey].added += item.quantity;
-      } else {
-        groups[dateKey].removed += item.quantity;
-      }
-      groups[dateKey].transactions.push(item);
-    });
-
-    return Object.values(groups).sort(
-      (a, b) => b.dateObj.getTime() - a.dateObj.getTime()
-    );
   };
 
   const toggleDayExpanded = (date: string) => {
@@ -199,64 +110,18 @@ const ProductDetail = () => {
     setViewMode((prev) => (prev === "days" ? "months" : "days"));
   }, [viewMode]);
 
-  // Funcion que filtra la data por mes
-  const filterByMonth = (
-    data: ProductDetail[],
-    month: number,
-    year: number
-  ) => {
-    const filtered = data.filter((item) => {
-      const itemDate = new Date(item.date);
-      return itemDate.getMonth() === month && itemDate.getFullYear() === year;
-    });
-
-    setFilteredDetails(filtered);
-    const daily = groupTransactionsByDay(filtered);
-    // const monthly = groupTransactionsByMonth(filtered);
-    setDailySummaries(daily);
-    // setMonthlySummaries(monthly);
-
-    // Calculate monthly totals
-    if (filtered.length > 0) {
-      fetchSummaryData(new Date(year, month, 1));
-    } else {
-      setProductDetailSummaryAdd(0);
-      setProductDetailSummaryMinus(0);
-    }
-  };
-
   // setea cambio de mes en vista producto detail
   const handlePrevMonth = () => {
-    const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
-    const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear;
-    setCurrentMonth(prevMonth);
-    setCurrentYear(prevYear);
+    const { month, year } = getPreviousMonth(currentMonth, currentYear);
+    setCurrentMonth(month);
+    setCurrentYear(year);
   };
 
   // setea cambio de mes en vista producto detail
   const handleNextMonth = () => {
-    const nextMonth = currentMonth === 11 ? 0 : currentMonth + 1;
-    const nextYear = currentMonth === 11 ? currentYear + 1 : currentYear;
-    setCurrentMonth(nextMonth);
-    setCurrentYear(nextYear);
-  };
-
-  const formatMonthYear = (month: number, year?: string) => {
-    const months = [
-      "ENE",
-      "FEB",
-      "MAR",
-      "ABR",
-      "MAY",
-      "JUN",
-      "JUL",
-      "AGO",
-      "SEP",
-      "OCT",
-      "NOV",
-      "DIC",
-    ];
-    return `${months[month]} ${year}`;
+    const { month, year } = getNextMonth(currentMonth, currentYear);
+    setCurrentMonth(month);
+    setCurrentYear(year);
   };
 
   const renderMonthItem = ({
@@ -270,20 +135,7 @@ const ProductDetail = () => {
       monthName: string;
     };
   }) => {
-    const monthNames = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ];
+    const monthNames = getMonthNames();
     const monthKey = `${monthNames[item.month - 1]}`;
     const today = new Date();
     const monthIndex = today.getMonth();
