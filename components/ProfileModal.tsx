@@ -13,12 +13,10 @@ const ProfileModal = ({
   const user = useUserStore((state) => state.user);
   const logout = async () => {
     await AsyncStorage.removeItem("token");
-    // setAuth(null);
     useUserStore.getState().clearUser();
   };
   return (
     <View>
-      {/* Profile Modal */}
       <Modal
         visible={showProfileModal}
         transparent={true}
@@ -26,12 +24,12 @@ const ProfileModal = ({
         onRequestClose={() => setShowProfileModal(false)}
       >
         <Pressable
-          className="flex-1 justify-end"
+          className="flex-1 justify-end bg-black/60"
           onPress={() => setShowProfileModal(false)}
         >
-          <View className="bg-slate-950 rounded-t-3xl p-6 pb-10">
+          <View className="bg-neutral-900 rounded-t-3xl p-6 pb-10 border-t border-l border-r border-neutral-800">
             <View className="items-center mb-6">
-              <View className="w-20 h-20 rounded-full bg-gray-200 overflow-hidden border-2 border-primary">
+              <View className="w-20 h-20 rounded-full overflow-hidden border-2 border-amber-500">
                 <Image
                   source={{
                     uri:
@@ -42,18 +40,19 @@ const ProfileModal = ({
                   resizeMode="cover"
                 />
               </View>
-              <Text className="text-lg font-bold mt-3 text-white">
-                {user?.name.split(" ")[0]}
+              <Text className="text-lg font-semibold mt-3 text-white">
+                {user?.name?.split(" ")[0]}
               </Text>
+              <Text className="text-neutral-400 text-sm">{user?.email}</Text>
             </View>
             <Pressable
               onPress={() => {
                 setShowProfileModal(false);
                 logout();
               }}
-              className="bg-red-500 py-3 rounded-lg items-center"
+              className="bg-red-600 py-3.5 rounded-xl items-center"
             >
-              <Text className="text-white font-medium">Cerrar sesión</Text>
+              <Text className="text-white font-semibold">Cerrar sesión</Text>
             </Pressable>
           </View>
         </Pressable>

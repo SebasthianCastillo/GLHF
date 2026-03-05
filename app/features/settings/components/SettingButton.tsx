@@ -6,8 +6,11 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 const SettingButton = () => {
   return (
     <View>
-      <Pressable onPress={() => router.push("/SettingScreen")} className="p-2">
-        <Ionicons name="settings-outline" size={26} color="white" />
+      <Pressable
+        onPress={() => router.push("/SettingScreen")}
+        className="p-2"
+      >
+        <Ionicons name="settings-outline" size={24} color="#A3A3A3" />
       </Pressable>
     </View>
   );

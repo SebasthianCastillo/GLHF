@@ -15,13 +15,13 @@ export default function ButtonLink({
   return (
     <TouchableOpacity
       activeOpacity={0.7}
-      className="p-10 justify-center items-center"
+      className="p-6 justify-center items-center"
       onPress={onPress}
     >
       <View
-        className={`w-16 h-16 rounded-full ${backgroundColor} shadow-lg justify-center items-center`}
+        className={`w-14 h-14 rounded-full ${backgroundColor} shadow-xl justify-center items-center`}
       >
-        <FontAwesome6 name={logotype} size={40} color="white" />
+        <FontAwesome6 name={logotype} size={32} color="white" />
       </View>
     </TouchableOpacity>
   );
