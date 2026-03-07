@@ -5,25 +5,23 @@ const SummarySquare = () => {
   const { productDetailSummaryAdd, productDetailSummaryMinus } = useSummaryStore();
 
   return (
-    <View className="flex-row justify-between mt-4">
-      <View className="h-16 w-32">
-        <View className="flex-1 items-center justify-center bg-emerald-600 rounded-lg shadow-lg p-4">
-          <Text className="text-3xl font-bold text-white">
+    <View className="flex-row justify-between gap-3">
+      <View className="flex-1">
+        <View className="items-center justify-center bg-[#2ba640]/10 rounded-2xl p-4">
+          <Text className="text-[#2ba640] text-xs font-medium mb-1 uppercase tracking-wide">
+            Agregados
+          </Text>
+          <Text className="text-3xl font-bold text-[#2ba640]">
             {productDetailSummaryAdd}
           </Text>
         </View>
       </View>
-      {/* <View className="h-24 w-32">
-          <View className="flex-1 items-center justify-center bg-yellow-500 rounded-lg shadow-lg p-4">
-            <Text className="text-3xl font-bold text-white pt-5">
-              {productDetailSummaryAdd - productDetailSummaryMinus}
-            </Text>
-            <Text className="text-center pt-1 ">Disponible</Text>
-          </View>
-        </View> */}
-      <View className="h-16 w-32">
-        <View className="flex-1 items-center justify-center bg-red-500 rounded-lg shadow-lg p-4">
-          <Text className="text-3xl font-bold text-white">
+      <View className="flex-1">
+        <View className="items-center justify-center bg-red-500/10 rounded-2xl p-4">
+          <Text className="text-red-500 text-xs font-medium mb-1 uppercase tracking-wide">
+            Retirados
+          </Text>
+          <Text className="text-3xl font-bold text-red-500">
             {productDetailSummaryMinus}
           </Text>
         </View>

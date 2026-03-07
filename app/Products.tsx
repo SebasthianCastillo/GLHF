@@ -9,6 +9,7 @@ import {
   Button,
   StyleSheet,
   TouchableWithoutFeedback,
+  TouchableOpacity,
   Alert,
   SafeAreaView,
   useState,
@@ -16,7 +17,7 @@ import {
   useLocalSearchParams,
   FontAwesome6,
   React,
-} from "./lib/shared"; // Centralized imports
+} from "./lib/shared";
 import ButtonLink from "@/components/ButtonLink";
 import SearchBar from "@/components/SearchBar";
 import { useProducts } from "@/hooks/useProducts";
@@ -167,50 +168,50 @@ const Products = () => {
 
   return (
     <TouchableWithoutFeedback onPress={handlePressOutside}>
-      <SafeAreaView className="bg-primary h-full">
-        <View className="flex-row items-center p-4 bg-slate-950">
-          <RouterBackArrow />
-          <Text className="text-white text-xl font-bold flex-1">
-            {CategoryName}
-          </Text>
-          <View className="flex-end pt-2">
-            <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
+      <SafeAreaView className="bg-black flex-1">
+        <View className="bg-neutral-900/80 backdrop-blur-xl border-b border-neutral-800">
+          <View className="flex-row items-center px-4 py-3">
+            <View className="flex-row items-center flex-1">
+              <RouterBackArrow />
+              <Text className="text-white text-lg font-bold tracking-tight ml-3">
+                {CategoryName}
+              </Text>
+            </View>
+            <View className="pt-2">
+              <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
+            </View>
           </View>
         </View>
-        <ScrollView>
-          <View className="p-4 space-y-3 bg-slate-950">
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 0 }}>
+          <View className="pt-4 space-y-4 pb-24">
             {filteredProducts.map((item: any) => (
               <View
-                className="flex-row justify-between items-center"
+                className="flex-row justify-between items-center bg-neutral-900 p-3"
                 key={item._id}
               >
-                <View className="w-20">
-                  <Pressable
-                    key={item._id}
-                    onPress={() => handleLongPressProduct(item._id, item.Name)}
-                  >
-                    <View className="flex-row items-center p-1">
-                      <Text className="text-base text-white font-bold">
-                        {item.Name}
-                      </Text>
-                      <FontAwesome6
-                        name="ellipsis-vertical"
-                        size={20}
-                        color="#999"
-                        className="ml-3"
-                      />
-                    </View>
-                  </Pressable>
-                </View>
-                {/* button for modal format picker */}
+                <Pressable
+                  onPress={() => handleLongPressProduct(item._id, item.Name)}
+                  className="flex-1 flex-row items-center mr-2"
+                >
+                  <Text className="text-base text-white font-semibold">
+                    {item.Name}
+                  </Text>
+                  <FontAwesome6
+                    name="ellipsis-vertical"
+                    size={16}
+                    color="#737373"
+                    className="ml-2"
+                  />
+                </Pressable>
+
                 <Pressable
                   onPress={() => {
                     setSelectedProductId(item._id);
                     setShowFormatPicker(true);
                   }}
-                  className="w-16 h-10 bg-slate-800 rounded-md justify-center items-center"
+                  className="w-10 h-9 bg-neutral-800 rounded-lg justify-center items-center border border-neutral-700"
                 >
-                  <Text className="text-white text-lg">
+                  <Text className="text-amber-500 text-base font-semibold">
                     {selectedValuesFormatPicker?.[item._id] || "P"}
                   </Text>
                 </Pressable>
@@ -218,24 +219,20 @@ const Products = () => {
                   showFormatPicker={showFormatPicker}
                   setShowFormatPicker={setShowFormatPicker}
                 />
-                {/* Minus button */}
+
                 <Pressable
                   onPress={() => handlePressMinus(item._id, "single")}
                   onLongPress={() => toggleSignVisibility(item._id, false)}
+                  className={`w-9 h-9 rounded-lg bg-neutral-800 justify-center items-center mx-2 ${
+                    pressedItemId === item._id ? "opacity-0" : "opacity-100"
+                  }`}
                 >
-                  <View
-                    className={`p-1 rounded-md shadow-sm ${
-                      pressedItemId === item._id ? "opacity-0" : "opacity-100"
-                    }`} // Condicional para opacidad
-                  >
-                    <FontAwesome6 name="minus" size={22} color="white" />
-                  </View>
+                  <FontAwesome6 name="minus" size={18} color="white" />
                 </Pressable>
 
-                {/* Cant button when long press sign */}
                 {inputVisibility.showCustomCant &&
                   item._id === selectedItemId && (
-                    <View className="rounded-lg shadow-md space-y-1">
+                    <View className="rounded-lg space-y-1 mr-1">
                       <CustomField
                         value={CantidadProducto}
                         onChangeText={(CantidadProducto: any) =>
@@ -245,7 +242,6 @@ const Products = () => {
                         keyboardType="numeric"
                         otherStyles=""
                       ></CustomField>
-
                       <View style={styles.buttonContainer}>
                         <Button
                           color="#F59E0B"
@@ -260,9 +256,9 @@ const Products = () => {
                     </View>
                   )}
 
-                {/* Custom Field */}
-                {inputVisibility.showCant && (
-                  <View>
+                {(inputVisibility.showCant ||
+                  inputVisibility.showSecondCant) && (
+                  <View className="w-12 mr-2">
                     <CustomField
                       value={item.quantity}
                       editable={false}
@@ -272,47 +268,27 @@ const Products = () => {
                     ></CustomField>
                   </View>
                 )}
-                {inputVisibility.showSecondCant &&
-                  item._id !== selectedItemId && (
-                    <View>
-                      <CustomField
-                        value={item.quantity}
-                        editable={false}
-                        placeholder={`${item.quantity}`}
-                        keyboardType="numeric"
-                        otherStyles=""
-                      ></CustomField>
-                    </View>
-                  )}
 
-                {/* Add button */}
                 <Pressable
                   onPress={() => handlePressAdd(item._id, "single")}
                   onLongPress={() => toggleSignVisibility(item._id, true)}
+                  className={`w-9 h-9 rounded-lg bg-neutral-800 justify-center items-center mr-2 ${
+                    pressedItemId === item._id ? "opacity-0" : "opacity-100"
+                  }`}
                 >
-                  <View
-                    className={`p-1 rounded-md shadow-sm ${
-                      pressedItemId === item._id ? "opacity-0" : "opacity-100"
-                    }`} // Condicional para opacidad
-                  >
-                    <FontAwesome6 name="add" size={22} color="white" />
-                  </View>
+                  <FontAwesome6 name="add" size={18} color="white" />
                 </Pressable>
 
-                {/* Historial Button */}
                 <Pressable
                   onPress={() =>
                     router.push({
                       pathname: "../ProductDetail",
-                      params: {
-                        product: JSON.stringify(item),
-                      },
+                      params: { product: JSON.stringify(item) },
                     })
                   }
+                  className="w-9 h-9 rounded-lg bg-neutral-800 justify-center items-center"
                 >
-                  <View className="p-1 rounded-md shadow-sm">
-                    <FontAwesome5 name="history" size={24} color="#eab308" />
-                  </View>
+                  <FontAwesome5 name="history" size={18} color="#F59E0B" />
                 </Pressable>
               </View>
             ))}
@@ -328,10 +304,22 @@ const Products = () => {
             />
           )}
         </ScrollView>
-        <View className="flex-row justify-between items-center">
-          <ButtonLink
-            logotype={"add"}
-            backgroundColor={"bg-yellow-500"}
+
+        <View className="absolute bottom-6 left-6 right-6 flex-row justify-between">
+          {isLoadingPdfDownload ? (
+            <LoadingIndicator />
+          ) : (
+            <TouchableOpacity
+              className="w-14 h-14 rounded-full bg-green-600 shadow-lg shadow-green-600/30 justify-center items-center"
+              activeOpacity={0.8}
+              onPress={() => downloadProductListPdf(categoryObject._id)}
+            >
+              <FontAwesome5 name="file-pdf" size={22} color="white" />
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity
+            className="w-14 h-14 rounded-full bg-amber-500 shadow-lg shadow-amber-500/30 justify-center items-center"
+            activeOpacity={0.8}
             onPress={() =>
               router.push({
                 pathname: "../AddProduct",
@@ -341,16 +329,9 @@ const Products = () => {
                 },
               })
             }
-          ></ButtonLink>
-          {isLoadingPdfDownload ? (
-            <LoadingIndicator />
-          ) : (
-            <ButtonLink
-              logotype={"file-pdf"}
-              backgroundColor={"bg-green-500"}
-              onPress={() => downloadProductListPdf(categoryObject._id)}
-            />
-          )}
+          >
+            <FontAwesome6 name="add" size={28} color="white" />
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
     </TouchableWithoutFeedback>

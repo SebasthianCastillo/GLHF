@@ -34,63 +34,88 @@ export const TransactionDayItem = ({
     item.dateObj.getFullYear() === today.getFullYear();
 
   return (
-    <View className="mb-2">
+    <View className="mb-3">
       <TouchableOpacity
         onPress={() => onToggleExpand(item.date)}
-        className={`flex-row justify-between items-center p-4 rounded-lg ${
-          isToday ? "bg-blue-900/30" : "bg-gray-700"
+        className={`flex-row justify-between items-center p-4 rounded-2xl ${
+          isToday 
+            ? "bg-[#272727]" 
+            : "bg-[#272727]/60"
         }`}
       >
         <View className="flex-row items-center">
-          <Text className="text-white text-lg font-bold mr-2">{day}</Text>
-          <Text className="text-gray-300">{month}</Text>
-          {isToday && (
-            <Text className="ml-2 px-2 py-0.5 bg-yellow-500 text-xs text-white rounded-full">
-              Hoy
+          <View className={`w-10 h-10 rounded-xl items-center justify-center mr-3 ${
+            isToday ? "bg-[#F59E0B]" : "bg-[#3f3f3f]"
+          }`}>
+            <Text className={`text-lg font-bold ${isToday ? "text-black" : "text-white"}`}>
+              {day}
             </Text>
+          </View>
+          <Text className="text-white/80 text-sm capitalize">{month}</Text>
+          {isToday && (
+            <View className="ml-2 px-2 py-0.5 bg-[#F59E0B] rounded-full">
+              <Text className="text-black text-xs font-medium">Hoy</Text>
+            </View>
           )}
         </View>
-        <View className="flex-row items-center space-x-14">
-          <Text className="text-emerald-400 font-bold text-xl">
-            {item.added}
-          </Text>
-          <Text className="text-red-400 font-bold text-xl">{item.removed}</Text>
-          <FontAwesome6
-            name={isExpanded ? "chevron-up" : "chevron-down"}
-            size={16}
-            color="white"
-          />
+        <View className="flex-row items-center gap-6">
+          <View className="items-center min-w-[40px]">
+            <Text className="text-[#2ba640] font-bold text-lg">
+              {item.added}
+            </Text>
+            <Text className="text-[#aaa] text-[10px]">Agregado</Text>
+          </View>
+          <View className="items-center min-w-[40px]">
+            <Text className="text-[#F59E0B] font-bold text-lg">{item.removed}</Text>
+            <Text className="text-[#aaa] text-[10px]">Retirado</Text>
+          </View>
+          <View className="w-6 items-center justify-center">
+            <FontAwesome6
+              name={isExpanded ? "chevron-up" : "chevron-down"}
+              size={14}
+              color="#fff"
+            />
+          </View>
         </View>
       </TouchableOpacity>
 
       {isExpanded && (
-        <View className="mt-1 bg-gray-700 rounded-b-lg overflow-hidden">
-          {item.transactions.map((transaction) => (
+        <View className="mt-1 bg-[#1f1f1f] rounded-b-2xl overflow-hidden">
+          {item.transactions.map((transaction, index) => (
             <View
               key={transaction._id}
-              className={`p-2 ${
+              className={`flex-row h-12 items-center px-4 ${
                 transaction.operation === "add"
-                  ? "bg-emerald-600"
-                  : "bg-red-500"
+                  ? "bg-[#2ba640]/10"
+                  : "bg-[#F59E0B]/10"
+              } ${
+                index !== item.transactions.length - 1 
+                  ? "border-b border-[#3f3f3f]" 
+                  : ""
               }`}
             >
-              <View className="flex-row h-9">
-                <View className="flex-1 items-center justify-center border-r border-gray-300">
-                  <Text className="text-lg font-bold text-white">
-                    {transaction.operation === "add" ? "+" : "-"}{" "}
-                    {transaction.quantity}
-                  </Text>
-                </View>
-                <View className="flex-1 items-center justify-center border-r border-gray-300">
-                  <Text className="text-lg font-bold text-white">
-                    {transaction.format}
-                  </Text>
-                </View>
-                <View className="flex-1 items-center justify-center">
-                  <Text className="text-sm font-medium text-white">
-                    {new Date(transaction.date).toLocaleTimeString()}
-                  </Text>
-                </View>
+              <View className="flex-1 items-center justify-center">
+                <Text className={`font-semibold text-base ${
+                  transaction.operation === "add" 
+                    ? "text-[#2ba640]" 
+                    : "text-[#F59E0B]"
+                }`}>
+                  {transaction.operation === "add" ? "+" : "-"}{" "}
+                  {transaction.quantity}
+                </Text>
+              </View>
+              <View className="flex-1 items-center justify-center border-l border-[#3f3f3f]">
+                <Text className="text-white/80 text-sm font-medium">
+                  {transaction.format}
+                </Text>
+              </View>
+              <View className="flex-1 items-center justify-center border-l border-[#3f3f3f]">
+                <Text className="text-[#aaa] text-xs">
+                  {new Date(transaction.date).toLocaleTimeString([], { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                  })}
+                </Text>
               </View>
             </View>
           ))}

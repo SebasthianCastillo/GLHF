@@ -4,7 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import RouterBackArrow from "@/components/RouterBackArrow";
 import { ScrollView } from "react-native";
 import { useUserStore } from "@/store/useUserStore";
-import { updateUserSettings } from "../api/settings";
+import { updateUserSettings } from "@/app/features/settings/api/settings";
 
 const NotificationSettingScreen = () => {
   const user = useUserStore((state) => state.user);

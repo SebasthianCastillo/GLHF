@@ -3,7 +3,7 @@ import Constants from "expo-constants";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
-export interface ProductDetail {
+interface ProductDetail {
   _id: string;
   quantity: number;
   date: Date;
@@ -46,7 +46,7 @@ export const fetchMonthlySummaries = async (ProductKey: string) => {
 
 export const fetchSummaryByOperationAdd = async (
   ProductKey: string,
-  currentMonth: Date
+  currentMonth: Date,
 ) => {
   try {
     const response = await axios.get(
@@ -56,7 +56,7 @@ export const fetchSummaryByOperationAdd = async (
           ProductKey,
           currentMonth,
         },
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -67,7 +67,7 @@ export const fetchSummaryByOperationAdd = async (
 
 export const fetchSummaryByOperationMinus = async (
   ProductKey: string,
-  currentMonth: Date
+  currentMonth: Date,
 ) => {
   try {
     const response = await axios.get(
@@ -77,7 +77,7 @@ export const fetchSummaryByOperationMinus = async (
           ProductKey,
           currentMonth,
         },
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -121,7 +121,7 @@ export const groupTransactionsByDay = (transactions: ProductDetail[]) => {
   });
 
   return Object.values(groups).sort(
-    (a, b) => b.dateObj.getTime() - a.dateObj.getTime()
+    (a, b) => b.dateObj.getTime() - a.dateObj.getTime(),
   );
 };
 
@@ -151,17 +151,17 @@ export type SetSummaryCallbacks = {
 export const fetchSummaryData = async (
   ProductKey: string,
   currentMonth: Date,
-  callbacks: SetSummaryCallbacks
+  callbacks: SetSummaryCallbacks,
 ) => {
   try {
     const addResponse = await fetchSummaryByOperationAdd(
       ProductKey,
-      currentMonth
+      currentMonth,
     );
 
     const minusResponse = await fetchSummaryByOperationMinus(
       ProductKey,
-      currentMonth
+      currentMonth,
     );
 
     if (Array.isArray(addResponse) && addResponse.length > 0) {
@@ -190,7 +190,7 @@ export const filterByMonth = (
   month: number,
   year: number,
   productKey: string,
-  callbacks: FilterByMonthCallbacks
+  callbacks: FilterByMonthCallbacks,
 ) => {
   const filtered = data.filter((item) => {
     const itemDate = new Date(item.date);
@@ -202,11 +202,7 @@ export const filterByMonth = (
   callbacks.setDailySummaries(daily);
 
   if (filtered.length > 0) {
-    fetchSummaryData(
-      productKey,
-      new Date(year, month, 1),
-      callbacks
-    );
+    fetchSummaryData(productKey, new Date(year, month, 1), callbacks);
   } else {
     callbacks.setProductDetailSummaryAdd(0);
     callbacks.setProductDetailSummaryMinus(0);

@@ -17,7 +17,7 @@ import {
   getNextMonth,
   getMonthNames,
 } from "./api/productDetail";
-import type { ProductDetail, DailySummary } from "./api/productDetail";
+import type { DailySummary } from "./api/productDetail";
 import { MonthSelector } from "@/components/ProductDetail/MonthSelector";
 import { TransactionDayItem } from "@/components/ProductDetail/TransactionDayItem";
 import SummarySquare from "@/components/ProductDetail/SummarySquare";
@@ -25,9 +25,11 @@ import { useSummaryStore } from "@/store/useSummaryStore";
 import { AggregationResult } from "./lib/types";
 import RouterBackArrow from "@/components/RouterBackArrow";
 import LoadingIndicator from "@/components/LoadingIndicator";
+import { FontAwesome5 } from "@expo/vector-icons";
 
 const ProductDetail = () => {
   const { product } = useLocalSearchParams();
+
   const [filteredDetails, setFilteredDetails] = useState<
     DailySummary["transactions"]
   >([]);
@@ -61,6 +63,7 @@ const ProductDetail = () => {
     useCallback(() => {
       const productDetailFunction = async () => {
         try {
+          console.log("productObject", productObject);
           setIsLoading(true);
           const data = await fetchProductDetailsById(productObject._id);
 
@@ -142,30 +145,32 @@ const ProductDetail = () => {
     const isMonth =
       item.month - 1 === monthIndex && item.year === today.getFullYear();
     return (
-      <View className="mb-2">
-        <View className="flex-row justify-between items-center bg-gray-700 p-3 pl-4 rounded-lg">
+      <View className="mb-3">
+        <View className="flex-row justify-between items-center bg-[#272727] p-4 pl-4 rounded-2xl">
           <View className="flex-row items-center">
             <View>
-              <Text className="text-white text-lg font-bold">{monthKey}</Text>
+              <Text className="text-white text-base font-semibold capitalize">
+                {monthKey}
+              </Text>
             </View>
             {isMonth && (
-              <Text className="ml-2 px-2 py-0.5 bg-yellow-500 text-xs text-white rounded-full">
-                Actual
-              </Text>
+              <View className="ml-2 px-2 py-0.5 bg-[#F59E0B]/80 rounded-full">
+                <Text className="text-black text-xs font-medium">Actual</Text>
+              </View>
             )}
           </View>
-          <View className="flex-row items-center space-x-6">
-            <View className="items-center">
-              <Text className="text-emerald-400 font-bold text-xl">
-                {item.added}
+          <View className="flex-row items-center gap-8">
+            <View className="items-center min-w-[50px]">
+              <Text className="text-[#2ba640] font-bold text-lg">
+                +{item.added}
               </Text>
-              <Text className="text-gray-400 text-xs">Agregados</Text>
+              <Text className="text-[#aaa] text-[10px]">Agregados</Text>
             </View>
-            <View className="items-center">
-              <Text className="text-red-400 font-bold text-xl">
-                {item.removed}
+            <View className="items-center min-w-[50px]">
+              <Text className="text-[#F59E0B] font-bold text-lg">
+                -{item.removed}
               </Text>
-              <Text className="text-gray-400 text-xs">Retirados</Text>
+              <Text className="text-[#aaa] text-[10px]">Retirados</Text>
             </View>
           </View>
         </View>
@@ -188,8 +193,11 @@ const ProductDetail = () => {
   );
 
   const renderEmptyComponent = () => (
-    <View className="flex-1 items-center justify-center p-4">
-      <Text className="text-gray-400 text-lg">
+    <View className="flex-1 items-center justify-center py-16">
+      <View className="w-16 h-16 rounded-full bg-[#272727] items-center justify-center mb-4">
+        <FontAwesome5 name="box-open" size={28} color="#666" />
+      </View>
+      <Text className="text-[#aaa] text-base font-medium">
         {viewMode === "days"
           ? "No hay movimientos este mes"
           : "No hay datos mensuales disponibles"}
@@ -198,28 +206,28 @@ const ProductDetail = () => {
   );
   // #endregion
   return (
-    <SafeAreaView className="bg-primary h-full">
-      <View className="flex-row items-center justify-between p-4 bg-primary">
+    <SafeAreaView className="bg-[#0f0f0f] flex-1">
+      <View className="flex-row items-center justify-between px-4 py-4 border-b border-[#3f3f3f] bg-[#0f0f0f]">
         <View className="flex-row items-center flex-1">
           <RouterBackArrow />
-          <Text className="text-white text-xl font-bold">
+          <Text className="text-white text-xl font-bold ml-2">
             {productObject.Name}
           </Text>
         </View>
         <TouchableOpacity
           onPress={toggleViewMode}
-          className="px-3 py-2 bg-slate-700 rounded-lg"
+          className="px-4 py-2 bg-[#272727] rounded-lg"
         >
-          <Text className="text-white font-medium">
+          <Text className="text-white font-medium text-sm">
             {viewMode === "days" ? "Por Mes" : "Por Días"}
           </Text>
         </TouchableOpacity>
       </View>
 
-      <View className="flex-1 px-2 py-2">
+      <View className="flex-1 px-4 py-4">
         {viewMode === "days" ? (
           <View className="flex-1">
-            <View className="mb-2">
+            <View className="mb-4">
               <MonthSelector
                 currentMonth={currentMonth}
                 currentYear={currentYear}
@@ -237,12 +245,12 @@ const ProductDetail = () => {
                   renderItem={renderDayItem}
                   keyExtractor={(item) => item.date}
                   ListEmptyComponent={renderEmptyComponent}
-                  contentContainerStyle={{ paddingBottom: 100 }}
+                  contentContainerStyle={{ paddingBottom: 120 }}
                   showsVerticalScrollIndicator={false}
                 />
               )}
             </View>
-            <View>
+            <View className="pt-4">
               <SummarySquare />
             </View>
           </View>
@@ -252,14 +260,17 @@ const ProductDetail = () => {
             keyExtractor={(year) => year.toString()}
             renderItem={({ item: year }) => (
               <View key={year}>
-                <View className="bg-gray-800 py-2 px-2 mb-2 rounded-lg items-center justify-center">
-                  <Text className="text-white font-bold text-lg">{year}</Text>
+                <View className="py-3 px-2 mb-3 border-b border-[#3f3f3f]">
+                  <Text className="text-[#aaa] font-semibold text-sm tracking-wide">
+                    {year}
+                  </Text>
                 </View>
                 <FlatList
                   data={monthlySummaries.dataByYear[year]}
                   renderItem={renderMonthItem}
                   keyExtractor={(item) => `${item.year}-${item.month}`}
                   scrollEnabled={true}
+                  contentContainerStyle={{ paddingBottom: 20 }}
                 />
               </View>
             )}

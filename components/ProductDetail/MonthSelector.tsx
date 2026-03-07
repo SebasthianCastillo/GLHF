@@ -18,17 +18,23 @@ export const MonthSelector = ({
   viewMode = "days",
 }: MonthSelectorProps) => {
   return (
-    <View className="flex-row items-center justify-between px-4 py-3 bg-primary">
-      <TouchableOpacity onPress={onPrevMonth} className="px-3 py-1">
-        <Text className="text-2xl text-yellow-500">&lt;</Text>
+    <View className="flex-row items-center justify-between px-2 py-3 bg-[#272727] rounded-xl">
+      <TouchableOpacity 
+        onPress={onPrevMonth} 
+        className="w-10 h-10 items-center justify-center"
+      >
+        <Text className="text-[#F59E0B] text-3xl font-medium">‹</Text>
       </TouchableOpacity>
-      <Text className="text-lg font-semibold text-white">
+      <Text className="text-base font-semibold text-white">
         {viewMode === "days"
           ? formatMonthYear(currentMonth, currentYear.toString())
           : currentYear.toString()}
       </Text>
-      <TouchableOpacity onPress={onNextMonth} className="px-3 py-1">
-        <Text className="text-2xl text-yellow-500">&gt;</Text>
+      <TouchableOpacity 
+        onPress={onNextMonth} 
+        className="w-10 h-10 items-center justify-center"
+      >
+        <Text className="text-[#F59E0B] text-3xl font-medium">›</Text>
       </TouchableOpacity>
     </View>
   );

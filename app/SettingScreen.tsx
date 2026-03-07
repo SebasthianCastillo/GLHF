@@ -66,7 +66,7 @@ const SettingsScreen = () => {
                       className="w-full flex-row justify-between items-center py-4 pr-2"
                       onPress={() => {
                         if (item.type === "navigation") {
-                          router.push(`../Settings/${item.id}`);
+                          router.push(`/${item.id}` as any);
                         }
                       }}
                     >
