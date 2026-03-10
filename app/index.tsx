@@ -92,9 +92,11 @@ export default function HomeScreen() {
       <View className="bg-neutral-900/80 backdrop-blur-xl border-b border-neutral-800">
         <View className="flex-row justify-between items-center px-4 py-3">
           <View className="flex-row items-center gap-3">
-            <Pressable onPress={() => router.push("/SettingScreen")}>
-              <Ionicons name="settings-outline" size={24} color="#A3A3A3" />
-            </Pressable>
+            {user && (
+              <Pressable onPress={() => router.push("/SettingScreen")}>
+                <Ionicons name="settings-outline" size={24} color="#A3A3A3" />
+              </Pressable>
+            )}
           </View>
           <View className="flex-row items-center gap-2">
             <Image
@@ -157,21 +159,22 @@ export default function HomeScreen() {
             </View>
           </View>
         )}
-
-        <View className="h-20" />
       </ScrollView>
-
-      <View className="absolute bottom-6 right-6 items-center">
-        <TouchableOpacity
-          className="w-14 h-14 rounded-full bg-amber-500 shadow-lg shadow-amber-500/30 justify-center items-center"
-          activeOpacity={0.8}
-          onPress={() => router.push("../AddCategory")}
-        >
-          <Ionicons name="add" size={28} color="white" />
-        </TouchableOpacity>
-        <Text className="text-neutral-500 text-xs mt-1.5 font-medium">Agregar</Text>
-      </View>
-
+      {user ? (
+        <View className="absolute bottom-6 right-6 items-center">
+          <TouchableOpacity
+            className="w-14 h-14 rounded-full bg-amber-500 shadow-lg shadow-amber-500/30 justify-center items-center"
+            activeOpacity={0.8}
+            onPress={() => router.push("../AddCategory")}
+          >
+            <Ionicons name="add" size={28} color="white" />
+          </TouchableOpacity>
+          <Text className="text-neutral-500 text-xs mt-1.5 font-medium">
+            Agregar
+          </Text>
+        </View>
+      ) : null}
+      <View className="h-20" />
       <ProfileModal
         showProfileModal={showProfileModal}
         setShowProfileModal={setShowProfileModal}

@@ -15,7 +15,7 @@ function getLocalIP() {
 export default {
   expo: {
     name: "Captain Chef",
-    slug: "glhf",
+    slug: "GLHF",
     version: "1.0.0",
     orientation: "portrait",
     icon: "./assets/images/icon.png",
@@ -72,9 +72,10 @@ export default {
       eas: {
         projectId: "c69b3306-b872-4414-a490-dedbd3b5cfb6",
       },
-      API_URL: `http://${getLocalIP()}:5000`,
+      // API_URL: `http://${getLocalIP()}:5000`,
+      API_URL: `https://glhf.onrender.com`,
       WEB_CLIENT_ID_GOOGLE:
-        "305169218247-rd7peu927l4f43nhl6ecuj79rumi8ueu.apps.googleusercontent.com",
+        "305169218247-e4k2trrdb30kqfmgil2h6gggas0i6sbr.apps.googleusercontent.com",
     },
   },
 };
