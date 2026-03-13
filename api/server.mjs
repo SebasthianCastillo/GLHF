@@ -543,13 +543,14 @@ app.post("/addProduct", async (req, res) => {
 
 app.post("/addProductDetail", async (req, res) => {
   try {
-    const { quantity, date, format, operation, ProductID } = req.body;
+    const { quantity, date, format, operation, ProductID, cost } = req.body;
     const newProductDetail = new ProductDetail({
       quantity,
       date,
       format,
       operation,
       ProductID,
+      cost: cost || 0,
     });
 
     await newProductDetail.save();
@@ -562,17 +563,32 @@ app.post("/addProductDetail", async (req, res) => {
   }
 });
 app.patch("/quantityUpdateProduct", async (req, res) => {
-  const { _id, quantity, operation } = req.body;
-  // Los cambios a realizar deben venir en el cuerpo de la solicitud
+  const { _id, quantity, operation, cost } = req.body;
   const filter = { _id: new ObjectId(_id) };
 
-  // Definir la actualización: incrementar o decrementar el campo
-  const update = {
-    $inc: { quantity: operation === "add" ? quantity : -quantity },
-  };
   try {
-    // Actualizar el documento
-    await Producto.updateOne(filter, update);
+    if (operation === "add") {
+      const costValue = cost || 0;
+      const product = await Producto.findOne(filter);
+      
+      const update = {
+        $inc: { 
+          quantity: quantity,
+          totalSpent: quantity * costValue,
+        },
+        $set: {
+          cost: costValue,
+        },
+      };
+      
+      await Producto.updateOne(filter, update);
+    } else {
+      const update = {
+        $inc: { quantity: -quantity },
+      };
+      
+      await Producto.updateOne(filter, update);
+    }
 
     res.status(201).json({ message: "Product Detail saved successfully" });
   } catch (error) {

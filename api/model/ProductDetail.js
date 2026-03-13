@@ -20,6 +20,10 @@ const ProductDetailSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  cost: {
+    type: Number,
+    default: 0,
+  },
 });
 
 const ProductDetail = mongoose.model("ProductDetail", ProductDetailSchema);

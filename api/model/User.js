@@ -21,6 +21,9 @@ const userSchema = new mongoose.Schema(
         intervalDays: { type: Number, default: 7 },
         lowStockThreshold: { type: Number, default: 5 },
       },
+      stockValueSettings: {
+        enabled: { type: Boolean, default: true },
+      },
     },
     passwordHash: String,
     expoPushToken: String, // For local auth

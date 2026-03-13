@@ -8,6 +8,7 @@ export interface ProductData {
   qty: number;
   format: string;
   operation: string;
+  cost?: number;
 }
 
 export const registerProduct = async (
@@ -43,16 +44,18 @@ export const updateQuantity = async (
   id: string,
   qty: number,
   format: string,
-  operation: string
+  operation: string,
+  cost?: number
 ) => {
   try {
     await axios.patch(`${API_URL}/quantityUpdateProduct`, {
       _id: id,
       quantity: qty,
       operation,
+      cost,
     });
 
-    await addProductDetail(id, qty, format, operation);
+    await addProductDetail(id, qty, format, operation, cost);
   } catch (err) {
     console.log("❌ Error updating quantity", err);
   }
@@ -62,7 +65,8 @@ export const addProductDetail = async (
   id: string,
   qty: number,
   format: string,
-  operation: string
+  operation: string,
+  cost?: number
 ) => {
   try {
     await axios.post(`${API_URL}/addProductDetail`, {
@@ -71,6 +75,7 @@ export const addProductDetail = async (
       date: new Date(),
       format,
       operation,
+      cost: cost || 0,
     });
   } catch (e) {
     console.log("❌ Error adding detail", e);

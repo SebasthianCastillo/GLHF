@@ -19,6 +19,9 @@ interface User {
       intervalDays: { type: Number; default: 7 };
       lowStockThreshold: { type: Number; default: 5 };
     };
+    stockValueSettings: {
+      enabled: boolean;
+    };
   };
   passwordHash: String; // For local auth
   expoPushToken: String;
@@ -36,7 +39,25 @@ export const useUserStore = create<UserStore>((set) => ({
   clearUser: () => set({ user: null }),
   updateUserSettingsContext: (newSetting) =>
     set((state) => {
-      if (!state.user) return state; // ✅ skip if no user
+      if (!state.user) return state;
+      
+      const settingKey = Object.keys(newSetting)[0];
+      const settingValue = Object.values(newSetting)[0];
+      
+      if (settingKey === 'enabled' && 'stockValueSettings' in state.user.settings) {
+        return {
+          user: {
+            ...state.user,
+            settings: {
+              ...state.user.settings,
+              stockValueSettings: {
+                enabled: settingValue as boolean,
+              },
+            },
+          },
+        };
+      }
+      
       return {
         user: {
           ...state.user,

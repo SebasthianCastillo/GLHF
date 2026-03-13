@@ -20,4 +20,16 @@ export const sections: SettingSection[] = [
       },
     ],
   },
+  {
+    title: "Stock",
+    items: [
+      {
+        id: "stockValueEnabled",
+        label: "Enable Stock Value",
+        icon: <FontAwesome6 name="dollar-sign" size={24} color="white" />,
+        type: "toggle",
+        description: "Allow adding cost value to products",
+      },
+    ],
+  },
 ];

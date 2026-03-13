@@ -14,6 +14,14 @@ const ProductoSchema = new mongoose.Schema({
     ref: "Category",
   },
   lastNotifiedAt: Date,
+  cost: {
+    type: Number,
+    default: 0,
+  },
+  totalSpent: {
+    type: Number,
+    default: 0,
+  },
 });
 
 const Producto = mongoose.model("Producto", ProductoSchema);

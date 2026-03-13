@@ -26,13 +26,25 @@ import RouterBackArrow from "@/components/RouterBackArrow";
 import { useSelectedValuesFormatPicker } from "@/store/useSelectedIdProduct";
 import FormatPicker from "@/components/FormatPicker";
 import LoadingIndicator from "@/components/LoadingIndicator";
+import { useUserStore } from "@/store/useUserStore";
+import { updateUserSettings } from "./features/settings/api/settings";
 
 const Products = () => {
+  const { user, updateUserSettingsContext } = useUserStore();
+  const stockValueEnabled = user?.settings?.stockValueSettings?.enabled ?? true;
+  const [isStockValueActive, setIsStockValueActive] =
+    useState(stockValueEnabled);
+
+  React.useEffect(() => {
+    setIsStockValueActive(stockValueEnabled);
+  }, [stockValueEnabled]);
   const { category } = useLocalSearchParams();
   const categoryObject = Array.isArray(category)
     ? JSON.parse(category[0])
     : JSON.parse(category || "{}");
   const [CantidadProducto, setCantidadProducto] = useState(0);
+  const [CostoProducto, setCostoProducto] = useState(0);
+  const [tempCost, setTempCost] = useState<Record<string, string>>({});
   const [selectedItemId, setSelectedItemId] = useState("");
   const [selectedProductName, setSelectedProductName] = useState("");
   const [showOptionsModal, setShowOptionsModal] = useState(false); // Para mostrar el menú de opciones
@@ -44,6 +56,18 @@ const Products = () => {
     isOnAdd: false,
   });
   let CategoryName = categoryObject.Name;
+
+  const toggleStockValue = () => {
+    const newValue = !isStockValueActive;
+    setIsStockValueActive(newValue);
+    updateUserSettingsContext({ enabled: newValue } as any);
+
+    if (user?.email) {
+      updateUserSettings("stockValueSettings", user.email, {
+        enabled: newValue,
+      });
+    }
+  };
 
   const [showFormatPicker, setShowFormatPicker] = useState(false);
 
@@ -65,14 +89,40 @@ const Products = () => {
     idProducto: any,
     fromWhatQuantityCallfunction: string,
   ) => {
+    // Validación: si es single click, toggle activo, y costo <= 0 o vacío → no permitir
+    if (fromWhatQuantityCallfunction === "single" && isStockValueActive) {
+      const costValue = tempCost[idProducto]
+        ? parseFloat(tempCost[idProducto])
+        : 0;
+      if (!tempCost[idProducto] || costValue <= 0) {
+        Alert.alert(
+          "Valor requerido",
+          "Ingresa un valor mayor a 0 para agregar el producto",
+        );
+        return;
+      }
+    }
+
     const quantityProduct =
       fromWhatQuantityCallfunction === "single" ? 1 : CantidadProducto;
     let operation = "add";
+    let cost = 0;
+
+    if (fromWhatQuantityCallfunction === "single") {
+      cost =
+        isStockValueActive && tempCost[idProducto]
+          ? parseFloat(tempCost[idProducto]) || 0
+          : 0;
+    } else {
+      cost = isStockValueActive ? CostoProducto : 0;
+    }
+
     const ProductData = {
       id: idProducto,
       qty: quantityProduct,
       format: selectedValuesFormatPicker?.[idProducto] || "P",
       operation,
+      cost,
     };
 
     mutateQuantity(ProductData);
@@ -177,12 +227,29 @@ const Products = () => {
                 {CategoryName}
               </Text>
             </View>
+            <TouchableOpacity
+              onPress={toggleStockValue}
+              className={`w-10 h-9 rounded-lg justify-center items-center mr-2 ${
+                isStockValueActive
+                  ? "bg-amber-500"
+                  : "bg-neutral-800 border border-red-500"
+              }`}
+            >
+              <FontAwesome6
+                name="dollar-sign"
+                size={18}
+                color={isStockValueActive ? "white" : "#F59E0B"}
+              />
+            </TouchableOpacity>
             <View className="pt-2">
               <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
             </View>
           </View>
         </View>
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 0 }}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 0 }}
+        >
           <View className="pt-4 space-y-4 pb-24">
             {filteredProducts.map((item: any) => (
               <View
@@ -193,15 +260,25 @@ const Products = () => {
                   onPress={() => handleLongPressProduct(item._id, item.Name)}
                   className="flex-1 flex-row items-center mr-2"
                 >
-                  <Text className="text-base text-white font-semibold">
-                    {item.Name}
-                  </Text>
-                  <FontAwesome6
-                    name="ellipsis-vertical"
-                    size={16}
-                    color="#737373"
-                    className="ml-2"
-                  />
+                  <View className="flex-1">
+                    <View className="flex-row items-center">
+                      <Text className="text-base text-white font-semibold">
+                        {item.Name}
+                      </Text>
+                      <FontAwesome6
+                        name="ellipsis-vertical"
+                        size={16}
+                        color="#737373"
+                        className="ml-2"
+                      />
+                    </View>
+                    {item.totalSpent > 0 && (
+                      <Text className="text-xs text-gray-400">
+                        Total gastado: $
+                        {item.totalSpent.toLocaleString("es-CL")}
+                      </Text>
+                    )}
+                  </View>
                 </Pressable>
 
                 <Pressable
@@ -209,12 +286,25 @@ const Products = () => {
                     setSelectedProductId(item._id);
                     setShowFormatPicker(true);
                   }}
-                  className="w-10 h-9 bg-neutral-800 rounded-lg justify-center items-center border border-neutral-700"
+                  className="w-9 h-9 bg-neutral-800 rounded-lg justify-center items-center border border-neutral-700"
                 >
-                  <Text className="text-amber-500 text-base font-semibold">
+                  <Text className="text-amber-500 text-sm font-semibold">
                     {selectedValuesFormatPicker?.[item._id] || "P"}
                   </Text>
                 </Pressable>
+                {isStockValueActive && (
+                  <View className="ml-1">
+                    <CustomField
+                      value={tempCost[item._id] || ""}
+                      onChangeText={(text: string) =>
+                        setTempCost((prev) => ({ ...prev, [item._id]: text }))
+                      }
+                      placeholder="$"
+                      keyboardType="numeric"
+                      otherStyles="text-white text-xs text-center w-12 h-9"
+                    />
+                  </View>
+                )}
                 <FormatPicker
                   showFormatPicker={showFormatPicker}
                   setShowFormatPicker={setShowFormatPicker}
@@ -258,14 +348,15 @@ const Products = () => {
 
                 {(inputVisibility.showCant ||
                   inputVisibility.showSecondCant) && (
-                  <View className="w-12 mr-2">
-                    <CustomField
-                      value={item.quantity}
-                      editable={false}
-                      placeholder={`${item.quantity}`}
-                      keyboardType="numeric"
-                      otherStyles=""
-                    ></CustomField>
+                  <View className="w-12 mr-2 items-center">
+                    <Text className="text-white font-bold text-base">
+                      {item.quantity}
+                    </Text>
+                    {item.cost > 0 && (
+                      <Text className="text-amber-500 text-xs font-medium">
+                        ${(item.quantity * item.cost).toLocaleString("es-CL")}
+                      </Text>
+                    )}
                   </View>
                 )}
 

@@ -17,12 +17,14 @@ export const useProducts = (categoryId: string) => {
       qty,
       format,
       operation,
+      cost,
     }: {
       id: string;
       qty: number;
       format: string;
       operation: string;
-    }) => updateQuantity(id, qty, format, operation),
+      cost?: number;
+    }) => updateQuantity(id, qty, format, operation, cost),
     onSuccess: () =>
       queryClient.invalidateQueries({
         queryKey: ["getProducts", categoryId],
