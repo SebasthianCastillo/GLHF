@@ -12,6 +12,10 @@ import {
   useFocusEffect,
   Pressable,
   Text,
+  TextInput,
+  Modal,
+  Alert,
+  ActivityIndicator,
 } from "./lib/shared";
 import { GoogleSignin, User } from "@react-native-google-signin/google-signin";
 import { useUserStore } from "@/store/useUserStore";
@@ -24,6 +28,13 @@ import { Ionicons } from "@expo/vector-icons";
 
 export default function HomeScreen() {
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [isLoginMode, setIsLoginMode] = useState(true);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [loading, setLoading] = useState(false);
   const { expoPushToken, notification } = usePushNotifications();
   const user = useUserStore((state) => state.user);
 
@@ -87,6 +98,62 @@ export default function HomeScreen() {
     }
   }
 
+  const handleLocalAuth = async () => {
+    if (!email || !password) {
+      Alert.alert("Error", "Please enter email and password");
+      return;
+    }
+
+    if (!isLoginMode && password.length < 6) {
+      Alert.alert("Error", "Password must be at least 6 characters");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const endpoint = isLoginMode ? "/login" : "/register";
+      const payload = isLoginMode 
+        ? { email, password }
+        : { email, password, name: name || email.split("@")[0] };
+
+      const { data } = await axios.post(`${API_URL}${endpoint}`, payload);
+
+      await AsyncStorage.setItem("token", data.token);
+      useUserStore.getState().setUser(data.user);
+      
+      setEmail("");
+      setPassword("");
+      setName("");
+    } catch (error: any) {
+      const message = error.response?.data?.message || "An error occurred";
+      Alert.alert("Error", message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!forgotEmail) {
+      Alert.alert("Error", "Please enter your email");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { data } = await axios.post(`${API_URL}/forgot-password`, {
+        email: forgotEmail,
+      });
+      Alert.alert("Success", data.message);
+      setShowForgotPassword(false);
+      setForgotEmail("");
+    } catch (error: any) {
+      const message = error.response?.data?.message || "An error occurred";
+      Alert.alert("Error", message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <SafeAreaView className="bg-black flex-1">
       <View className="bg-neutral-900/80 backdrop-blur-xl border-b border-neutral-800">
@@ -144,11 +211,92 @@ export default function HomeScreen() {
                 <Ionicons name="person-add-outline" size={32} color="#F59E0B" />
               </View>
               <Text className="text-white text-lg font-semibold mb-2">
-                ¡Únete a Captain Chef!
+                {isLoginMode ? "¡Bienvenido de nuevo!" : "¡Únete a Captain Chef!"}
               </Text>
               <Text className="text-neutral-400 text-sm text-center mb-5">
-                Guarda tus recetas y categorías en la nube
+                {isLoginMode 
+                  ? "Ingresa con tu correo y contraseña" 
+                  : "Guarda tus recetas y categorías en la nube"}
               </Text>
+
+              {!isLoginMode && (
+                <TextInput
+                  className="w-full bg-neutral-800 text-white rounded-xl px-4 py-3 mb-3 border border-neutral-700"
+                  placeholder="Nombre"
+                  placeholderTextColor="#737373"
+                  value={name}
+                  onChangeText={setName}
+                  autoCapitalize="words"
+                />
+              )}
+              <TextInput
+                className="w-full bg-neutral-800 text-white rounded-xl px-4 py-3 mb-3 border border-neutral-700"
+                placeholder="Correo electrónico"
+                placeholderTextColor="#737373"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+              <TextInput
+                className="w-full bg-neutral-800 text-white rounded-xl px-4 py-3 mb-2 border border-neutral-700"
+                placeholder="Contraseña"
+                placeholderTextColor="#737373"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+
+              {isLoginMode && (
+                <TouchableOpacity
+                  className="self-end mb-4"
+                  onPress={() => setShowForgotPassword(true)}
+                >
+                  <Text className="text-amber-500 text-sm">¿Olvidaste tu contraseña?</Text>
+                </TouchableOpacity>
+              )}
+
+              <TouchableOpacity
+                className="w-full bg-amber-500 rounded-xl py-3.5 items-center mb-3"
+                activeOpacity={0.8}
+                onPress={handleLocalAuth}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator color="white" />
+                ) : (
+                  <Text className="text-white font-semibold">
+                    {isLoginMode ? "Iniciar sesión" : "Crear cuenta"}
+                  </Text>
+                )}
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                className="mb-4"
+                onPress={() => {
+                  setIsLoginMode(!isLoginMode);
+                  setEmail("");
+                  setPassword("");
+                  setName("");
+                }}
+              >
+                <Text className="text-neutral-400 text-sm">
+                  {isLoginMode ? "¿No tienes cuenta? " : "¿Ya tienes cuenta? "}
+                  <Text className="text-amber-500 font-semibold">
+                    {isLoginMode ? "Regístrate" : "Inicia sesión"}
+                  </Text>
+                </Text>
+              </TouchableOpacity>
+
+              <View className="flex-row items-center w-full mb-4">
+                <View className="flex-1 h-px bg-neutral-700" />
+                <Text className="text-neutral-500 text-sm mx-3">o</Text>
+                <View className="flex-1 h-px bg-neutral-700" />
+              </View>
+
               <TouchableOpacity
                 className="w-full bg-white rounded-xl py-3.5 items-center"
                 activeOpacity={0.8}
@@ -179,6 +327,55 @@ export default function HomeScreen() {
         showProfileModal={showProfileModal}
         setShowProfileModal={setShowProfileModal}
       />
+      <Modal
+        visible={showForgotPassword}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowForgotPassword(false)}
+      >
+        <View className="flex-1 bg-black/50 justify-center items-center px-4">
+          <View className="bg-neutral-900 w-full max-w-sm rounded-2xl p-6 border border-neutral-800">
+            <Text className="text-white text-xl font-bold mb-2">
+              Recuperar contraseña
+            </Text>
+            <Text className="text-neutral-400 text-sm mb-4">
+              Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.
+            </Text>
+            <TextInput
+              className="w-full bg-neutral-800 text-white rounded-xl px-4 py-3 mb-4 border border-neutral-700"
+              placeholder="Correo electrónico"
+              placeholderTextColor="#737373"
+              value={forgotEmail}
+              onChangeText={setForgotEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+            <View className="flex-row gap-3">
+              <TouchableOpacity
+                className="flex-1 bg-neutral-700 rounded-xl py-3 items-center"
+                onPress={() => {
+                  setShowForgotPassword(false);
+                  setForgotEmail("");
+                }}
+              >
+                <Text className="text-white font-semibold">Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="flex-1 bg-amber-500 rounded-xl py-3 items-center"
+                onPress={handleForgotPassword}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator color="white" />
+                ) : (
+                  <Text className="text-white font-semibold">Enviar</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }

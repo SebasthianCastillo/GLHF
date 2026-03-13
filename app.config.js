@@ -75,7 +75,7 @@ export default {
       // API_URL: `http://${getLocalIP()}:5000`,
       API_URL: `https://glhf.onrender.com`,
       WEB_CLIENT_ID_GOOGLE:
-        "305169218247-e4k2trrdb30kqfmgil2h6gggas0i6sbr.apps.googleusercontent.com",
+        "305169218247-rd7peu927l4f43nhl6ecuj79rumi8ueu.apps.googleusercontent.com",
     },
   },
 };

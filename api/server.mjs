@@ -14,6 +14,7 @@ import requireAuth from "./middleware/auth.js";
 import { chromium } from "playwright";
 import cron from "node-cron";
 import axios from "axios";
+import bcrypt from "bcrypt";
 const app = express();
 const PORT = process.env.PORT || 5000;
 app.use(cors());
@@ -309,6 +310,177 @@ app.post("/google", async (req, res) => {
   });
 
   res.json({ token, user }); // Paso 8: Se devuelve token y datos de usuario
+});
+
+/*---------------------- Local Auth (Email/Password) ---------------------- */
+
+// POST /register - Register new user with email/password
+app.post("/register", async (req, res) => {
+  const { email, password, name } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ message: "Email and password are required" });
+  }
+
+  if (password.length < 6) {
+    return res.status(400).json({ message: "Password must be at least 6 characters" });
+  }
+
+  try {
+    let user = await User.findOne({ email });
+
+    if (user) {
+      // Check if user already has local auth
+      const hasLocalProvider = user.authProviders.some(p => p.provider === "local");
+      if (hasLocalProvider) {
+        return res.status(400).json({ message: "User already exists" });
+      }
+      // Link local auth to existing user (Google/GitHub user)
+      user.authProviders.push({ provider: "local", providerId: email });
+    } else {
+      // Create new user
+      user = new User({
+        email,
+        name: name || email.split("@")[0],
+        avatar: null,
+        authProviders: [{ provider: "local", providerId: email }],
+      });
+    }
+
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    user.passwordHash = await bcrypt.hash(password, salt);
+
+    await user.save();
+
+    // Generate JWT
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+
+    res.json({ token, user });
+  } catch (error) {
+    console.error("Register error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// POST /login - Login with email/password
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ message: "Email and password are required" });
+  }
+
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    // Check if user has local provider
+    const localProvider = user.authProviders.find(p => p.provider === "local");
+    if (!localProvider) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    // Compare password
+    const isMatch = await bcrypt.compare(password, user.passwordHash);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    // Generate JWT
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+
+    res.json({ token, user });
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// POST /forgot-password - Request password reset
+app.post("/forgot-password", async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: "Email is required" });
+  }
+
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      // Don't reveal if user exists
+      return res.json({ message: "If the email exists, a reset link has been sent" });
+    }
+
+    // Check if user has local provider
+    const hasLocalProvider = user.authProviders.some(p => p.provider === "local");
+    if (!hasLocalProvider) {
+      return res.json({ message: "If the email exists, a reset link has been sent" });
+    }
+
+    // Generate reset token (valid for 1 hour)
+    const resetToken = jwt.sign({ userId: user._id, type: "reset" }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+
+    // In production: send email with reset link
+    // For now: log to console
+    console.log(`Password reset token for ${email}: ${resetToken}`);
+    console.log(`Reset link: yourapp://reset-password?token=${resetToken}`);
+
+    res.json({ message: "If the email exists, a reset link has been sent" });
+  } catch (error) {
+    console.error("Forgot password error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// POST /reset-password - Reset password with token
+app.post("/reset-password", async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  if (!token || !newPassword) {
+    return res.status(400).json({ message: "Token and new password are required" });
+  }
+
+  if (newPassword.length < 6) {
+    return res.status(400).json({ message: "Password must be at least 6 characters" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    if (decoded.type !== "reset") {
+      return res.status(400).json({ message: "Invalid token" });
+    }
+
+    const user = await User.findById(decoded.userId);
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    user.passwordHash = await bcrypt.hash(newPassword, salt);
+
+    await user.save();
+
+    res.json({ message: "Password reset successfully" });
+  } catch (error) {
+    if (error.name === "JsonWebTokenError" || error.name === "TokenExpiredError") {
+      return res.status(400).json({ message: "Invalid or expired token" });
+    }
+    console.error("Reset password error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
 // Obtener datos del usuario actual desde token

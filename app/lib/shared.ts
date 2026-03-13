@@ -4,6 +4,7 @@ export {
   TouchableOpacity,
   Pressable,
   Text,
+  TextInput,
   Button,
   StyleSheet,
   TouchableWithoutFeedback,
