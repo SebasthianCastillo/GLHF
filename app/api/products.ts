@@ -89,3 +89,11 @@ export const modifyProduct = async (id: string, newName?: string) => {
 export const deleteProduct = async (id: string) => {
   await axios.delete(`${API_URL}/deleteProduct/${id}`);
 };
+
+export const updateProductCost = async (id: string, cost: number) => {
+  try {
+    await axios.patch(`${API_URL}/updateProductCost/${id}`, { cost });
+  } catch (err) {
+    console.log("❌ Error updating product cost", err);
+  }
+};

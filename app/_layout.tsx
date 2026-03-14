@@ -35,6 +35,10 @@ export default function RootLayout() {
           options={{ headerShown: false }}
         />
         <Stack.Screen name="ProductDetail" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="ProductStockValues"
+          options={{ headerShown: false }}
+        />
       </Stack>
     </QueryClientProvider>
   );

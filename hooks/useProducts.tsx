@@ -6,6 +6,7 @@ import {
   updateQuantity,
   modifyProduct,
   deleteProduct,
+  updateProductCost as apiUpdateProductCost,
 } from "../app/api/products";
 export const useProducts = (categoryId: string) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -48,6 +49,10 @@ export const useProducts = (categoryId: string) => {
           return old;
         }
         product.quantity = product.quantity + sign * productData.qty;
+        if (productData.operation === "add" && productData.cost) {
+          product.totalSpent = (product.totalSpent || 0) + productData.qty * productData.cost;
+          product.cost = productData.cost;
+        }
         return old;
       });
 
@@ -107,6 +112,16 @@ export const useProducts = (categoryId: string) => {
     setTimeout(() => setIsRefreshing(false), 1000);
   }, [categoryId]);
 
+  const updateProductCostMutation = useMutation({
+    mutationFn: ({ id, cost }: { id: string; cost: number }) => 
+      apiUpdateProductCost(id, cost),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["getProducts", categoryId],
+      });
+    },
+  });
+
   return {
     getProducts,
     isRefreshing,
@@ -116,5 +131,6 @@ export const useProducts = (categoryId: string) => {
     addProduct,
     modifyProduct,
     deleteProduct,
+    updateProductCost: updateProductCostMutation,
   };
 };

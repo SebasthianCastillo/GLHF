@@ -26,25 +26,13 @@ import RouterBackArrow from "@/components/RouterBackArrow";
 import { useSelectedValuesFormatPicker } from "@/store/useSelectedIdProduct";
 import FormatPicker from "@/components/FormatPicker";
 import LoadingIndicator from "@/components/LoadingIndicator";
-import { useUserStore } from "@/store/useUserStore";
-import { updateUserSettings } from "./features/settings/api/settings";
 
 const Products = () => {
-  const { user, updateUserSettingsContext } = useUserStore();
-  const stockValueEnabled = user?.settings?.stockValueSettings?.enabled ?? true;
-  const [isStockValueActive, setIsStockValueActive] =
-    useState(stockValueEnabled);
-
-  React.useEffect(() => {
-    setIsStockValueActive(stockValueEnabled);
-  }, [stockValueEnabled]);
   const { category } = useLocalSearchParams();
   const categoryObject = Array.isArray(category)
     ? JSON.parse(category[0])
     : JSON.parse(category || "{}");
   const [CantidadProducto, setCantidadProducto] = useState(0);
-  const [CostoProducto, setCostoProducto] = useState(0);
-  const [tempCost, setTempCost] = useState<Record<string, string>>({});
   const [selectedItemId, setSelectedItemId] = useState("");
   const [selectedProductName, setSelectedProductName] = useState("");
   const [showOptionsModal, setShowOptionsModal] = useState(false); // Para mostrar el menú de opciones
@@ -56,18 +44,6 @@ const Products = () => {
     isOnAdd: false,
   });
   let CategoryName = categoryObject.Name;
-
-  const toggleStockValue = () => {
-    const newValue = !isStockValueActive;
-    setIsStockValueActive(newValue);
-    updateUserSettingsContext({ enabled: newValue } as any);
-
-    if (user?.email) {
-      updateUserSettings("stockValueSettings", user.email, {
-        enabled: newValue,
-      });
-    }
-  };
 
   const [showFormatPicker, setShowFormatPicker] = useState(false);
 
@@ -89,34 +65,12 @@ const Products = () => {
     idProducto: any,
     fromWhatQuantityCallfunction: string,
   ) => {
-    // Validación: si es single click, toggle activo, y costo <= 0 o vacío → no permitir
-    if (fromWhatQuantityCallfunction === "single" && isStockValueActive) {
-      const costValue = tempCost[idProducto]
-        ? parseFloat(tempCost[idProducto])
-        : 0;
-      if (!tempCost[idProducto] || costValue <= 0) {
-        Alert.alert(
-          "Valor requerido",
-          "Ingresa un valor mayor a 0 para agregar el producto",
-        );
-        return;
-      }
-    }
-
+    const product = products?.find((p: any) => p._id === idProducto);
+    const cost = product?.cost || 0;
+    
     const quantityProduct =
       fromWhatQuantityCallfunction === "single" ? 1 : CantidadProducto;
     let operation = "add";
-    let cost = 0;
-
-    if (fromWhatQuantityCallfunction === "single") {
-      cost =
-        isStockValueActive && tempCost[idProducto]
-          ? parseFloat(tempCost[idProducto]) || 0
-          : 0;
-    } else {
-      cost = isStockValueActive ? CostoProducto : 0;
-    }
-
     const ProductData = {
       id: idProducto,
       qty: quantityProduct,
@@ -228,17 +182,18 @@ const Products = () => {
               </Text>
             </View>
             <TouchableOpacity
-              onPress={toggleStockValue}
-              className={`w-10 h-9 rounded-lg justify-center items-center mr-2 ${
-                isStockValueActive
-                  ? "bg-amber-500"
-                  : "bg-neutral-800 border border-red-500"
-              }`}
+              onPress={() =>
+                router.push({
+                  pathname: "../ProductStockValues",
+                  params: { category: JSON.stringify(categoryObject) },
+                })
+              }
+              className="w-10 h-9 rounded-lg justify-center items-center mr-2 bg-amber-500"
             >
               <FontAwesome6
                 name="dollar-sign"
                 size={18}
-                color={isStockValueActive ? "white" : "#F59E0B"}
+                color="white"
               />
             </TouchableOpacity>
             <View className="pt-2">
@@ -292,19 +247,6 @@ const Products = () => {
                     {selectedValuesFormatPicker?.[item._id] || "P"}
                   </Text>
                 </Pressable>
-                {isStockValueActive && (
-                  <View className="ml-1">
-                    <CustomField
-                      value={tempCost[item._id] || ""}
-                      onChangeText={(text: string) =>
-                        setTempCost((prev) => ({ ...prev, [item._id]: text }))
-                      }
-                      placeholder="$"
-                      keyboardType="numeric"
-                      otherStyles="text-white text-xs text-center w-12 h-9"
-                    />
-                  </View>
-                )}
                 <FormatPicker
                   showFormatPicker={showFormatPicker}
                   setShowFormatPicker={setShowFormatPicker}
