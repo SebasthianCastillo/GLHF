@@ -75,13 +75,10 @@ export const useProducts = (categoryId: string) => {
       });
     },
   });
-  // Function for fetching products
-  const getProducts = () => {
-    return useQuery({
-      queryKey: ["getProducts", categoryId],
-      queryFn: () => apiFetchProducts(categoryId),
-    });
-  };
+  const productsQuery = useQuery({
+    queryKey: ["getProducts", categoryId],
+    queryFn: () => apiFetchProducts(categoryId),
+  });
   // Mutation Function for adding a product
   const addProduct = useMutation({
     mutationFn: ({
@@ -123,7 +120,7 @@ export const useProducts = (categoryId: string) => {
   });
 
   return {
-    getProducts,
+    productsQuery,
     isRefreshing,
     fetchProducts: apiFetchProducts,
     refreshProducts,

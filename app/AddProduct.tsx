@@ -15,14 +15,14 @@ import { useProducts } from "@/hooks/useProducts";
 
 const AddProduct = () => {
   const [ProductName, setProductName] = useState("");
-  const [quantityProduct, setquantityProduct] = useState(0);
+  const [quantityProduct] = useState(0);
   const { CategoryKey } = useLocalSearchParams();
   const { CategoryName } = useLocalSearchParams();
   const [successMessage, setSuccessMessage] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
 
   const categoryId = CategoryKey.toString();
   const { addProduct } = useProducts(categoryId);
+  const isLoading = addProduct.isPending;
 
   // handle function for adding a product
   const HandleRegisterButton = () => {
@@ -38,8 +38,7 @@ const AddProduct = () => {
           setSuccessMessage("Producto agregado");
           setTimeout(() => setSuccessMessage(""), 3000);
         },
-        onError: (error: any) => {
-          console.log("Error adding product:", error);
+        onError: () => {
           setSuccessMessage("Error al agregar producto");
           setTimeout(() => setSuccessMessage(""), 3000);
         },

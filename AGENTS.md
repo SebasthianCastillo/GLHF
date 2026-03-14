@@ -1,13 +1,17 @@
 # Agents
 
+## Normas Generales
+
+- **Context7**: Always use Context7 when I need library/API documentation, code generation, setup or configuration steps without me having to explicitly ask.
+
 ## Commands
 
-- `npm start` - Start Expo development server
-- `npm run android` - Run on Android
-- `npm run ios` - Run on iOS
-- `npm run web` - Run web version
-- `npm run lint` - Run ESLint
-- `npm test` - Run Jest tests
+- `pnpm start` - Start Expo development server
+- `pnpm run android` - Run on Android
+- `pnpm run ios` - Run on iOS
+- `pnpm run web` - Run web version
+- `pnpm lint` - Run ESLint
+- `pnpm test` - Run Jest tests
 
 ## Project Structure
 

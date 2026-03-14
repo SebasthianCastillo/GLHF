@@ -23,8 +23,7 @@ const AddCategory = () => {
         setSuccessMessage("Categoría agregada");
         setTimeout(() => setSuccessMessage(""), 3000);
       },
-      onError: (error: any) => {
-        console.log("Error adding category:", error);
+      onError: () => {
         setSuccessMessage("Error al agregar categoría");
         setTimeout(() => setSuccessMessage(""), 3000);
       },

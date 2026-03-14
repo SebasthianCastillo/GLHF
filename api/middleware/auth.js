@@ -17,7 +17,7 @@ const requireAuth = async (req, res, next) => {
     if (!user) return res.status(401).json({ message: "User not found" });
     res.user = user;
     next();
-  } catch (err) {
+  } catch (_err) {
     res.status(403).json({ message: "Invalid token" });
   }
 };

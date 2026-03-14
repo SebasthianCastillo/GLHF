@@ -1,5 +1,5 @@
 import { View, Text, Switch, TextInput } from "react-native";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import RouterBackArrow from "@/components/RouterBackArrow";
 import { ScrollView } from "react-native";

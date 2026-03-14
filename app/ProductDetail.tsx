@@ -35,9 +35,9 @@ const ProductDetail = () => {
   >([]);
   const [dailySummaries, setDailySummaries] = useState<DailySummary[]>([]);
   const {
-    productDetailSummaryAdd: ProductDetailSummaryAdd,
+    productDetailSummaryAdd: _ProductDetailSummaryAdd,
     setProductDetailSummaryAdd,
-    productDetailSummaryMinus: ProductDetailSummaryMinus,
+    productDetailSummaryMinus: _ProductDetailSummaryMinus,
     setProductDetailSummaryMinus,
   } = useSummaryStore();
   const [currentMonth, setCurrentMonth] = useState<number>(
@@ -63,7 +63,6 @@ const ProductDetail = () => {
     useCallback(() => {
       const productDetailFunction = async () => {
         try {
-          console.log("productObject", productObject);
           setIsLoading(true);
           const data = await fetchProductDetailsById(productObject._id);
 
@@ -74,10 +73,6 @@ const ProductDetail = () => {
             setProductDetailSummaryMinus,
           });
         } catch (error) {
-          console.log(
-            "error fetching products detail by id data or month dosent have products",
-            error,
-          );
           setProductDetailSummaryAdd(0);
           setProductDetailSummaryMinus(0);
         } finally {

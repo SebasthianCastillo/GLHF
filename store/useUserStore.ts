@@ -1,30 +1,30 @@
 import { create } from "zustand";
 interface User {
   email: string;
-  name: String;
-  avatar: String;
+  name: string;
+  avatar: string;
   authProviders: [
     {
       provider: {
-        type: String;
+        type: string;
         enum: ["google", "github", "local"];
         required: true;
       };
-      providerId: String;
+      providerId: string;
     }
   ];
   settings: {
     reminderSettings: {
       enabled: boolean;
-      intervalDays: { type: Number; default: 7 };
-      lowStockThreshold: { type: Number; default: 5 };
+      intervalDays: { type: number; default: 7 };
+      lowStockThreshold: { type: number; default: 5 };
     };
     stockValueSettings: {
       enabled: boolean;
     };
   };
-  passwordHash: String; // For local auth
-  expoPushToken: String;
+  passwordHash: string;
+  expoPushToken: string;
 }
 interface UserStore {
   user: User | null;

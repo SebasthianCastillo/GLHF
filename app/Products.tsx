@@ -47,13 +47,13 @@ const Products = () => {
 
   const [showFormatPicker, setShowFormatPicker] = useState(false);
 
-  const { getProducts, updateQuantityProduct, modifyProduct, deleteProduct } =
+  const { productsQuery, updateQuantityProduct, modifyProduct, deleteProduct } =
     useProducts(categoryObject._id);
 
   //hook for selected value format picker and selected product id
   const { selectedValuesFormatPicker, setSelectedProductId } =
     useSelectedValuesFormatPicker();
-  const { data: products, isLoading, isError } = getProducts();
+  const { data: products, isLoading, isError } = productsQuery;
 
   // mutation for update quantity product
   const { mutate: mutateQuantity } = updateQuantityProduct;
