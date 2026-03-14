@@ -7,13 +7,15 @@
     "paths": {
       "@/*": ["./*"]
     },
-    "ignoreDeprecations": "6.0"
+    "ignoreDeprecations": "5.0",
+    "types": ["nativewind/types", "jest", "@types/react"]
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts",
+    "nativewind.d.ts",
     "api/server.mjs",
     "api/model/Producto.js",
     "api/model/ProductDetail.js",

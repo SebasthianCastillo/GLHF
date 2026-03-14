@@ -18,7 +18,7 @@ import {
   FontAwesome6,
   React,
 } from "./lib/shared";
-import ButtonLink from "@/components/ButtonLink";
+
 import SearchBar from "@/components/SearchBar";
 import { useProducts } from "@/hooks/useProducts";
 import { useFilePdfDownload } from "@/hooks/useFilePdfDownload";
@@ -67,7 +67,7 @@ const Products = () => {
   ) => {
     const product = products?.find((p: any) => p._id === idProducto);
     const cost = product?.cost || 0;
-    
+
     const quantityProduct =
       fromWhatQuantityCallfunction === "single" ? 1 : CantidadProducto;
     let operation = "add";
@@ -190,11 +190,7 @@ const Products = () => {
               }
               className="w-10 h-9 rounded-lg justify-center items-center mr-2 bg-amber-500"
             >
-              <FontAwesome6
-                name="dollar-sign"
-                size={18}
-                color="white"
-              />
+              <FontAwesome6 name="dollar-sign" size={18} color="white" />
             </TouchableOpacity>
             <View className="pt-2">
               <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
