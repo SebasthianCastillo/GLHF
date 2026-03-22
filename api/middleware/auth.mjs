@@ -1,6 +1,6 @@
-const jwt = require("jsonwebtoken");
-const User = require("../model/User.js");
-require("dotenv").config();
+import jwt from "jsonwebtoken";
+import prisma from "../lib/prisma.mjs";
+import "dotenv/config";
 
 const requireAuth = async (req, res, next) => {
   const authHeader = req.headers["authorization"];
@@ -13,7 +13,13 @@ const requireAuth = async (req, res, next) => {
       return res.status(500).json({ message: "JWT secret not configured" });
     }
     const decoded = jwt.verify(token, secret);
-    const user = await User.findById(decoded.userId);
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      include: {
+        authProviders: true,
+        settings: true
+      }
+    });
     if (!user) return res.status(401).json({ message: "User not found" });
     res.user = user;
     next();
@@ -22,4 +28,4 @@ const requireAuth = async (req, res, next) => {
   }
 };
 
-module.exports = requireAuth;
+export default requireAuth;

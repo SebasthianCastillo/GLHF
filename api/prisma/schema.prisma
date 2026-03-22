@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int              @id @default(autoincrement())
+  email         String           @unique
+  name          String?
+  avatar        String?
+  passwordHash  String?
+  expoPushToken String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  authProviders AuthProvider[]
+  settings      UserSettings?
+  categories    Category[]
+}
+
+model AuthProvider {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  provider   String
+  providerId String?
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, provider])
+  @@index([providerId])
+}
+
+model UserSettings {
+  userId                    Int     @id
+  reminderEnabled           Boolean @default(false)
+  reminderIntervalDays      Int     @default(7)
+  reminderLowStockThreshold Int     @default(5)
+  stockValueEnabled         Boolean @default(true)
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  name      String
+  userId    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productos Producto[]
+
+  @@index([userId])
+}
+
+model Producto {
+  id              Int           @id @default(autoincrement())
+  name            String
+  quantity        Int           @default(0)
+  categoryId      Int?
+  lastNotifiedAt  DateTime?
+  cost            Decimal       @default(0) @db.Decimal(10, 2)
+  totalSpent      Decimal       @default(0) @db.Decimal(10, 2)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  category       Category?      @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  productDetails ProductDetail[]
+
+  @@index([categoryId])
+}
+
+model ProductDetail {
+  id        Int      @id @default(autoincrement())
+  quantity  Int
+  date      DateTime
+  format    String
+  operation String
+  productId Int
+  cost      Decimal   @default(0) @db.Decimal(10, 2)
+  createdAt DateTime @default(now())
+
+  product Producto @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([date])
+}
