@@ -18,7 +18,7 @@ const FilteredCategoriesList = () => {
   } = useCategories();
 
   const filteredCategories = (categoriesData ?? []).filter((product: any) =>
-    product.Name.toString().toLowerCase().includes(searchQuery.toLowerCase())
+    product.name.toString().toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const OnPressColorChange = (categoryId: any) => {
@@ -41,7 +41,7 @@ const FilteredCategoriesList = () => {
       try {
         await AsyncStorage.setItem(
           "categoryColors",
-          JSON.stringify(updatedColors)
+          JSON.stringify(updatedColors),
         );
       } catch (error) {
         console.log("Error saving colors:", error);
@@ -74,7 +74,9 @@ const FilteredCategoriesList = () => {
   if (isError) {
     return (
       <View className="px-4 py-8">
-        <Text className="text-red-400 text-center">Error al cargar categorías</Text>
+        <Text className="text-red-400 text-center">
+          Error al cargar categorías
+        </Text>
       </View>
     );
   }
@@ -113,10 +115,7 @@ const FilteredCategoriesList = () => {
       </View>
       {Array.from({ length: Math.ceil(filteredCategories.length / 2) }).map(
         (_, rowIndex) => (
-          <View
-            key={rowIndex}
-            className="flex-row justify-between w-full mb-3"
-          >
+          <View key={rowIndex} className="flex-row justify-between w-full mb-3">
             {filteredCategories
               .slice(rowIndex * 2, rowIndex * 2 + 2)
               .map((category: any) => (
@@ -143,7 +142,7 @@ const FilteredCategoriesList = () => {
                         className="text-white text-sm font-semibold text-center"
                         numberOfLines={1}
                       >
-                        {category.Name}
+                        {category.name}
                       </Text>
                     </View>
                   </View>
@@ -151,17 +150,13 @@ const FilteredCategoriesList = () => {
               ))}
             {filteredCategories.length % 2 === 1 &&
               rowIndex === Math.ceil(filteredCategories.length / 2) - 1 && (
-                <View className="w-[48%]" />
+                <View key={`placeholder-${rowIndex}`} className="w-[48%]" />
               )}
           </View>
-        )
+        ),
       )}
 
-      <Modal
-        visible={IsPickerVisible}
-        transparent={true}
-        animationType="slide"
-      >
+      <Modal visible={IsPickerVisible} transparent={true} animationType="slide">
         <View className="flex-1 justify-center items-center bg-black/70">
           <View className="w-4/5 bg-neutral-900 p-5 rounded-2xl border border-neutral-800 items-center">
             <Text className="text-white text-lg font-semibold mb-4">

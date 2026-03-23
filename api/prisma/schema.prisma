@@ -20,6 +20,7 @@ model User {
   authProviders AuthProvider[]
   settings      UserSettings?
   categories    Category[]
+  expenses      Expense[]
 }
 
 model AuthProvider {
@@ -56,6 +57,7 @@ model Category {
 
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   productos Producto[]
+  expenses  Expense[]
 
   @@index([userId])
 }
@@ -91,4 +93,31 @@ model ProductDetail {
 
   @@index([productId])
   @@index([date])
+}
+
+model Expense {
+  id          Int           @id @default(autoincrement())
+  amount      Float
+  date        DateTime
+  dueDate     DateTime
+  status      ExpenseStatus @default(PENDING)
+  categoryId  Int
+  userId      Int
+  description String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  category    Category @relation(fields: [categoryId], references: [id])
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([categoryId])
+  @@index([status])
+  @@index([date])
+}
+
+enum ExpenseStatus {
+  PENDING
+  PAID
+  OVERDUE
 }

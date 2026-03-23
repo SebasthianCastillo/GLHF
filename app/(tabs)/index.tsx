@@ -1,4 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
+export {} from "../lib/shared";
 import {
   View,
   ScrollView,
@@ -16,7 +18,7 @@ import {
   Modal,
   Alert,
   ActivityIndicator,
-} from "./lib/shared";
+} from "../lib/shared";
 import { GoogleSignin, User } from "@react-native-google-signin/google-signin";
 import { useUserStore } from "@/store/useUserStore";
 import { usePushNotifications } from "@/services/usePushNotifications";
@@ -47,7 +49,7 @@ export default function HomeScreen() {
   useFocusEffect(
     useCallback(() => {
       getCurrentUser();
-    }, []),
+    }, [])
   );
 
   const data = JSON.stringify(notification, undefined, 2);
@@ -167,7 +169,7 @@ export default function HomeScreen() {
           </View>
           <View className="flex-row items-center gap-2">
             <Image
-              source={require("../assets/images/CaptainChefPNG.png")}
+              source={require("../../assets/images/CaptainChefPNG.png")}
               style={{ width: 32, height: 32 }}
               resizeMode="contain"
             />

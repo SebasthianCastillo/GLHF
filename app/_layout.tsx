@@ -25,7 +25,7 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <Stack>
-        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="AddCategory" options={{ headerShown: false }} />
         <Stack.Screen name="Products" options={{ headerShown: false }} />
         <Stack.Screen name="AddProduct" options={{ headerShown: false }} />
@@ -39,6 +39,8 @@ export default function RootLayout() {
           name="ProductStockValues"
           options={{ headerShown: false }}
         />
+        <Stack.Screen name="ExpenseList" options={{ headerShown: false }} />
+        <Stack.Screen name="AddExpense" options={{ headerShown: false }} />
       </Stack>
     </QueryClientProvider>
   );

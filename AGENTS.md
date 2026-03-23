@@ -1,35 +1,148 @@
-# Agents
+# GLHF - Documentación del Proyecto
 
-## Commands
+## Comandos para Desarrollar
 
-- `npm start` - Start Expo development server
-- `npm run android` - Run on Android
-- `npm run ios` - Run on iOS
-- `npm run web` - Run web version
-- `npm run lint` - Run ESLint
-- `npm test` - Run Jest tests
+### Frontend (Expo)
+```bash
+npm start          # Servidor de desarrollo Expo
+npm run android    # Ejecutar en Android
+npm run ios        # Ejecutar en iOS
+npm run web        # Ejecutar versión web
+npm run lint       # Run ESLint
+npm test           # Run Jest tests
+```
 
-## Project Structure
+### Backend (API)
+```bash
+cd api
+npm install        # Instalar dependencias
+npx prisma generate  # Generar Prisma Client
+npm run dev        # Modo desarrollo
+```
 
-- `app/` - Expo Router screens and pages
-- `api/` - Express backend server with MongoDB
-- `components/` - Reusable UI components
-- `store/` - Zustand state stores
-- `hooks/` - Custom React hooks
-- `services/` - Push notifications and other services
+### Prisma (Base de datos)
+```bash
+cd api
+npx prisma db push          # Sincronizar schema con BD
+npx prisma studio           # UI para explorar datos
+npx prisma migrate dev       # Crear migración (producción)
+```
 
-## Tech Stack
+## Estructura del Proyecto
 
-- Expo (SDK 51) with React Native
-- Zustand for state management
-- TanStack Query for data fetching
-- MongoDB backend
-- Firebase Cloud Messaging for push notifications
-- Google Sign-In authentication
+```
+GLHF/
+├── 📱 app/                    # Expo Router (pantallas)
+│   ├── _layout.tsx            # Layout principal
+│   ├── index.tsx              # Home
+│   ├── AddCategory.tsx        # Agregar categoría
+│   ├── AddProduct.tsx         # Agregar producto
+│   ├── Products.tsx           # Lista de productos
+│   ├── ProductDetail.tsx      # Detalle de producto
+│   ├── ProductStockValues.tsx # Valores de stock
+│   ├── SettingScreen.tsx      # Configuración
+│   ├── NotificationSettingScreen.tsx
+│   ├── api/                   # Rutas API locales
+│   ├── lib/                   # Utilidades de screens
+│   └── (tabs)/                # Navegación por tabs
+│       └── _layout.tsx
+│
+├── ⚙️  api/                   # Backend Express + Prisma
+│   ├── server.mjs             # Entry point
+│   ├── prisma/
+│   │   ├── schema.prisma      # Modelos de BD
+│   │   └── migrations/        # Migraciones
+│   ├── routes/                # Rutas API
+│   ├── services/              # Lógica de negocio
+│   ├── middleware/            # Auth, validation, rate limit
+│   ├── config/                # Configuración
+│   ├── lib/                   # Prisma client, errors
+│   ├── validators/            # Validaciones
+│   ├── cron/                  # Tareas programadas
+│   ├── database/              # Conexiones DB
+│   └── __tests__/             # Tests
+│
+├── 🧩 components/              # Componentes reutilizables
+│   ├── Button.tsx
+│   ├── Logo.tsx
+│   ├── SearchBar.tsx
+│   ├── FormatPicker.tsx
+│   ├── InfoModal.tsx
+│   ├── categoriesScreen/
+│   ├── ProductDetail/
+│   ├── GoogleLogin/
+│   └── navigation/
+│
+├── 📦 store/                  # Zustand stores
+│   ├── useUserStore.ts        # Usuario y sesión
+│   ├── useSummaryStore.ts      # Contadores suma/resta
+│   ├── useSelectedIdProduct.ts # Producto seleccionado
+│   ├── useSettingStore.ts      # Configuraciones
+│   └── __tests__/
+│
+├── 🪝 hooks/                   # Custom hooks
+│   ├── useCategories.ts        # Query categorías
+│   ├── useProducts.tsx         # Query productos
+│   ├── useColorScheme.ts        # Tema oscuro
+│   └── useFilePdfDownload.ts    # Descarga PDFs
+│
+├── 🔔 services/                # Servicios
+│   └── usePushNotifications.tsx # Push notifications
+│
+├── 📁 constants/               # Constantes
+├── 📁 types/                   # Tipos TypeScript
+├── 📁 utils/                   # Utilidades
+├── 📁 assets/                  # Imágenes, fuentes
+│
+├── 📄 package.json             # Root (Expo)
+├── 📄 api/package.json         # Backend
+├── 📄 prisma/schema.prisma     # Modelos
+├── 📄 app.config.js             # Config Expo
+├── 📄 tailwind.config.js
+├── 📄 tsconfig.json
+├── 📄 eas.json                  # EAS Build
+└── 📄 google-services.json      # Firebase
+```
+
+## Stack Tecnológico
+
+| Capa | Tecnología |
+|------|------------|
+| **Frontend** | Expo SDK 51, React Native |
+| **Navegación** | Expo Router (file-based) |
+| **Estado** | Zustand |
+| **Data Fetching** | TanStack Query |
+| **Backend** | Express.js |
+| **Base de Datos** | PostgreSQL (Neon) |
+| **ORM** | Prisma |
+| **Auth** | Google Sign-In |
+| **Push** | Firebase Cloud Messaging |
+| **Estilos** | Tailwind CSS + NativeWind |
+
+## Flujo de Datos
+
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│   Screens   │────▶│   Hooks     │────▶│   Stores    │
+│   (app/)    │     │  (hooks/)   │     │  (store/)  │
+└─────────────┘     └──────┬──────┘     └─────────────┘
+                           │
+                           ▼
+                    ┌─────────────┐
+                    │  TanStack   │
+                    │   Query     │
+                    └──────┬──────┘
+                           │
+                           ▼
+                    ┌─────────────┐     ┌─────────────┐
+                    │ Express API │────▶│  PostgreSQL │
+                    │   (api/)    │     │   (Neon)    │
+                    └─────────────┘     └─────────────┘
+```
 
 ## Arquitectura de Desarrollo
 
-Este proyecto sigue una arquitectura basada en **stores** (Zzustand) y **hooks** personalizados. Es obligatorio seguir esta arquitectura para cualquier nueva funcionalidad siempre y cuando haga sentido segun la estructura del proyecto.
+Este proyecto sigue una arquitectura basada en **stores** (Zustand) y **hooks** personalizados. Es obligatorio seguir esta arquitectura para cualquier nueva funcionalidad siempre y cuando haga sentido según la estructura del proyecto.
 
 ### Stores (Zustand)
 
@@ -42,6 +155,7 @@ Los stores se encuentran en `store/` y contienen el estado global de la aplicaci
 | `useUserStore`                  | `store/useUserStore.ts`         | Gestiona el usuario autenticado, sus settings (notificaciones, stock) y estado de sesión |
 | `useSummaryStore`               | `store/useSummaryStore.ts`      | Controla los contadores de sumas/restas en detalle de producto                           |
 | `useSelectedValuesFormatPicker` | `store/useSelectedIdProduct.ts` | Maneja el ID de producto seleccionado y valores del picker de formato                    |
+| `useSettingStore`               | `store/useSettingStore.ts`     | Configuraciones de la aplicación                                                         |
 
 #### Cómo crear un nuevo store:
 
@@ -50,9 +164,7 @@ Los stores se encuentran en `store/` y contienen el estado global de la aplicaci
 import { create } from "zustand";
 
 interface NuevoStore {
-  // Estado
   valor: string;
-  // Acciones
   setValor: (value: string) => void;
 }
 
@@ -78,6 +190,7 @@ Los hooks están en `hooks/` y encapsulan lógica de negocio, integración con A
 | Hook                 | Archivo                       | Descripción                                                   |
 | -------------------- | ----------------------------- | ------------------------------------------------------------- |
 | `useCategories`      | `hooks/useCategories.ts`      | Query y mutation para categorías (usa TanStack Query + store) |
+| `useProducts`        | `hooks/useProducts.tsx`       | Query y mutation para productos                               |
 | `useFilePdfDownload` | `hooks/useFilePdfDownload.ts` | Lógica de descarga y guardado de PDFs                         |
 | `useColorScheme`     | `hooks/useColorScheme.ts`     | Re-export de React Native para tema oscuro                    |
 
