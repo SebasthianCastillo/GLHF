@@ -7,6 +7,8 @@ import {
   ScrollView,
   Alert,
   ActivityIndicator,
+  Platform,
+  Modal,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useExpenses } from "../hooks/useExpenses";
@@ -15,28 +17,10 @@ import { Picker } from "@react-native-picker/picker";
 import { Ionicons } from "@expo/vector-icons";
 import RouterBackArrow from "@/components/RouterBackArrow";
 import { SafeAreaView } from "react-native-safe-area-context";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 const formatDateForInput = (date: Date) => {
   return date.toISOString().split("T")[0];
-};
-
-// Auto-formatear fecha mientras el usuario escribe
-const formatDateInput = (text: string): string => {
-  // Solo permitir números
-  let cleaned = text.replace(/[^0-9]/g, "");
-  
-  // Limitar a 8 dígitos (YYYYMMDD)
-  cleaned = cleaned.slice(0, 8);
-  
-  // Agregar guiones automáticamente
-  if (cleaned.length >= 4) {
-    cleaned = cleaned.slice(0, 4) + "-" + cleaned.slice(4);
-  }
-  if (cleaned.length >= 7) {
-    cleaned = cleaned.slice(0, 7) + "-" + cleaned.slice(7);
-  }
-  
-  return cleaned;
 };
 
 export default function AddExpense() {
