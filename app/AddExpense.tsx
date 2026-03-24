@@ -15,8 +15,28 @@ import { Picker } from "@react-native-picker/picker";
 import { Ionicons } from "@expo/vector-icons";
 import RouterBackArrow from "@/components/RouterBackArrow";
 import { SafeAreaView } from "react-native-safe-area-context";
+
 const formatDateForInput = (date: Date) => {
   return date.toISOString().split("T")[0];
+};
+
+// Auto-formatear fecha mientras el usuario escribe
+const formatDateInput = (text: string): string => {
+  // Solo permitir números
+  let cleaned = text.replace(/[^0-9]/g, "");
+  
+  // Limitar a 8 dígitos (YYYYMMDD)
+  cleaned = cleaned.slice(0, 8);
+  
+  // Agregar guiones automáticamente
+  if (cleaned.length >= 4) {
+    cleaned = cleaned.slice(0, 4) + "-" + cleaned.slice(4);
+  }
+  if (cleaned.length >= 7) {
+    cleaned = cleaned.slice(0, 7) + "-" + cleaned.slice(7);
+  }
+  
+  return cleaned;
 };
 
 export default function AddExpense() {
@@ -34,6 +54,10 @@ export default function AddExpense() {
   const [categoryId, setCategoryId] = useState<string>("");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Date picker states
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [dueDatePickerOpen, setDueDatePickerOpen] = useState(false);
 
   useEffect(() => {
     if (!categoryId && categories.length > 0) {
@@ -124,16 +148,13 @@ export default function AddExpense() {
             <Text className="text-[#aaaaaa] text-sm font-medium mb-2">
               Fecha *
             </Text>
-            <View className="bg-[#272727] rounded-xl border border-[#3f3f3f] px-4 py-3 flex-row items-center justify-between">
-              <TextInput
-                className="text-white text-base flex-1"
-                placeholder="YYYY-MM-DD"
-                value={date}
-                onChangeText={setDate}
-                placeholderTextColor="#666666"
-              />
+            <TouchableOpacity
+              className="bg-[#272727] rounded-xl border border-[#3f3f3f] px-4 py-3 flex-row items-center justify-between"
+              onPress={() => setDatePickerOpen(true)}
+            >
+              <Text className="text-white text-base">{date}</Text>
               <Ionicons name="calendar-outline" size={20} color="#aaaaaa" />
-            </View>
+            </TouchableOpacity>
           </View>
 
           {/* Due Date Input */}
@@ -141,16 +162,13 @@ export default function AddExpense() {
             <Text className="text-[#aaaaaa] text-sm font-medium mb-2">
               Fecha de Vencimiento *
             </Text>
-            <View className="bg-[#272727] rounded-xl border border-[#3f3f3f] px-4 py-3 flex-row items-center justify-between">
-              <TextInput
-                className="text-white text-base flex-1"
-                placeholder="YYYY-MM-DD"
-                value={dueDate}
-                onChangeText={setDueDate}
-                placeholderTextColor="#666666"
-              />
+            <TouchableOpacity
+              className="bg-[#272727] rounded-xl border border-[#3f3f3f] px-4 py-3 flex-row items-center justify-between"
+              onPress={() => setDueDatePickerOpen(true)}
+            >
+              <Text className="text-white text-base">{dueDate}</Text>
               <Ionicons name="calendar-outline" size={20} color="#aaaaaa" />
-            </View>
+            </TouchableOpacity>
           </View>
 
           {/* Category Picker */}
@@ -221,6 +239,35 @@ export default function AddExpense() {
           <Text className="text-[#aaaaaa] font-medium">Cancelar</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Date Pickers */}
+      {datePickerOpen && (
+        <DateTimePicker
+          value={new Date(date)}
+          mode="date"
+          display={Platform.OS === "ios" ? "spinner" : "default"}
+          onChange={(event, selectedDate) => {
+            setDatePickerOpen(false);
+            if (selectedDate) {
+              setDate(formatDateForInput(selectedDate));
+            }
+          }}
+        />
+      )}
+
+      {dueDatePickerOpen && (
+        <DateTimePicker
+          value={new Date(dueDate)}
+          mode="date"
+          display={Platform.OS === "ios" ? "spinner" : "default"}
+          onChange={(event, selectedDate) => {
+            setDueDatePickerOpen(false);
+            if (selectedDate) {
+              setDueDate(formatDateForInput(selectedDate));
+            }
+          }}
+        />
+      )}
     </SafeAreaView>
   );
 }

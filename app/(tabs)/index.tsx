@@ -49,7 +49,7 @@ export default function HomeScreen() {
   useFocusEffect(
     useCallback(() => {
       getCurrentUser();
-    }, [])
+    }, []),
   );
 
   const data = JSON.stringify(notification, undefined, 2);
@@ -114,7 +114,7 @@ export default function HomeScreen() {
     setLoading(true);
     try {
       const endpoint = isLoginMode ? "/login" : "/register";
-      const payload = isLoginMode 
+      const payload = isLoginMode
         ? { email, password }
         : { email, password, name: name || email.split("@")[0] };
 
@@ -122,7 +122,7 @@ export default function HomeScreen() {
 
       await AsyncStorage.setItem("token", data.token);
       useUserStore.getState().setUser(data.user);
-      
+
       setEmail("");
       setPassword("");
       setName("");
@@ -198,7 +198,11 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        className="flex-1"
+        scrollEventThrottle={16}
+      >
         <View className="pt-4 pb-4">
           <Text className="text-white text-base font-semibold px-4 mb-3">
             Tus Categorías
@@ -213,11 +217,13 @@ export default function HomeScreen() {
                 <Ionicons name="person-add-outline" size={32} color="#F59E0B" />
               </View>
               <Text className="text-white text-lg font-semibold mb-2">
-                {isLoginMode ? "¡Bienvenido de nuevo!" : "¡Únete a Captain Chef!"}
+                {isLoginMode
+                  ? "¡Bienvenido de nuevo!"
+                  : "¡Únete a Captain Chef!"}
               </Text>
               <Text className="text-neutral-400 text-sm text-center mb-5">
-                {isLoginMode 
-                  ? "Ingresa con tu correo y contraseña" 
+                {isLoginMode
+                  ? "Ingresa con tu correo y contraseña"
                   : "Guarda tus recetas y categorías en la nube"}
               </Text>
 
@@ -257,7 +263,9 @@ export default function HomeScreen() {
                   className="self-end mb-4"
                   onPress={() => setShowForgotPassword(true)}
                 >
-                  <Text className="text-amber-500 text-sm">¿Olvidaste tu contraseña?</Text>
+                  <Text className="text-amber-500 text-sm">
+                    ¿Olvidaste tu contraseña?
+                  </Text>
                 </TouchableOpacity>
               )}
 
@@ -311,20 +319,22 @@ export default function HomeScreen() {
         )}
       </ScrollView>
       {user ? (
-        <View className="absolute bottom-6 right-6 items-center">
-          <TouchableOpacity
-            className="w-14 h-14 rounded-full bg-amber-500 shadow-lg shadow-amber-500/30 justify-center items-center"
-            activeOpacity={0.8}
-            onPress={() => router.push("../AddCategory")}
-          >
-            <Ionicons name="add" size={28} color="white" />
-          </TouchableOpacity>
-          <Text className="text-neutral-500 text-xs mt-1.5 font-medium">
-            Agregar
-          </Text>
+        <View className="flex-1 justify-end items-end p-6">
+          <View className="items-center">
+            <TouchableOpacity
+              className="w-14 h-14 rounded-full bg-amber-500 shadow-lg shadow-amber-500/30 justify-center items-center"
+              activeOpacity={0.8}
+              onPress={() => router.push("../AddCategory")}
+            >
+              <Ionicons name="add" size={28} color="white" />
+            </TouchableOpacity>
+            <Text className="text-neutral-500 text-xs mt-1.5 font-medium">
+              Agregar
+            </Text>
+          </View>
         </View>
       ) : null}
-      <View className="h-20" />
+      <View className="" />
       <ProfileModal
         showProfileModal={showProfileModal}
         setShowProfileModal={setShowProfileModal}
@@ -341,7 +351,8 @@ export default function HomeScreen() {
               Recuperar contraseña
             </Text>
             <Text className="text-neutral-400 text-sm mb-4">
-              Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.
+              Ingresa tu correo electrónico y te enviaremos un enlace para
+              restablecer tu contraseña.
             </Text>
             <TextInput
               className="w-full bg-neutral-800 text-white rounded-xl px-4 py-3 mb-4 border border-neutral-700"

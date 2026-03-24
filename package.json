@@ -17,6 +17,7 @@
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
     "@react-native-async-storage/async-storage": "1.23.1",
+    "@react-native-community/datetimepicker": "8.0.1",
     "@react-native-community/slider": "4.5.2",
     "@react-native-firebase/app": "^23.4.1",
     "@react-native-google-signin/google-signin": "^10.1.2",

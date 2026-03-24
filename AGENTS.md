@@ -1,5 +1,23 @@
 # GLHF - Documentación del Proyecto
 
+## Reglas de Estilo
+
+**Nunca usar bun.** Usar siempre npm para instalar dependencias y ejecutar scripts.
+
+**Siempre usar NativeWind (className) para UI.** No usar StyleSheet ni estilos inline.
+
+```tsx
+// ✅ Correcto
+<View className="flex-1 bg-neutral-900 p-4">
+  <Text className="text-white text-lg font-bold">Title</Text>
+</View>
+
+// ❌ Incorrecto
+<View style={{ flex: 1, backgroundColor: '#0f0f0f' }}>
+  <Text style={{ color: 'white', fontSize: 16 }}>Title</Text>
+</View>
+```
+
 ## Comandos para Desarrollar
 
 ### Frontend (Expo)
