@@ -44,8 +44,8 @@ router.patch(
   "/quantityUpdateProduct",
   validate(quantityUpdateSchema),
   asyncHandler(async (req, res) => {
-    const { _id, quantity, operation, cost } = req.body;
-    const productId = parseInt(_id);
+    const { id, quantity, operation, cost } = req.body;
+    const productId = parseInt(id);
 
     if (operation === "add") {
       const costValue = parseFloat(cost) || 0;

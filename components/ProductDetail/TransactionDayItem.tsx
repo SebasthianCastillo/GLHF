@@ -8,7 +8,7 @@ type TransactionDayItemProps = {
     added: number;
     removed: number;
     transactions: Array<{
-      _id: string;
+      id: string;
       quantity: number;
       date: string;
       format: string;
@@ -37,17 +37,19 @@ export const TransactionDayItem = ({
     <View className="mb-3">
       <TouchableOpacity
         onPress={() => onToggleExpand(item.date)}
-        className={`flex-row justify-between items-center p-4 rounded-2xl ${
-          isToday 
-            ? "bg-[#272727]" 
-            : "bg-[#272727]/60"
+        className={`flex-row justify-between items-center p-4  ${
+          isToday ? "bg-[#272727]" : "bg-[#272727]/60"
         }`}
       >
         <View className="flex-row items-center">
-          <View className={`w-10 h-10 rounded-xl items-center justify-center mr-3 ${
-            isToday ? "bg-[#F59E0B]" : "bg-[#3f3f3f]"
-          }`}>
-            <Text className={`text-lg font-bold ${isToday ? "text-black" : "text-white"}`}>
+          <View
+            className={`w-10 h-10 rounded-xl items-center justify-center mr-3 ${
+              isToday ? "bg-[#F59E0B]" : "bg-[#3f3f3f]"
+            }`}
+          >
+            <Text
+              className={`text-lg font-bold ${isToday ? "text-black" : "text-white"}`}
+            >
               {day}
             </Text>
           </View>
@@ -66,7 +68,9 @@ export const TransactionDayItem = ({
             <Text className="text-[#aaa] text-[10px]">Agregado</Text>
           </View>
           <View className="items-center min-w-[40px]">
-            <Text className="text-[#F59E0B] font-bold text-lg">{item.removed}</Text>
+            <Text className="text-[#F59E0B] font-bold text-lg">
+              {item.removed}
+            </Text>
             <Text className="text-[#aaa] text-[10px]">Retirado</Text>
           </View>
           <View className="w-6 items-center justify-center">
@@ -83,23 +87,25 @@ export const TransactionDayItem = ({
         <View className="mt-1 bg-[#1f1f1f] rounded-b-2xl overflow-hidden">
           {item.transactions.map((transaction, index) => (
             <View
-              key={transaction._id}
+              key={transaction.id}
               className={`flex-row h-12 items-center px-4 ${
                 transaction.operation === "add"
                   ? "bg-[#2ba640]/10"
                   : "bg-[#F59E0B]/10"
               } ${
-                index !== item.transactions.length - 1 
-                  ? "border-b border-[#3f3f3f]" 
+                index !== item.transactions.length - 1
+                  ? "border-b border-[#3f3f3f]"
                   : ""
               }`}
             >
               <View className="flex-1 items-center justify-center">
-                <Text className={`font-semibold text-base ${
-                  transaction.operation === "add" 
-                    ? "text-[#2ba640]" 
-                    : "text-[#F59E0B]"
-                }`}>
+                <Text
+                  className={`font-semibold text-base ${
+                    transaction.operation === "add"
+                      ? "text-[#2ba640]"
+                      : "text-[#F59E0B]"
+                  }`}
+                >
                   {transaction.operation === "add" ? "+" : "-"}{" "}
                   {transaction.quantity}
                 </Text>
@@ -111,9 +117,9 @@ export const TransactionDayItem = ({
               </View>
               <View className="flex-1 items-center justify-center border-l border-[#3f3f3f]">
                 <Text className="text-[#aaa] text-xs">
-                  {new Date(transaction.date).toLocaleTimeString([], { 
-                    hour: '2-digit', 
-                    minute: '2-digit' 
+                  {new Date(transaction.date).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
                   })}
                 </Text>
               </View>

@@ -42,7 +42,6 @@ const Products = () => {
   const categoryObject = Array.isArray(category)
     ? JSON.parse(category[0])
     : JSON.parse(category || "{}");
-  console.log(categoryObject);
 
   const [CantidadProducto, setCantidadProducto] = useState(0);
   const [selectedItemId, setSelectedItemId] = useState("");
@@ -77,9 +76,10 @@ const Products = () => {
     idProducto: any,
     fromWhatQuantityCallfunction: string,
   ) => {
-    const product = products?.find((p: any) => p._id === idProducto);
+    const product = products?.find((p: any) => p.id === idProducto);
     const cost = product?.cost || 0;
-
+    console.log("cost", cost);
+    console.log("idProducto", idProducto);
     const quantityProduct =
       fromWhatQuantityCallfunction === "single" ? 1 : CantidadProducto;
     let operation = "add";
@@ -220,7 +220,7 @@ const Products = () => {
                 key={item.id}
               >
                 <Pressable
-                  onPress={() => handleLongPressProduct(item._id, item.Name)}
+                  onPress={() => handleLongPressProduct(item.id, item.Name)}
                   className="flex-1 flex-row items-center mr-2"
                 >
                   <View className="flex-1">
@@ -246,13 +246,13 @@ const Products = () => {
 
                 <Pressable
                   onPress={() => {
-                    setSelectedProductId(item._id);
+                    setSelectedProductId(item.id);
                     setShowFormatPicker(true);
                   }}
                   className="w-9 h-9 bg-neutral-800 rounded-lg justify-center items-center border border-neutral-700"
                 >
                   <Text className="text-amber-500 text-sm font-semibold">
-                    {selectedValuesFormatPicker?.[item._id] || "P"}
+                    {selectedValuesFormatPicker?.[item.id] || "P"}
                   </Text>
                 </Pressable>
                 <FormatPicker
@@ -261,17 +261,17 @@ const Products = () => {
                 />
 
                 <Pressable
-                  onPress={() => handlePressMinus(item._id, "single")}
-                  onLongPress={() => toggleSignVisibility(item._id, false)}
+                  onPress={() => handlePressMinus(item.id, "single")}
+                  onLongPress={() => toggleSignVisibility(item.id, false)}
                   className={`w-9 h-9 rounded-lg bg-neutral-800 justify-center items-center mx-2 ${
-                    pressedItemId === item._id ? "opacity-0" : "opacity-100"
+                    pressedItemId === item.id ? "opacity-0" : "opacity-100"
                   }`}
                 >
                   <FontAwesome6 name="minus" size={18} color="white" />
                 </Pressable>
 
                 {inputVisibility.showCustomCant &&
-                  item._id === selectedItemId && (
+                  item.id === selectedItemId && (
                     <View className="rounded-lg space-y-1 mr-1">
                       <CustomField
                         value={CantidadProducto}
@@ -288,8 +288,8 @@ const Products = () => {
                           title={`${inputVisibility.isOnAdd ? "➕" : "➖"}`}
                           onPress={() =>
                             inputVisibility.isOnAdd
-                              ? handlePressAdd(item._id, "multiple")
-                              : handlePressMinus(item._id, "multiple")
+                              ? handlePressAdd(item.id, "multiple")
+                              : handlePressMinus(item.id, "multiple")
                           }
                         />
                       </View>
@@ -311,10 +311,10 @@ const Products = () => {
                 )}
 
                 <Pressable
-                  onPress={() => handlePressAdd(item._id, "single")}
-                  onLongPress={() => toggleSignVisibility(item._id, true)}
+                  onPress={() => handlePressAdd(item.id, "single")}
+                  onLongPress={() => toggleSignVisibility(item.id, true)}
                   className={`w-9 h-9 rounded-lg bg-neutral-800 justify-center items-center mr-2 ${
-                    pressedItemId === item._id ? "opacity-0" : "opacity-100"
+                    pressedItemId === item.id ? "opacity-0" : "opacity-100"
                   }`}
                 >
                   <FontAwesome6 name="add" size={18} color="white" />

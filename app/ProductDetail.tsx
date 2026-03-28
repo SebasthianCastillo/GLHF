@@ -65,9 +65,9 @@ const ProductDetail = () => {
         try {
           console.log("productObject", productObject);
           setIsLoading(true);
-          const data = await fetchProductDetailsById(productObject._id);
+          const data = await fetchProductDetailsById(productObject.id);
 
-          filterByMonth(data, currentMonth, currentYear, productObject._id, {
+          filterByMonth(data, currentMonth, currentYear, productObject.id, {
             setFilteredDetails,
             setDailySummaries,
             setProductDetailSummaryAdd,
@@ -91,7 +91,7 @@ const ProductDetail = () => {
 
   const getMonthlySummaries = async () => {
     try {
-      const data = await fetchMonthlySummaries(productObject._id);
+      const data = await fetchMonthlySummaries(productObject.id);
 
       setMonthlySummaries(data);
     } catch (error) {
@@ -146,7 +146,7 @@ const ProductDetail = () => {
       item.month - 1 === monthIndex && item.year === today.getFullYear();
     return (
       <View className="mb-3">
-        <View className="flex-row justify-between items-center bg-[#272727] p-4 pl-4 rounded-2xl">
+        <View className="flex-row justify-between items-center bg-[#272727] p-4 pl-4 ">
           <View className="flex-row items-center">
             <View>
               <Text className="text-white text-base font-semibold capitalize">
@@ -162,13 +162,13 @@ const ProductDetail = () => {
           <View className="flex-row items-center gap-8">
             <View className="items-center min-w-[50px]">
               <Text className="text-[#2ba640] font-bold text-lg">
-                +{item.added}
+                {item.added}
               </Text>
               <Text className="text-[#aaa] text-[10px]">Agregados</Text>
             </View>
             <View className="items-center min-w-[50px]">
               <Text className="text-[#F59E0B] font-bold text-lg">
-                -{item.removed}
+                {item.removed}
               </Text>
               <Text className="text-[#aaa] text-[10px]">Retirados</Text>
             </View>
@@ -224,7 +224,7 @@ const ProductDetail = () => {
         </TouchableOpacity>
       </View>
 
-      <View className="flex-1 px-4 py-4">
+      <View className={`flex-1 ${viewMode === "days" ? "px-2" : "px-0"} py-4`}>
         {viewMode === "days" ? (
           <View className="flex-1">
             <View className="mb-4">
@@ -260,8 +260,8 @@ const ProductDetail = () => {
             keyExtractor={(year) => year.toString()}
             renderItem={({ item: year }) => (
               <View key={year}>
-                <View className="py-3 px-2 mb-3 border-b border-[#3f3f3f]">
-                  <Text className="text-[#aaa] font-semibold text-sm tracking-wide">
+                <View className="py-3 px-2 items-center">
+                  <Text className="text-[#aaa] font-semibold text-base tracking-wide">
                     {year}
                   </Text>
                 </View>

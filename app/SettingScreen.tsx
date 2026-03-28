@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { View, Text, Switch, Pressable, ScrollView } from "react-native";
-import axios from "axios";
-import Constants from "expo-constants";
+
 import { useUserStore } from "@/store/useUserStore";
 import RouterBackArrow from "@/components/RouterBackArrow";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
@@ -13,7 +12,7 @@ import { updateUserSettings } from "./features/settings/api/settings";
 const SettingsScreen = () => {
   const user = useUserStore((state) => state.user);
   const [enabled, setEnabled] = useState(
-    user?.settings.reminderSettings.enabled,
+    user?.settings.reminderEnabled,
   );
 
   return (

@@ -28,7 +28,7 @@ const ProductStockValues = () => {
   const [tempCost, setTempCost] = useState<Record<string, string>>({});
   const [showInfo, setShowInfo] = useState(false);
 
-  const { getProducts, updateProductCost } = useProducts(categoryObject._id);
+  const { getProducts, updateProductCost } = useProducts(categoryObject.id);
   const { data: products, isLoading } = getProducts();
 
   const filteredProducts = (products ?? []).filter((product: any) =>
@@ -52,12 +52,11 @@ const ProductStockValues = () => {
   return (
     <View className="flex-1 bg-black">
       <SafeAreaView className="flex-1">
-        <View className="bg-neutral-900/80 backdrop-blur-xl border-b border-neutral-800 px-4 py-3">
+        <View className="bg-neutral-900/80 backdrop-blur-xl  px-4 py-4">
           <View className="flex-row items-center justify-between">
-            <TouchableOpacity onPress={() => router.back()} className="mr-2">
-              <FontAwesome6 name="arrow-left" size={20} color="white" />
-            </TouchableOpacity>
-            <Text className="text-white text-lg font-bold">Valor de Stock</Text>
+            <RouterBackArrow />
+
+            <Text className="text-white text-lg font-bold">Valor de stock</Text>
             <View className="flex-row items-center">
               <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
               <TouchableOpacity
@@ -76,10 +75,7 @@ const ProductStockValues = () => {
         >
           <View className="pt-4 space-y-3 pb-24">
             {filteredProducts.map((item: any) => (
-              <View
-                key={item._id}
-                className="bg-neutral-900 mx-3 p-4 rounded-xl border border-neutral-800"
-              >
+              <View key={item.id} className="bg-neutral-900 p-4 ">
                 <View className="flex-row justify-between items-center mb-2">
                   <Text className="text-white text-base font-semibold">
                     {item.name}
@@ -95,17 +91,19 @@ const ProductStockValues = () => {
                 <View className="h-px bg-neutral-800 mb-3" />
 
                 <View className="flex-row items-center justify-between mb-2">
-                  <Text className="text-gray-400 text-sm">Costo x unidad:</Text>
+                  <Text className="text-gray-400 text-sm">
+                    Costo por unidad:
+                  </Text>
                   <View className="flex-row items-center bg-neutral-800 rounded-lg px-2 py-1.5">
                     <Text className="text-amber-500 text-sm">$</Text>
                     <TextInput
                       value={
-                        tempCost[item._id] !== undefined
-                          ? tempCost[item._id]
+                        tempCost[item.id] !== undefined
+                          ? tempCost[item.id]
                           : String(item.cost || 0)
                       }
                       onChangeText={(text: string) =>
-                        handleCostChange(item._id, text)
+                        handleCostChange(item.id, text)
                       }
                       placeholder="0"
                       placeholderTextColor="#666"

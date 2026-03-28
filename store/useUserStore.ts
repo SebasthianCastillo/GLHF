@@ -14,14 +14,12 @@ interface User {
     }
   ];
   settings: {
-    reminderSettings: {
-      enabled: boolean;
-      intervalDays: { type: Number; default: 7 };
-      lowStockThreshold: { type: Number; default: 5 };
-    };
-    stockValueSettings: {
-      enabled: boolean;
-    };
+    // reminderSettings (flattened)
+    reminderEnabled: boolean;
+    reminderIntervalDays: number;
+    reminderLowStockThreshold: number;
+    // stockValueSettings (flattened)
+    stockValueEnabled: boolean;
   };
   passwordHash: String; // For local auth
   expoPushToken: String;
@@ -41,32 +39,13 @@ export const useUserStore = create<UserStore>((set) => ({
     set((state) => {
       if (!state.user) return state;
       
-      const settingKey = Object.keys(newSetting)[0];
-      const settingValue = Object.values(newSetting)[0];
-      
-      if (settingKey === 'enabled' && 'stockValueSettings' in state.user.settings) {
-        return {
-          user: {
-            ...state.user,
-            settings: {
-              ...state.user.settings,
-              stockValueSettings: {
-                enabled: settingValue as boolean,
-              },
-            },
-          },
-        };
-      }
-      
+      // Flat structure - directly merge the settings
       return {
         user: {
           ...state.user,
           settings: {
             ...state.user.settings,
-            reminderSettings: {
-              ...state.user.settings.reminderSettings,
-              ...newSetting,
-            },
+            ...newSetting,
           },
         },
       };

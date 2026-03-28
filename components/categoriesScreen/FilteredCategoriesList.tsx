@@ -25,7 +25,7 @@ const FilteredCategoriesList = () => {
     setSelectedCategoryId(categoryId);
     setIsPickerVisible(true);
   };
-  console.log("categorias data", categoriesData);
+
   const navigateToProductosFromCategory = (category: object) => {
     router.push({
       pathname: "/Products",

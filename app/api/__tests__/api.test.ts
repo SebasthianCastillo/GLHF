@@ -14,7 +14,13 @@ jest.mock("@react-native-async-storage/async-storage", () => ({
   getItem: jest.fn(),
 }));
 
-import { registerProduct, fetchProducts, updateQuantity, modifyProduct, deleteProduct } from "../products";
+import {
+  registerProduct,
+  fetchProducts,
+  updateQuantity,
+  modifyProduct,
+  deleteProduct,
+} from "../products";
 import { getCategories } from "../categories";
 
 describe("products API", () => {
@@ -32,7 +38,7 @@ describe("products API", () => {
       await registerProduct("Test Product", 10, "cat-123");
       expect(mockAxiosPost).toHaveBeenCalledWith(
         "http://localhost:3000/addProduct",
-        { Name: "Test Product", quantity: 10, CategoryID: "cat-123" }
+        { Name: "Test Product", quantity: 10, CategoryID: "cat-123" },
       );
     });
   });
@@ -44,7 +50,7 @@ describe("products API", () => {
       const result = await fetchProducts("cat-123");
       expect(mockAxiosGet).toHaveBeenCalledWith(
         "http://localhost:3000/productsByIDCategory",
-        { params: { CategoryKey: "cat-123" } }
+        { params: { CategoryKey: "cat-123" } },
       );
       expect(result).toEqual(mockProducts);
     });
@@ -57,7 +63,7 @@ describe("products API", () => {
       await updateQuantity("prod-1", 5, "kg", "add");
       expect(mockAxiosPatch).toHaveBeenCalledWith(
         "http://localhost:3000/quantityUpdateProduct",
-        { _id: "prod-1", quantity: 5, operation: "add" }
+        { id: "prod-1", quantity: 5, operation: "add" },
       );
       expect(mockAxiosPost).toHaveBeenCalledWith(
         "http://localhost:3000/addProductDetail",
@@ -66,7 +72,7 @@ describe("products API", () => {
           quantity: 5,
           format: "kg",
           operation: "add",
-        })
+        }),
       );
     });
   });
@@ -76,7 +82,7 @@ describe("products API", () => {
       await modifyProduct("prod-1", "New Name");
       expect(mockAxiosPatch).toHaveBeenCalledWith(
         "http://localhost:3000/updateProductName/prod-1",
-        { newName: "New Name" }
+        { newName: "New Name" },
       );
     });
   });
@@ -85,7 +91,7 @@ describe("products API", () => {
     it("should call delete API", async () => {
       await deleteProduct("prod-1");
       expect(mockAxiosDelete).toHaveBeenCalledWith(
-        "http://localhost:3000/deleteProduct/prod-1"
+        "http://localhost:3000/deleteProduct/prod-1",
       );
     });
   });
@@ -103,13 +109,13 @@ describe("categories API", () => {
       AsyncStorage.getItem.mockResolvedValueOnce("mock-token");
       const mockCategories = [{ id: "1", name: "Category 1" }];
       mockAxiosGet.mockResolvedValueOnce({ data: mockCategories });
-      
+
       const result = await getCategories();
-      
+
       expect(AsyncStorage.getItem).toHaveBeenCalledWith("token");
       expect(mockAxiosGet).toHaveBeenCalledWith(
         "http://localhost:3000/categories",
-        { headers: { Authorization: "Bearer mock-token" } }
+        { headers: { Authorization: "Bearer mock-token" } },
       );
       expect(result).toEqual(mockCategories);
     });
@@ -117,7 +123,7 @@ describe("categories API", () => {
     it("should throw error when no token", async () => {
       const AsyncStorage = require("@react-native-async-storage/async-storage");
       AsyncStorage.getItem.mockResolvedValueOnce(null);
-      
+
       await expect(getCategories()).rejects.toThrow("No token found");
     });
   });

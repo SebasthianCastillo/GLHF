@@ -14,7 +14,7 @@ export interface ProductData {
 export const registerProduct = async (
   ProductName: string,
   quantityProduct: number,
-  CategoryKey: string
+  CategoryKey: string,
 ) => {
   try {
     const ProductData = {
@@ -45,11 +45,11 @@ export const updateQuantity = async (
   qty: number,
   format: string,
   operation: string,
-  cost?: number
+  cost?: number,
 ) => {
   try {
     await axios.patch(`${API_URL}/quantityUpdateProduct`, {
-      _id: id,
+      id: id,
       quantity: qty,
       operation,
       cost,
@@ -66,7 +66,7 @@ export const addProductDetail = async (
   qty: number,
   format: string,
   operation: string,
-  cost?: number
+  cost?: number,
 ) => {
   try {
     await axios.post(`${API_URL}/addProductDetail`, {

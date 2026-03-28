@@ -42,9 +42,15 @@ router.get(
   '/productDetailSummaryByOperationAdd',
   validateQuery(productDetailQuerySchema),
   asyncHandler(async (req, res) => {
-    const { ProductKey } = req.query;
-    const currentMonth = new Date(req.query.currentMonth);
-    const result = await getOperationSummary(ProductKey, currentMonth, 'add');
+    const { ProductKey, currentMonth } = req.query;
+    console.log('🔍 backend - productDetailSummaryByOperationAdd:', { ProductKey, currentMonth });
+    const monthDate = new Date(currentMonth);
+    console.log('🔍 backend - monthDate:', monthDate);
+    if (isNaN(monthDate.getTime())) {
+      return res.status(400).json({ error: 'Invalid date format', received: currentMonth });
+    }
+    const result = await getOperationSummary(ProductKey, monthDate, 'add');
+    console.log('🔍 backend - result:', result);
     res.status(200).json(result);
   })
 );
@@ -53,9 +59,12 @@ router.get(
   '/productDetailSummaryByOperationMinus',
   validateQuery(productDetailQuerySchema),
   asyncHandler(async (req, res) => {
-    const { ProductKey } = req.query;
-    const currentMonth = new Date(req.query.currentMonth);
-    const result = await getOperationSummary(ProductKey, currentMonth, 'minus');
+    const { ProductKey, currentMonth } = req.query;
+    const monthDate = new Date(currentMonth);
+    if (isNaN(monthDate.getTime())) {
+      return res.status(400).json({ error: 'Invalid date format', received: currentMonth });
+    }
+    const result = await getOperationSummary(ProductKey, monthDate, 'minus');
     res.status(200).json(result);
   })
 );

@@ -4,7 +4,7 @@ import Constants from "expo-constants";
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
 interface ProductDetail {
-  _id: string;
+  id: string;
   quantity: number;
   date: Date;
   format: string;
@@ -154,25 +154,33 @@ export const fetchSummaryData = async (
   callbacks: SetSummaryCallbacks,
 ) => {
   try {
+    console.log('📊 fetchSummaryData:', { ProductKey, currentMonth });
+    
     const addResponse = await fetchSummaryByOperationAdd(
       ProductKey,
       currentMonth,
     );
+    console.log('📊 addResponse:', addResponse);
 
     const minusResponse = await fetchSummaryByOperationMinus(
       ProductKey,
       currentMonth,
     );
+    console.log('📊 minusResponse:', minusResponse);
 
     if (Array.isArray(addResponse) && addResponse.length > 0) {
-      callbacks.setProductDetailSummaryAdd(addResponse[0].totalQuantity);
+      console.log('📊 setting add:', addResponse[0].total_quantity);
+      callbacks.setProductDetailSummaryAdd(addResponse[0].total_quantity);
     } else {
+      console.log('📊 setting add to 0');
       callbacks.setProductDetailSummaryAdd(0);
     }
 
     if (Array.isArray(minusResponse) && minusResponse.length > 0) {
-      callbacks.setProductDetailSummaryMinus(minusResponse[0].totalQuantity);
+      console.log('📊 setting minus:', minusResponse[0].total_quantity);
+      callbacks.setProductDetailSummaryMinus(minusResponse[0].total_quantity);
     } else {
+      console.log('📊 setting minus to 0');
       callbacks.setProductDetailSummaryMinus(0);
     }
   } catch (error) {

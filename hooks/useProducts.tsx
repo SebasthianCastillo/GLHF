@@ -43,7 +43,7 @@ export const useProducts = (categoryId: string) => {
         if (!old) return old;
         const sign = productData.operation === "add" ? 1 : -1;
         const product = old.find(
-          (product: any) => product._id === productData.id,
+          (product: any) => product.id === productData.id,
         );
         if (!product) {
           return old;

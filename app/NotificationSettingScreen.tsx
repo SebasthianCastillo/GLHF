@@ -12,11 +12,11 @@ const NotificationSettingScreen = () => {
     (state) => state.updateUserSettingsContext,
   );
   const [intervalDays, setIntervalDays] = useState(
-    user?.settings.reminderSettings.intervalDays.toString(),
+    user?.settings.reminderIntervalDays?.toString() || "7",
   );
 
   const [lowStockThreshold, setLowStockThreshold] = useState(
-    user?.settings.reminderSettings.lowStockThreshold.toString(),
+    user?.settings.reminderLowStockThreshold?.toString() || "5",
   );
 
   interface NotificationSettings {

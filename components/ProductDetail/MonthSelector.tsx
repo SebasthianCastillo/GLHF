@@ -18,9 +18,9 @@ export const MonthSelector = ({
   viewMode = "days",
 }: MonthSelectorProps) => {
   return (
-    <View className="flex-row items-center justify-between px-2 py-3 bg-[#272727] rounded-xl">
-      <TouchableOpacity 
-        onPress={onPrevMonth} 
+    <View className="flex-row items-center justify-between px-2 py-3 bg-[#272727] rounded-sm">
+      <TouchableOpacity
+        onPress={onPrevMonth}
         className="w-10 h-10 items-center justify-center"
       >
         <Text className="text-[#F59E0B] text-3xl font-medium">‹</Text>
@@ -30,8 +30,8 @@ export const MonthSelector = ({
           ? formatMonthYear(currentMonth, currentYear.toString())
           : currentYear.toString()}
       </Text>
-      <TouchableOpacity 
-        onPress={onNextMonth} 
+      <TouchableOpacity
+        onPress={onNextMonth}
         className="w-10 h-10 items-center justify-center"
       >
         <Text className="text-[#F59E0B] text-3xl font-medium">›</Text>
