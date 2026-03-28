@@ -25,7 +25,7 @@ const FilteredCategoriesList = () => {
     setSelectedCategoryId(categoryId);
     setIsPickerVisible(true);
   };
-
+  console.log("categorias data", categoriesData);
   const navigateToProductosFromCategory = (category: object) => {
     router.push({
       pathname: "/Products",
@@ -120,16 +120,16 @@ const FilteredCategoriesList = () => {
               .slice(rowIndex * 2, rowIndex * 2 + 2)
               .map((category: any) => (
                 <TouchableOpacity
-                  key={category._id}
+                  key={category.id}
                   className="w-[48%] rounded-xl overflow-hidden"
                   activeOpacity={0.7}
                   onPress={() => navigateToProductosFromCategory(category)}
-                  onLongPress={() => OnPressColorChange(category._id)}
+                  onLongPress={() => OnPressColorChange(category.id)}
                 >
                   <View
                     className="h-24 justify-center items-center relative"
                     style={{
-                      backgroundColor: colors[category._id] || "#F59E0B",
+                      backgroundColor: colors[category.id] || "#F59E0B",
                     }}
                   >
                     <Ionicons

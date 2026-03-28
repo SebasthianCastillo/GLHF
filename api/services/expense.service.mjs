@@ -44,7 +44,7 @@ export const createExpense = async (data) => {
       categoryId: parseInt(categoryId),
       description: description || null,
       userId: parseInt(userId),
-      status: "PENDING",
+      status: "OVERDUE",
     },
     include: {
       category: true,
@@ -52,4 +52,44 @@ export const createExpense = async (data) => {
   });
 
   return expense;
+};
+
+export const payExpense = async (expenseId, amount) => {
+  return prisma.$transaction(async (tx) => {
+    const expense = await tx.expense.findUnique({ where: { id: expenseId } });
+    
+    if (!expense) {
+      throw new Error("Expense not found");
+    }
+    
+    const payment = await tx.payment.create({
+      data: { 
+        expenseId, 
+        amount: parseFloat(amount) 
+      }
+    });
+    
+    const totalPaid = await tx.payment.aggregate({
+      where: { expenseId },
+      _sum: { amount: true }
+    });
+    
+    const newStatus = (totalPaid._sum.amount || 0) >= expense.amount 
+      ? 'PAID' 
+      : 'PARTIAL';
+    
+    await tx.expense.update({
+      where: { id: expenseId },
+      data: { status: newStatus }
+    });
+    
+    return payment;
+  });
+};
+
+export const getPaymentsByExpense = async (expenseId) => {
+  return prisma.payment.findMany({
+    where: { expenseId },
+    orderBy: { paidAt: 'desc' }
+  });
 };

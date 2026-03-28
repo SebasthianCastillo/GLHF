@@ -4,7 +4,65 @@
 
 **Nunca usar bun.** Usar siempre npm para instalar dependencias y ejecutar scripts.
 
-**Siempre usar NativeWind (className) para UI.** No usar StyleSheet ni estilos inline.
+**Siempre usar NativeWind (className) para UI y Interface-design Skill.** No usar StyleSheet ni estilos inline.
+
+---
+
+## Engram - Guardado Automático de Contexto
+
+**REGLA OBLIGATORIA**: Todo cambio significativo debe guardarse en engram al final de cada tarea.
+
+### Cuándo guardar (inmediatamente después de):
+
+| Tipo | Cuándo | type en engram |
+|------|--------|----------------|
+| **UI/UX** | Nuevos componentes, patrones de diseño, cambios visuales | `pattern` |
+| **Bugfix** | Errores corregidos y su solución | `bugfix` |
+| **Arquitectura** | Decisiones técnicas, cambios en estructura | `architecture` |
+| **Config** | Variables de entorno, configuraciones | `config` |
+| **Discovery** | Descubrimientos sobre el codebase | `discovery` |
+
+### Cómo guardar:
+
+```typescript
+engram_mem_save({
+  title: "Nombre descriptivo del cambio",
+  content: `**What**: Qué se hizo
+**Why**: Por qué se hizo (user request, bug, etc.)
+**Where**: Archivos afectados
+**Learned**: Gotchas o decisiones importantes`,
+  type: "pattern|bugfix|architecture|config|discovery",
+  project: "GLHF"
+});
+```
+
+### Al cerrar sesión:
+
+```typescript
+engram_mem_session_summary({
+  content: `## Goal
+[Qué trabajamos]
+
+## Accomplished
+- [Tareas completadas]
+
+## Next Steps
+- [Qué falta hacer]
+
+## Relevant Files
+- archivo.ts`,
+  project: "GLHF"
+});
+```
+
+---
+
+### Ejemplos de guardados en este proyecto:
+
+- `PayExpenseModal redesign` → pattern
+- `ExpenseList UI improvements` → pattern
+- `Expense filter flow` → discovery
+- `CreateExpense 401 fix` → bugfix
 
 ```tsx
 // ✅ Correcto
@@ -21,6 +79,7 @@
 ## Comandos para Desarrollar
 
 ### Frontend (Expo)
+
 ```bash
 npm start          # Servidor de desarrollo Expo
 npm run android    # Ejecutar en Android
@@ -31,6 +90,7 @@ npm test           # Run Jest tests
 ```
 
 ### Backend (API)
+
 ```bash
 cd api
 npm install        # Instalar dependencias
@@ -39,6 +99,7 @@ npm run dev        # Modo desarrollo
 ```
 
 ### Prisma (Base de datos)
+
 ```bash
 cd api
 npx prisma db push          # Sincronizar schema con BD
@@ -124,18 +185,18 @@ GLHF/
 
 ## Stack Tecnológico
 
-| Capa | Tecnología |
-|------|------------|
-| **Frontend** | Expo SDK 51, React Native |
-| **Navegación** | Expo Router (file-based) |
-| **Estado** | Zustand |
-| **Data Fetching** | TanStack Query |
-| **Backend** | Express.js |
-| **Base de Datos** | PostgreSQL (Neon) |
-| **ORM** | Prisma |
-| **Auth** | Google Sign-In |
-| **Push** | Firebase Cloud Messaging |
-| **Estilos** | Tailwind CSS + NativeWind |
+| Capa              | Tecnología                |
+| ----------------- | ------------------------- |
+| **Frontend**      | Expo SDK 51, React Native |
+| **Navegación**    | Expo Router (file-based)  |
+| **Estado**        | Zustand                   |
+| **Data Fetching** | TanStack Query            |
+| **Backend**       | Express.js                |
+| **Base de Datos** | PostgreSQL (Neon)         |
+| **ORM**           | Prisma                    |
+| **Auth**          | Google Sign-In            |
+| **Push**          | Firebase Cloud Messaging  |
+| **Estilos**       | Tailwind CSS + NativeWind |
 
 ## Flujo de Datos
 
@@ -173,7 +234,7 @@ Los stores se encuentran en `store/` y contienen el estado global de la aplicaci
 | `useUserStore`                  | `store/useUserStore.ts`         | Gestiona el usuario autenticado, sus settings (notificaciones, stock) y estado de sesión |
 | `useSummaryStore`               | `store/useSummaryStore.ts`      | Controla los contadores de sumas/restas en detalle de producto                           |
 | `useSelectedValuesFormatPicker` | `store/useSelectedIdProduct.ts` | Maneja el ID de producto seleccionado y valores del picker de formato                    |
-| `useSettingStore`               | `store/useSettingStore.ts`     | Configuraciones de la aplicación                                                         |
+| `useSettingStore`               | `store/useSettingStore.ts`      | Configuraciones de la aplicación                                                         |
 
 #### Cómo crear un nuevo store:
 

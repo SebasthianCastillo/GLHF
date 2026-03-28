@@ -24,7 +24,7 @@ export default function InfoModal({
           <Text className="text-white text-lg font-semibold mb-3 text-center">
             {title}
           </Text>
-          <Text className="text-gray-300 text-sm text-center leading-5">
+          <Text className="text-gray-300 text-sm leading-5" style={{ textAlign: 'justify' }}>
             {message}
           </Text>
           <TouchableOpacity

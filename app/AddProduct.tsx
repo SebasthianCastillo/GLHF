@@ -16,12 +16,23 @@ import { useProducts } from "@/hooks/useProducts";
 const AddProduct = () => {
   const [ProductName, setProductName] = useState("");
   const [quantityProduct, setquantityProduct] = useState(0);
-  const { CategoryKey } = useLocalSearchParams();
-  const { CategoryName } = useLocalSearchParams();
+  const { CategoryKey, CategoryName } = useLocalSearchParams();
   const [successMessage, setSuccessMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const categoryId = CategoryKey.toString();
+  const categoryId = CategoryKey?.toString() || "";
+
+  // Early return if no categoryId
+  if (!CategoryKey) {
+    return (
+      <SafeAreaView className="bg-primary h-full">
+        <View className="flex-1 items-center justify-center">
+          <Text className="text-white">Cargando...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   const { addProduct } = useProducts(categoryId);
 
   // handle function for adding a product
@@ -30,7 +41,7 @@ const AddProduct = () => {
       {
         ProductName: ProductName,
         quantityProduct: quantityProduct,
-        CategoryKey: CategoryKey.toString(),
+        CategoryKey: categoryId,
       },
       {
         onSuccess: () => {
@@ -51,7 +62,7 @@ const AddProduct = () => {
     <SafeAreaView className="bg-primary h-full">
       <View className="flex-row items-center p-4 bg-primary">
         <RouterBackArrow />
-        <Text className="text-white text-xl font-bold">{CategoryName}</Text>
+        <Text className="text-white text-xl font-bold">{CategoryName || "Agregar Producto"}</Text>
       </View>
       <ScrollView>
         <View

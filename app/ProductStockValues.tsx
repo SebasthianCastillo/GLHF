@@ -16,6 +16,7 @@ import { useProducts } from "@/hooks/useProducts";
 import RouterBackArrow from "@/components/RouterBackArrow";
 import LoadingIndicator from "@/components/LoadingIndicator";
 import InfoModal from "@/components/InfoModal";
+import { Ionicons } from "@expo/vector-icons";
 
 const ProductStockValues = () => {
   const { category } = useLocalSearchParams();
@@ -31,7 +32,8 @@ const ProductStockValues = () => {
   const { data: products, isLoading } = getProducts();
 
   const filteredProducts = (products ?? []).filter((product: any) =>
-    product.Name.toString()
+    product.name
+      .toString()
       .toLowerCase()
       .includes(searchQuery.toLocaleString().toLowerCase()),
   );
@@ -58,11 +60,11 @@ const ProductStockValues = () => {
             <Text className="text-white text-lg font-bold">Valor de Stock</Text>
             <View className="flex-row items-center">
               <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
-              <TouchableOpacity 
-                onPress={() => setShowInfo(true)} 
+              <TouchableOpacity
+                onPress={() => setShowInfo(true)}
                 className="ml-2 w-8 h-8 rounded-full bg-neutral-700 justify-center items-center"
               >
-                <Text className="text-white font-bold">?</Text>
+                <Ionicons name="help-circle-outline" size={18} color="white" />
               </TouchableOpacity>
             </View>
           </View>
@@ -73,63 +75,68 @@ const ProductStockValues = () => {
           contentContainerStyle={{ paddingHorizontal: 0 }}
         >
           <View className="pt-4 space-y-3 pb-24">
-          {filteredProducts.map((item: any) => (
-            <View key={item._id} className="bg-neutral-900 mx-3 p-4 rounded-xl border border-neutral-800">
-              <View className="flex-row justify-between items-center mb-2">
-                <Text className="text-white text-base font-semibold">
-                  {item.Name}
-                </Text>
-                <View className="flex-row items-center">
-                  <Text className="text-amber-500 font-medium">{item.quantity}</Text>
-                  <Text className="text-gray-500 text-sm ml-1">Cant</Text>
+            {filteredProducts.map((item: any) => (
+              <View
+                key={item._id}
+                className="bg-neutral-900 mx-3 p-4 rounded-xl border border-neutral-800"
+              >
+                <View className="flex-row justify-between items-center mb-2">
+                  <Text className="text-white text-base font-semibold">
+                    {item.name}
+                  </Text>
+                  <View className="flex-row items-center">
+                    <Text className="text-amber-500 font-medium">
+                      {item.quantity}
+                    </Text>
+                    <Text className="text-gray-500 text-sm ml-1">Cant</Text>
+                  </View>
                 </View>
-              </View>
-              
-              <View className="h-px bg-neutral-800 mb-3" />
-              
-              <View className="flex-row items-center justify-between mb-2">
-                <Text className="text-gray-400 text-sm">Costo x unidad:</Text>
-                <View className="flex-row items-center bg-neutral-800 rounded-lg px-2 py-1.5">
-                  <Text className="text-amber-500 text-sm">$</Text>
-                  <TextInput
-                    value={
-                      tempCost[item._id] !== undefined
-                        ? tempCost[item._id]
-                        : String(item.cost || 0)
-                    }
-                    onChangeText={(text: string) =>
-                      handleCostChange(item._id, text)
-                    }
-                    placeholder="0"
-                    placeholderTextColor="#666"
-                    keyboardType="numeric"
-                    className="text-white text-sm text-center w-20 ml-1"
-                  />
-                </View>
-              </View>
 
-              <View className="flex-row justify-between items-center mb-1">
-                <Text className="text-gray-500 text-xs">Valor stock:</Text>
-                <Text className="text-amber-400 text-sm font-medium">
-                  {formatCurrencyCLP(item.quantity * (item.cost || 0))}
-                </Text>
+                <View className="h-px bg-neutral-800 mb-3" />
+
+                <View className="flex-row items-center justify-between mb-2">
+                  <Text className="text-gray-400 text-sm">Costo x unidad:</Text>
+                  <View className="flex-row items-center bg-neutral-800 rounded-lg px-2 py-1.5">
+                    <Text className="text-amber-500 text-sm">$</Text>
+                    <TextInput
+                      value={
+                        tempCost[item._id] !== undefined
+                          ? tempCost[item._id]
+                          : String(item.cost || 0)
+                      }
+                      onChangeText={(text: string) =>
+                        handleCostChange(item._id, text)
+                      }
+                      placeholder="0"
+                      placeholderTextColor="#666"
+                      keyboardType="numeric"
+                      className="text-white text-sm text-center w-20 ml-1"
+                    />
+                  </View>
+                </View>
+
+                <View className="flex-row justify-between items-center mb-1">
+                  <Text className="text-gray-500 text-xs">Valor stock:</Text>
+                  <Text className="text-amber-400 text-sm font-medium">
+                    {formatCurrencyCLP(item.quantity * (item.cost || 0))}
+                  </Text>
+                </View>
+
+                <View className="flex-row justify-between items-center">
+                  <Text className="text-gray-500 text-xs">Total gastado:</Text>
+                  <Text className="text-green-400 text-sm font-medium">
+                    {formatCurrencyCLP(item.totalSpent || 0)}
+                  </Text>
+                </View>
               </View>
-              
-              <View className="flex-row justify-between items-center">
-                <Text className="text-gray-500 text-xs">Total gastado:</Text>
-                <Text className="text-green-400 text-sm font-medium">
-                  {formatCurrencyCLP(item.totalSpent || 0)}
-                </Text>
-              </View>
-            </View>
-          ))}
-        </View>
-        {isLoading && (
-          <View className="py-10">
-            <LoadingIndicator />
+            ))}
           </View>
-        )}
-      </ScrollView>
+          {isLoading && (
+            <View className="py-10">
+              <LoadingIndicator />
+            </View>
+          )}
+        </ScrollView>
       </SafeAreaView>
 
       <InfoModal

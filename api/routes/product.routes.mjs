@@ -1,18 +1,18 @@
-import { Router } from 'express';
-import prisma from '../lib/prisma.mjs';
-import { asyncHandler } from '../lib/errors.mjs';
-import { validate } from '../middleware/validate.mjs';
+import { Router } from "express";
+import prisma from "../lib/prisma.mjs";
+import { asyncHandler } from "../lib/errors.mjs";
+import { validate } from "../middleware/validate.mjs";
 import {
   addProductSchema,
   quantityUpdateSchema,
   updateProductNameSchema,
   updateProductCostSchema,
-} from '../validators/product.validator.mjs';
+} from "../validators/product.validator.mjs";
 
 const router = Router();
 
 router.post(
-  '/addProduct',
+  "/addProduct",
   validate(addProductSchema),
   asyncHandler(async (req, res) => {
     const { Name, quantity, CategoryID } = req.body;
@@ -20,33 +20,34 @@ router.post(
       data: {
         name: Name,
         quantity: parseInt(quantity) || 0,
-        categoryId: CategoryID ? parseInt(CategoryID) : null
-      }
+        categoryId: CategoryID ? parseInt(CategoryID) : null,
+      },
     });
-    res.status(201).json({ message: 'Product saved successfully' });
-  })
+    res.status(201).json({ message: "Product saved successfully" });
+  }),
 );
 
 router.get(
-  '/productsByIDCategory',
+  "/productsByIDCategory",
   asyncHandler(async (req, res) => {
     const CategoryID = req.query.CategoryKey;
     const products = await prisma.producto.findMany({
       where: { categoryId: parseInt(CategoryID) },
-      orderBy: { name: 'asc' }
+      orderBy: { name: "asc" },
     });
+    console.log(products);
     res.status(200).json(products);
-  })
+  }),
 );
 
 router.patch(
-  '/quantityUpdateProduct',
+  "/quantityUpdateProduct",
   validate(quantityUpdateSchema),
   asyncHandler(async (req, res) => {
     const { _id, quantity, operation, cost } = req.body;
     const productId = parseInt(_id);
 
-    if (operation === 'add') {
+    if (operation === "add") {
       const costValue = parseFloat(cost) || 0;
       await prisma.$transaction([
         prisma.producto.update({
@@ -54,63 +55,65 @@ router.patch(
           data: {
             quantity: { increment: parseInt(quantity) },
             totalSpent: { increment: parseInt(quantity) * costValue },
-            cost: costValue
-          }
-        })
+            cost: costValue,
+          },
+        }),
       ]);
     } else {
       await prisma.producto.update({
         where: { id: productId },
         data: {
-          quantity: { decrement: parseInt(quantity) }
-        }
+          quantity: { decrement: parseInt(quantity) },
+        },
       });
     }
 
-    res.status(201).json({ message: 'Product Detail saved successfully' });
-  })
+    res.status(201).json({ message: "Product Detail saved successfully" });
+  }),
 );
 
 router.patch(
-  '/updateProductCost/:id',
+  "/updateProductCost/:id",
   validate(updateProductCostSchema),
   asyncHandler(async (req, res) => {
     const { id } = req.params;
     const { cost } = req.body;
     const result = await prisma.producto.update({
       where: { id: parseInt(id) },
-      data: { cost: parseFloat(cost) }
+      data: { cost: parseFloat(cost) },
     });
-    res.status(200).json({ message: 'Costo actualizado exitosamente', product: result });
-  })
+    res
+      .status(200)
+      .json({ message: "Costo actualizado exitosamente", product: result });
+  }),
 );
 
 router.patch(
-  '/updateProductName/:id',
+  "/updateProductName/:id",
   validate(updateProductNameSchema),
   asyncHandler(async (req, res) => {
     const { id } = req.params;
     const { newName } = req.body;
     const updatedProduct = await prisma.producto.update({
       where: { id: parseInt(id) },
-      data: { name: newName }
+      data: { name: newName },
     });
     res.status(200).json({
-      message: 'Nombre del producto actualizado exitosamente',
-      product: updatedProduct
+      message: "Nombre del producto actualizado exitosamente",
+      product: updatedProduct,
     });
-  })
+  }),
 );
 
 router.delete(
-  '/deleteProduct/:id',
+  "/deleteProduct/:id",
   asyncHandler(async (req, res) => {
     const { id } = req.params;
     await prisma.producto.delete({
-      where: { id: parseInt(id) }
+      where: { id: parseInt(id) },
     });
-    res.status(200).json({ message: 'Producto eliminado exitosamente' });
-  })
+    res.status(200).json({ message: "Producto eliminado exitosamente" });
+  }),
 );
 
 export default router;

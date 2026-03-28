@@ -50,7 +50,8 @@ export const useProducts = (categoryId: string) => {
         }
         product.quantity = product.quantity + sign * productData.qty;
         if (productData.operation === "add" && productData.cost) {
-          product.totalSpent = (product.totalSpent || 0) + productData.qty * productData.cost;
+          product.totalSpent =
+            (product.totalSpent || 0) + productData.qty * productData.cost;
           product.cost = productData.cost;
         }
         return old;
@@ -113,7 +114,7 @@ export const useProducts = (categoryId: string) => {
   }, [categoryId]);
 
   const updateProductCostMutation = useMutation({
-    mutationFn: ({ id, cost }: { id: string; cost: number }) => 
+    mutationFn: ({ id, cost }: { id: string; cost: number }) =>
       apiUpdateProductCost(id, cost),
     onSuccess: () => {
       queryClient.invalidateQueries({

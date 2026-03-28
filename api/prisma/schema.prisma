@@ -107,8 +107,9 @@ model Expense {
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
-  category    Category @relation(fields: [categoryId], references: [id])
-  user        User     @relation(fields: [userId], references: [id])
+  category    Category  @relation(fields: [categoryId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+  payments    Payment[]
 
   @@index([userId])
   @@index([categoryId])
@@ -120,4 +121,19 @@ enum ExpenseStatus {
   PENDING
   PAID
   OVERDUE
+  PARTIAL
+}
+
+model Payment {
+  id        Int      @id @default(autoincrement())
+  expenseId Int
+  amount    Float
+  paidAt     DateTime @default(now())
+  
+  expense   Expense  @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([expenseId])
 }

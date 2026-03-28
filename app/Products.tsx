@@ -29,9 +29,21 @@ import LoadingIndicator from "@/components/LoadingIndicator";
 
 const Products = () => {
   const { category } = useLocalSearchParams();
+  // Early return if no category param
+  if (!category) {
+    return (
+      <SafeAreaView className="bg-primary h-full">
+        <View className="flex-1 items-center justify-center">
+          <Text className="text-white">Cargando...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
   const categoryObject = Array.isArray(category)
     ? JSON.parse(category[0])
     : JSON.parse(category || "{}");
+  console.log(categoryObject);
+
   const [CantidadProducto, setCantidadProducto] = useState(0);
   const [selectedItemId, setSelectedItemId] = useState("");
   const [selectedProductName, setSelectedProductName] = useState("");
@@ -43,12 +55,12 @@ const Products = () => {
     showSecondCant: false,
     isOnAdd: false,
   });
-  let CategoryName = categoryObject.Name;
+  let CategoryName = categoryObject.name;
 
   const [showFormatPicker, setShowFormatPicker] = useState(false);
 
   const { getProducts, updateQuantityProduct, modifyProduct, deleteProduct } =
-    useProducts(categoryObject._id);
+    useProducts(categoryObject.id);
 
   //hook for selected value format picker and selected product id
   const { selectedValuesFormatPicker, setSelectedProductId } =
@@ -67,7 +79,7 @@ const Products = () => {
   ) => {
     const product = products?.find((p: any) => p._id === idProducto);
     const cost = product?.cost || 0;
-    
+
     const quantityProduct =
       fromWhatQuantityCallfunction === "single" ? 1 : CantidadProducto;
     let operation = "add";
@@ -167,7 +179,7 @@ const Products = () => {
   //Simple nice and beatiful search bar filter
   const [searchQuery, setSearchQuery] = useState("");
   const filteredProducts = (products ?? []).filter((product: any) =>
-    product.Name.toString().toLowerCase().includes(searchQuery.toLowerCase()),
+    product.name.toString().toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   return (
@@ -190,11 +202,7 @@ const Products = () => {
               }
               className="w-10 h-9 rounded-lg justify-center items-center mr-2 bg-amber-500"
             >
-              <FontAwesome6
-                name="dollar-sign"
-                size={18}
-                color="white"
-              />
+              <FontAwesome6 name="dollar-sign" size={18} color="white" />
             </TouchableOpacity>
             <View className="pt-2">
               <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
@@ -209,7 +217,7 @@ const Products = () => {
             {filteredProducts.map((item: any) => (
               <View
                 className="flex-row justify-between items-center bg-neutral-900 p-3"
-                key={item._id}
+                key={item.id}
               >
                 <Pressable
                   onPress={() => handleLongPressProduct(item._id, item.Name)}
@@ -218,7 +226,7 @@ const Products = () => {
                   <View className="flex-1">
                     <View className="flex-row items-center">
                       <Text className="text-base text-white font-semibold">
-                        {item.Name}
+                        {item.name}
                       </Text>
                       <FontAwesome6
                         name="ellipsis-vertical"
@@ -345,7 +353,7 @@ const Products = () => {
             <TouchableOpacity
               className="w-14 h-14 rounded-full bg-green-600 shadow-lg shadow-green-600/30 justify-center items-center"
               activeOpacity={0.8}
-              onPress={() => downloadProductListPdf(categoryObject._id)}
+              onPress={() => downloadProductListPdf(categoryObject.id)}
             >
               <FontAwesome5 name="file-pdf" size={22} color="white" />
             </TouchableOpacity>
@@ -357,7 +365,7 @@ const Products = () => {
               router.push({
                 pathname: "../AddProduct",
                 params: {
-                  CategoryKey: categoryObject._id,
+                  CategoryKey: categoryObject.id,
                   CategoryName: CategoryName,
                 },
               })

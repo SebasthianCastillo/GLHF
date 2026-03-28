@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getExpenses, createExpense, ExpenseFilters, Expense } from '../app/api/expenses';
+import { getExpenses, createExpense, payExpense, ExpenseFilters, Expense } from '../app/api/expenses';
 import { useExpenseStore } from '../store/useExpenseStore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -35,6 +35,14 @@ export const useExpenses = () => {
     },
   });
 
+  const payExpenseMutation = useMutation({
+    mutationFn: ({ expenseId, amount }: { expenseId: number; amount: number }) =>
+      payExpense(expenseId, amount),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['expenses'] });
+    },
+  });
+
   const refetchExpenses = () => {
     queryClient.invalidateQueries({ queryKey: ['expenses'] });
   };
@@ -42,11 +50,15 @@ export const useExpenses = () => {
   return {
     expenses: expensesQuery.data as Expense[] | undefined,
     isLoading: expensesQuery.isLoading,
+    isFetching: expensesQuery.isFetching,
     isError: expensesQuery.isError,
     error: expensesQuery.error,
     createExpense: createExpenseMutation.mutate,
     createExpenseAsync: createExpenseMutation.mutateAsync,
     isCreating: createExpenseMutation.isPending,
+    payExpense: payExpenseMutation.mutate,
+    payExpenseAsync: payExpenseMutation.mutateAsync,
+    isPaying: payExpenseMutation.isPending,
     refetchExpenses,
   };
 };

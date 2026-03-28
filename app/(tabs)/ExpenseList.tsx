@@ -8,6 +8,7 @@ import {
   RefreshControl,
   Modal,
   Pressable,
+  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useExpenses } from "../../hooks/useExpenses";
@@ -15,11 +16,16 @@ import { useExpenseStore } from "../../store/useExpenseStore";
 import { Expense } from "../api/expenses";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { ExpenseFilterModal } from "../../components/ExpenseFilterModal";
+import PayExpenseModal from "../../components/PayExpenseModal";
+import RouterBackArrow from "../../components/RouterBackArrow";
+import InfoModal from "../../components/InfoModal";
 
 const STATUS_COLORS = {
   PENDING: "#FFA500",
   PAID: "#2ba640",
   OVERDUE: "#ef4444",
+  PARTIAL: "#3b82f6",
 };
 
 const formatDate = (dateString: string) => {
@@ -32,15 +38,42 @@ const formatDate = (dateString: string) => {
 };
 
 const formatAmount = (amount: number) => {
-  return `$${amount.toLocaleString("es-ES", { minimumFractionDigits: 2 })}`;
+  return `$${amount.toLocaleString("es-ES", { maximumFractionDigits: 0 })}`;
 };
 
 export default function ExpenseList() {
   const router = useRouter();
-  const { expenses, isLoading, isError, refetchExpenses } = useExpenses();
-  const { filters, setFilters, clearFilters } = useExpenseStore();
+  const {
+    expenses,
+    isLoading,
+    isFetching,
+    isError,
+    refetchExpenses,
+    payExpenseAsync,
+    isPaying,
+  } = useExpenses();
+  const { filters, setFilters } = useExpenseStore();
   const [showFilters, setShowFilters] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
+  const [showPayModal, setShowPayModal] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
+
+  const handlePayExpense = (expense: Expense) => {
+    setSelectedExpense(expense);
+    setShowPayModal(true);
+  };
+
+  const handlePaySuccess = () => {
+    setShowPayModal(false);
+    setSelectedExpense(null);
+    Alert.alert("Éxito", "Pago registrado correctamente");
+  };
+
+  const handlePay = async (amount: number) => {
+    if (!selectedExpense) return;
+    await payExpenseAsync({ expenseId: selectedExpense.id, amount });
+  };
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -54,15 +87,37 @@ export default function ExpenseList() {
 
   const renderExpenseItem = ({ item }: { item: Expense }) => (
     <TouchableOpacity
-      className="bg-[#272727] rounded-2xl p-4 mb-3"
+      className="bg-[#272727] p-4 border-b border-[#3f3f3f]"
       onPress={() => handleExpensePress(item)}
     >
-      <View className="flex-row justify-between items-center mb-3">
-        <Text className="text-white font-semibold text-base">
+      <View className="flex-row items-center">
+        <Text
+          className="text-white font-semibold text-sm flex-1"
+          numberOfLines={1}
+        >
           {item.categoryName || "Sin categoría"}
         </Text>
+        {item.description && (
+          <Text
+            className="text-[#aaaaaa] text-sm flex-1 ml-2"
+            numberOfLines={1}
+          >
+            {item.description}
+          </Text>
+        )}
+        <Text className="text-white text-sm font-bold ml-2">
+          {formatAmount(item.amount)}
+        </Text>
+        {item.status !== "PAID" && (
+          <TouchableOpacity
+            onPress={() => handlePayExpense(item)}
+            className="p-1.5 bg-green-600/20 rounded ml-2"
+          >
+            <Ionicons name="card-outline" size={14} color="#2ba640" />
+          </TouchableOpacity>
+        )}
         <View
-          className="px-3 py-1 rounded-full"
+          className="px-2.5 py-1 rounded-full ml-2"
           style={{ backgroundColor: STATUS_COLORS[item.status] + "20" }}
         >
           <Text
@@ -73,93 +128,14 @@ export default function ExpenseList() {
           </Text>
         </View>
       </View>
-      <View className="mb-3">
-        <Text className="text-white text-2xl font-bold">
-          {formatAmount(item.amount)}
-        </Text>
-        {item.description && (
-          <Text className="text-[#aaaaaa] text-sm mt-1" numberOfLines={2}>
-            {item.description}
-          </Text>
-        )}
-      </View>
-      <View className="flex-row justify-between border-t border-[#3f3f3f] pt-3">
-        <Text className="text-[#aaaaaa] text-xs">
-          Fecha: {formatDate(item.date)}
-        </Text>
+      <View className="flex-row items-center justify-between mt-2">
+        <Text className="text-[#aaaaaa] text-xs">{formatDate(item.date)}</Text>
         <Text className="text-[#aaaaaa] text-xs">
           Vence: {formatDate(item.dueDate)}
         </Text>
       </View>
     </TouchableOpacity>
   );
-
-  const FilterModal = () => (
-    <Modal visible={showFilters} animationType="slide" transparent>
-      <View className="flex-1 bg-black/70 justify-end">
-        <View className="bg-[#272727] rounded-t-2xl p-5 pb-8">
-          <View className="flex-row justify-between items-center mb-5">
-            <Text className="text-white text-xl font-bold">Filtros</Text>
-            <TouchableOpacity onPress={() => setShowFilters(false)}>
-              <Ionicons name="close" size={24} color="#aaaaaa" />
-            </TouchableOpacity>
-          </View>
-
-          <Text className="text-[#aaaaaa] text-sm font-medium mb-2">
-            Estado
-          </Text>
-          <View className="flex-row gap-2 mb-6">
-            {["PENDING", "PAID", "OVERDUE"].map((status) => (
-              <Pressable
-                key={status}
-                className={`flex-1 py-3 rounded-lg border ${
-                  filters.status === status
-                    ? "bg-[#F59E0B] border-[#F59E0B]"
-                    : "bg-[#3f3f3f] border-[#3f3f3f]"
-                }`}
-                onPress={() =>
-                  setFilters({
-                    status: filters.status === status ? null : (status as any),
-                  })
-                }
-              >
-                <Text
-                  className={`text-center text-xs font-semibold ${
-                    filters.status === status ? "text-black" : "text-white"
-                  }`}
-                >
-                  {status}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-
-          <View className="flex-row gap-3">
-            <TouchableOpacity
-              className="flex-1 py-4 rounded-lg border border-[#3f3f3f] items-center"
-              onPress={clearFilters}
-            >
-              <Text className="text-white font-medium">Limpiar</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className="flex-1 bg-[#F59E0B] rounded-lg py-4 items-center"
-              onPress={() => setShowFilters(false)}
-            >
-              <Text className="text-black font-semibold">Aplicar</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    </Modal>
-  );
-
-  if (isLoading) {
-    return (
-      <View className="flex-1 bg-[#0f0f0f] justify-center items-center">
-        <ActivityIndicator size="large" color="#F59E0B" />
-      </View>
-    );
-  }
 
   if (isError) {
     return (
@@ -180,10 +156,19 @@ export default function ExpenseList() {
   return (
     <SafeAreaView className="flex-1 bg-[#0f0f0f]">
       {/* Header */}
-      <View className="bg-[#0f0f0f] border-b border-[#3f3f3f] px-4 py-4">
+      <View className="bg-[#0f0f0f] px-4 py-4">
         <View className="flex-row justify-between items-center">
-          <Text className="text-white text-xl font-bold">Gastos</Text>
+          <View className="flex-row items-center">
+            <RouterBackArrow />
+            <Text className="text-white text-xl font-bold">Gastos</Text>
+          </View>
           <View className="flex-row items-center gap-3">
+            <TouchableOpacity
+              className="p-2 bg-[#272727] rounded-lg"
+              onPress={() => setShowInfo(true)}
+            >
+              <Ionicons name="help-circle-outline" size={20} color="#aaaaaa" />
+            </TouchableOpacity>
             <TouchableOpacity
               className="p-2 bg-[#272727] rounded-lg"
               onPress={() => setShowFilters(true)}
@@ -202,12 +187,19 @@ export default function ExpenseList() {
         </View>
       </View>
 
+      {/* Inline loading indicator */}
+      {(isFetching || isLoading) && (
+        <View className="py-2 items-center">
+          <ActivityIndicator size="small" color="#F59E0B" />
+        </View>
+      )}
+
       {expenses && expenses.length > 0 ? (
         <FlatList
           data={expenses}
           renderItem={renderExpenseItem}
           keyExtractor={(item) => item.id.toString()}
-          contentContainerStyle={{ padding: 16 }}
+          contentContainerStyle={{ paddingVertical: 16 }}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
@@ -216,7 +208,7 @@ export default function ExpenseList() {
             />
           }
         />
-      ) : (
+      ) : !isLoading ? (
         <View className="flex-1 justify-center items-center px-8">
           <View className="w-20 h-20 rounded-full bg-[#272727] items-center justify-center mb-4">
             <Ionicons name="wallet-outline" size={40} color="#aaaaaa" />
@@ -233,9 +225,33 @@ export default function ExpenseList() {
             </Text>
           </TouchableOpacity>
         </View>
-      )}
+      ) : null}
 
-      <FilterModal />
+      <ExpenseFilterModal
+        visible={showFilters}
+        filters={filters}
+        setFilters={setFilters}
+        onClose={() => setShowFilters(false)}
+      />
+
+      <PayExpenseModal
+        visible={showPayModal}
+        expense={selectedExpense}
+        onClose={() => {
+          setShowPayModal(false);
+          setSelectedExpense(null);
+        }}
+        onSuccess={handlePaySuccess}
+        onPay={handlePay}
+        isLoading={isPaying}
+      />
+
+      <InfoModal
+        visible={showInfo}
+        onClose={() => setShowInfo(false)}
+        title="¿Qué es esta pantalla?"
+        message="Aquí puedes ver y gestionar tus gastos. Cada gasto muestra la categoría, descripción, monto y fecha de vencimiento. Toca el ícono de tarjeta para registrar un pago."
+      />
     </SafeAreaView>
   );
 }
