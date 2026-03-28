@@ -35,7 +35,7 @@ router.get(
       where: { categoryId: parseInt(CategoryID) },
       orderBy: { name: "asc" },
     });
-    console.log(products);
+
     res.status(200).json(products);
   }),
 );

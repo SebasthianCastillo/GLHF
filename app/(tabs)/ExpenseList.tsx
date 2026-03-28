@@ -154,7 +154,7 @@ export default function ExpenseList() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-[#0f0f0f]">
+    <SafeAreaView className="flex-1 bg-black">
       {/* Header */}
       <View className="bg-[#0f0f0f] px-4 py-4">
         <View className="flex-row justify-between items-center">
@@ -199,7 +199,7 @@ export default function ExpenseList() {
           data={expenses}
           renderItem={renderExpenseItem}
           keyExtractor={(item) => item.id.toString()}
-          contentContainerStyle={{ paddingVertical: 16 }}
+          contentContainerStyle={{ paddingVertical: 0 }}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
