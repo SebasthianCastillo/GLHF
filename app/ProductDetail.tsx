@@ -1,5 +1,5 @@
 import { useLocalSearchParams } from "expo-router";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import {
   View,
   Text,
@@ -26,9 +26,12 @@ import { AggregationResult } from "./lib/types";
 import RouterBackArrow from "@/components/RouterBackArrow";
 import LoadingIndicator from "@/components/LoadingIndicator";
 import { FontAwesome5 } from "@expo/vector-icons";
+import CalendarPicker from "@/components/ProductDetail/CalendarPicker";
+import { type ProductMovement } from "./api/products";
+import { useProductMovements } from "@/hooks/useProductMovements";
 
 const ProductDetail = () => {
-  const { product } = useLocalSearchParams();
+  const { product, category } = useLocalSearchParams();
 
   const [filteredDetails, setFilteredDetails] = useState<
     DailySummary["transactions"]
@@ -52,19 +55,63 @@ const ProductDetail = () => {
     years: [],
     dataByYear: {},
   });
-  const [isLoading, setIsLoading] = useState(false);
-  const productObject = Array.isArray(product)
-    ? JSON.parse(product[0])
-    : JSON.parse(product || "{}");
 
-  // #region Functions
-  // carga lista de historial de productos
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [expandedProducts, setExpandedProducts] = useState<Record<string, boolean>>({});
+  const [showCalendar, setShowCalendar] = useState(false);
+
+  const productObject = useMemo(() => {
+    if (Array.isArray(product)) {
+      return JSON.parse(product[0]);
+    }
+    return JSON.parse(product || "{}");
+  }, [product]);
+
+  const categoryObject = useMemo(() => {
+    if (Array.isArray(category)) {
+      return JSON.parse(category[0]);
+    }
+    return JSON.parse(category || "{}");
+  }, [category]);
+
+  const isCategoryMode = !!categoryObject.id;
+
+  // React Query para movimientos de productos por fecha
+  // Usar formato local para evitar problemas de timezone
+  const year = selectedDate.getFullYear();
+  const month = String(selectedDate.getMonth() + 1).padStart(2, "0");
+  const day = String(selectedDate.getDate()).padStart(2, "0");
+  const dateStr = `${year}-${month}-${day}`;
+  const { data: productMovements = [], isLoading, refetch: refetchMovements } = useProductMovements(
+    categoryObject.id || "",
+    dateStr
+  );
+
+  const handlePrevMonth = () => {
+    const { month, year } = getPreviousMonth(currentMonth, currentYear);
+    setCurrentMonth(month);
+    setCurrentYear(year);
+  };
+
+  const handleNextMonth = () => {
+    const { month, year } = getNextMonth(currentMonth, currentYear);
+    setCurrentMonth(month);
+    setCurrentYear(year);
+  };
+
+  const handleDateSelect = (date: Date) => {
+    setSelectedDate(date);
+  };
+
+  const handleRefreshMovements = () => {
+    refetchMovements();
+  };
+
   useFocusEffect(
     useCallback(() => {
       const productDetailFunction = async () => {
         try {
-          console.log("productObject", productObject);
-          setIsLoading(true);
+          setIsLoadingSingle(true);
           const data = await fetchProductDetailsById(productObject.id);
 
           filterByMonth(data, currentMonth, currentYear, productObject.id, {
@@ -76,23 +123,23 @@ const ProductDetail = () => {
         } catch (error) {
           console.log(
             "error fetching products detail by id data or month dosent have products",
-            error,
           );
           setProductDetailSummaryAdd(0);
           setProductDetailSummaryMinus(0);
         } finally {
-          setIsLoading(false);
+          setIsLoadingSingle(false);
         }
       };
 
-      productDetailFunction();
-    }, [currentMonth, currentYear]),
+      if (!isCategoryMode) {
+        productDetailFunction();
+      }
+    }, [currentMonth, currentYear, productObject.id, isCategoryMode]),
   );
 
   const getMonthlySummaries = async () => {
     try {
       const data = await fetchMonthlySummaries(productObject.id);
-
       setMonthlySummaries(data);
     } catch (error) {
       console.log("error fetching monthly summaries data", error);
@@ -106,26 +153,21 @@ const ProductDetail = () => {
     }));
   };
 
+  const toggleProductExpanded = (productId: string) => {
+    setExpandedProducts((prev) => ({
+      ...prev,
+      [productId]: !prev[productId],
+    }));
+  };
+
+  const [isLoadingSingle, setIsLoadingSingle] = useState(false);
+
   const toggleViewMode = useCallback(() => {
-    if (viewMode === "days") {
+    if (viewMode === "days" && !isCategoryMode) {
       getMonthlySummaries();
     }
     setViewMode((prev) => (prev === "days" ? "months" : "days"));
-  }, [viewMode]);
-
-  // setea cambio de mes en vista producto detail
-  const handlePrevMonth = () => {
-    const { month, year } = getPreviousMonth(currentMonth, currentYear);
-    setCurrentMonth(month);
-    setCurrentYear(year);
-  };
-
-  // setea cambio de mes en vista producto detail
-  const handleNextMonth = () => {
-    const { month, year } = getNextMonth(currentMonth, currentYear);
-    setCurrentMonth(month);
-    setCurrentYear(year);
-  };
+  }, [viewMode, isCategoryMode]);
 
   const renderMonthItem = ({
     item,
@@ -192,6 +234,77 @@ const ProductDetail = () => {
     />
   );
 
+  const renderProductMovementItem = ({ item }: { item: ProductMovement }) => {
+    const isExpanded = !!expandedProducts[item.productId];
+    const hasMovements = item.movements && item.movements.length > 0;
+
+    return (
+      <View className="mb-3">
+        <TouchableOpacity
+          onPress={() => toggleProductExpanded(item.productId)}
+          className="flex-row justify-between items-center bg-[#272727] p-4"
+        >
+          <View className="flex-1">
+            <Text className="text-white text-base font-semibold">
+              {item.productName}
+            </Text>
+          </View>
+          <View className="flex-row items-center gap-6">
+            <View className="items-center min-w-[50px]">
+              <Text className="text-[#2ba640] font-bold text-lg">
+                {item.added}
+              </Text>
+              <Text className="text-[#aaa] text-[10px]">Agregados</Text>
+            </View>
+            <View className="items-center min-w-[50px]">
+              <Text className="text-[#F59E0B] font-bold text-lg">
+                {item.removed}
+              </Text>
+              <Text className="text-[#aaa] text-[10px]">Retirados</Text>
+            </View>
+            {hasMovements && (
+              <View className="ml-2">
+                <FontAwesome5
+                  name={isExpanded ? "chevron-up" : "chevron-down"}
+                  size={14}
+                  color="#aaa"
+                />
+              </View>
+            )}
+          </View>
+        </TouchableOpacity>
+        
+        {isExpanded && hasMovements && (
+          <View className="bg-[#1a1a1a] px-4 pb-4">
+            {item.movements.map((movement) => (
+              <View
+                key={movement.id}
+                className="flex-row justify-between items-center py-3 border-b border-[#333]"
+              >
+                <View className="flex-row items-center gap-3">
+                  <View
+                    className={`w-2 h-2 rounded-full ${
+                      movement.operation === "add" ? "bg-[#2ba640]" : "bg-[#F59E0B]"
+                    }`}
+                  />
+                  <Text className="text-white text-sm">
+                    {movement.quantity}x {movement.format}
+                  </Text>
+                </View>
+                <Text className="text-[#aaa] text-xs">
+                  {new Date(movement.date).toLocaleTimeString("es-ES", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </Text>
+              </View>
+            ))}
+          </View>
+        )}
+      </View>
+    );
+  };
+
   const renderEmptyComponent = () => (
     <View className="flex-1 items-center justify-center py-16">
       <View className="w-16 h-16 rounded-full bg-[#272727] items-center justify-center mb-4">
@@ -199,19 +312,25 @@ const ProductDetail = () => {
       </View>
       <Text className="text-[#aaa] text-base font-medium">
         {viewMode === "days"
-          ? "No hay movimientos este mes"
+          ? isCategoryMode
+            ? "No hay movimientos este día"
+            : "No hay movimientos este mes"
           : "No hay datos mensuales disponibles"}
       </Text>
     </View>
   );
-  // #endregion
+
+  const headerTitle = isCategoryMode
+    ? categoryObject.name || "Productos"
+    : productObject.Name || "Detalle";
+
   return (
     <SafeAreaView className="bg-[#0f0f0f] flex-1">
       <View className="flex-row items-center justify-between px-4 py-4 border-b border-[#3f3f3f] bg-[#0f0f0f]">
         <View className="flex-row items-center flex-1">
           <RouterBackArrow />
-          <Text className="text-white text-xl font-bold ml-2">
-            {productObject.Name}
+          <Text className="text-white text-xl font-bold ml-2" numberOfLines={1}>
+            {headerTitle}
           </Text>
         </View>
         <TouchableOpacity
@@ -226,34 +345,92 @@ const ProductDetail = () => {
 
       <View className={`flex-1 ${viewMode === "days" ? "px-2" : "px-0"} py-4`}>
         {viewMode === "days" ? (
-          <View className="flex-1">
-            <View className="mb-4">
-              <MonthSelector
-                currentMonth={currentMonth}
-                currentYear={currentYear}
-                onPrevMonth={handlePrevMonth}
-                onNextMonth={handleNextMonth}
-                formatMonthYear={formatMonthYear}
-              />
-            </View>
+          isCategoryMode ? (
             <View className="flex-1">
-              {isLoading ? (
-                <LoadingIndicator />
-              ) : (
-                <FlatList
-                  data={dailySummaries}
-                  renderItem={renderDayItem}
-                  keyExtractor={(item) => item.date}
-                  ListEmptyComponent={renderEmptyComponent}
-                  contentContainerStyle={{ paddingBottom: 120 }}
-                  showsVerticalScrollIndicator={false}
+              <View className="mb-4">
+                {/* Botón de fecha */}
+                <TouchableOpacity
+                  onPress={() => setShowCalendar(!showCalendar)}
+                  className="flex-row items-center justify-center bg-[#272727] py-3 px-4 rounded-lg"
+                >
+                  <FontAwesome5 name="calendar-alt" size={16} color="#F59E0B" className="mr-2" />
+                  <Text className="text-white font-medium text-base">
+                    {selectedDate.toLocaleDateString("es-ES", {
+                      weekday: "short",
+                      day: "numeric",
+                      month: "short",
+                    })}
+                  </Text>
+                  <FontAwesome5
+                    name={showCalendar ? "chevron-up" : "chevron-down"}
+                    size={14}
+                    color="#aaa"
+                    className="ml-2"
+                  />
+                </TouchableOpacity>
+                
+                {/* Calendario */}
+                {showCalendar && (
+                  <View className="mt-2">
+                    <CalendarPicker
+                      selectedDate={selectedDate}
+                      onDateSelect={(date) => {
+                        handleDateSelect(date);
+                        setShowCalendar(false);
+                      }}
+                      currentMonth={currentMonth}
+                      currentYear={currentYear}
+                      onPrevMonth={handlePrevMonth}
+                      onNextMonth={handleNextMonth}
+                    />
+                  </View>
+                )}
+              </View>
+              <View className="flex-1">
+                {isLoading ? (
+                  <LoadingIndicator />
+                ) : (
+                  <FlatList
+                    data={productMovements}
+                    renderItem={renderProductMovementItem}
+                    keyExtractor={(item) => item.productId}
+                    ListEmptyComponent={renderEmptyComponent}
+                    contentContainerStyle={{ paddingBottom: 120 }}
+                    showsVerticalScrollIndicator={false}
+                  />
+                )}
+              </View>
+            </View>
+          ) : (
+            <View className="flex-1">
+              <View className="mb-4">
+                <MonthSelector
+                  currentMonth={currentMonth}
+                  currentYear={currentYear}
+                  onPrevMonth={handlePrevMonth}
+                  onNextMonth={handleNextMonth}
+                  formatMonthYear={formatMonthYear}
                 />
-              )}
+              </View>
+              <View className="flex-1">
+                {isLoadingSingle ? (
+                  <LoadingIndicator />
+                ) : (
+                  <FlatList
+                    data={dailySummaries}
+                    renderItem={renderDayItem}
+                    keyExtractor={(item) => item.date}
+                    ListEmptyComponent={renderEmptyComponent}
+                    contentContainerStyle={{ paddingBottom: 120 }}
+                    showsVerticalScrollIndicator={false}
+                  />
+                )}
+              </View>
+              <View className="pt-4">
+                <SummarySquare />
+              </View>
             </View>
-            <View className="pt-4">
-              <SummarySquare />
-            </View>
-          </View>
+          )
         ) : (
           <FlatList
             data={monthlySummaries.years}

@@ -196,6 +196,17 @@ const Products = () => {
             <TouchableOpacity
               onPress={() =>
                 router.push({
+                  pathname: "../ProductDetail",
+                  params: { category: JSON.stringify(categoryObject) },
+                })
+              }
+              className="w-10 h-9 rounded-lg justify-center items-center mr-2 bg-neutral-800 border border-neutral-700"
+            >
+              <FontAwesome5 name="history" size={18} color="#F59E0B" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() =>
+                router.push({
                   pathname: "../ProductStockValues",
                   params: { category: JSON.stringify(categoryObject) },
                 })
@@ -318,18 +329,6 @@ const Products = () => {
                   }`}
                 >
                   <FontAwesome6 name="add" size={18} color="white" />
-                </Pressable>
-
-                <Pressable
-                  onPress={() =>
-                    router.push({
-                      pathname: "../ProductDetail",
-                      params: { product: JSON.stringify(item) },
-                    })
-                  }
-                  className="w-9 h-9 rounded-lg bg-neutral-800 justify-center items-center"
-                >
-                  <FontAwesome5 name="history" size={18} color="#F59E0B" />
                 </Pressable>
               </View>
             ))}
