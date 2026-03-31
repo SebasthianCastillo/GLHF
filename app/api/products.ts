@@ -143,6 +143,20 @@ export const filterMovementsByDate = (
   });
 };
 
+export const filterMovementsByMonth = (
+  movements: ProductDetailResponse[],
+  month: number,
+  year: number,
+): ProductDetailResponse[] => {
+  return movements.filter((movement) => {
+    const movementDateObj = new Date(movement.date);
+    return (
+      movementDateObj.getMonth() === month &&
+      movementDateObj.getFullYear() === year
+    );
+  });
+};
+
 export const fetchProductsMovementsByDate = async (
   categoryId: string,
   date: string,
@@ -204,6 +218,72 @@ export const fetchProductsMovementsByDate = async (
     return movementsByProduct;
   } catch (error) {
     console.log("❌ Error fetching products movements by date:", error);
+    return [];
+  }
+};
+
+export const fetchProductsMovementsByMonth = async (
+  categoryId: string,
+  month: number,
+  year: number,
+): Promise<ProductMovement[]> => {
+  try {
+    const products = await fetchProducts(categoryId);
+    
+    if (!products || !Array.isArray(products)) {
+      return [];
+    }
+
+    const movementsByProduct = await Promise.all(
+      products.map(async (product: any) => {
+        const details = await fetchProductDetailsById(product.id);
+        
+        const productName = product.Name || product.name || product.ProductName || "Sin nombre";
+        const productId = product.id || product.ProductID;
+        
+        if (!details || !Array.isArray(details)) {
+          return {
+            productId,
+            productName,
+            added: 0,
+            removed: 0,
+            movements: [],
+          };
+        }
+
+        const filteredMovements = filterMovementsByMonth(details, month, year);
+
+        let added = 0;
+        let removed = 0;
+        const movements = filteredMovements.map((m) => {
+          if (m.operation === "add") {
+            added += m.quantity;
+          } else {
+            removed += m.quantity;
+          }
+          return {
+            id: m.id,
+            quantity: m.quantity,
+            format: m.format,
+            operation: m.operation,
+            date: new Date(m.date).toISOString(),
+          };
+        });
+
+        return {
+          productId,
+          productName,
+          added,
+          removed,
+          movements,
+        };
+      }),
+    );
+
+    // Filtrar solo productos con movimientos (opcional)
+    return movementsByProduct.filter(m => m.added > 0 || m.removed > 0);
+  } catch (error) {
+    console.log("❌ Error fetching products movements by month:", error);
     return [];
   }
 };

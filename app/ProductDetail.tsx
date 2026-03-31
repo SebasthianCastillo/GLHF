@@ -29,6 +29,8 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import CalendarPicker from "@/components/ProductDetail/CalendarPicker";
 import { type ProductMovement } from "./api/products";
 import { useProductMovements } from "@/hooks/useProductMovements";
+import { useProductMovementsByMonth } from "@/hooks/useProductMovementsByMonth";
+import MonthYearPicker from "@/components/MonthYearPicker/MonthYearPicker";
 
 const ProductDetail = () => {
   const { product, category } = useLocalSearchParams();
@@ -59,6 +61,11 @@ const ProductDetail = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [expandedProducts, setExpandedProducts] = useState<Record<string, boolean>>({});
   const [showCalendar, setShowCalendar] = useState(false);
+  
+  // Estados para modo "months" (vista por mes)
+  const [selectedMonthForView, setSelectedMonthForView] = useState<number>(new Date().getMonth());
+  const [selectedYearForView, setSelectedYearForView] = useState<number>(new Date().getFullYear());
+  const [showMonthYearPicker, setShowMonthYearPicker] = useState(false);
 
   const productObject = useMemo(() => {
     if (Array.isArray(product)) {
@@ -85,6 +92,13 @@ const ProductDetail = () => {
   const { data: productMovements = [], isLoading, refetch: refetchMovements } = useProductMovements(
     categoryObject.id || "",
     dateStr
+  );
+
+  // React Query para movimientos de productos por mes
+  const { data: productMovementsByMonth = [], isLoading: isLoadingMonthly, refetch: refetchMovementsByMonth } = useProductMovementsByMonth(
+    categoryObject.id || "",
+    selectedMonthForView,
+    selectedYearForView
   );
 
   const handlePrevMonth = () => {
@@ -169,6 +183,25 @@ const ProductDetail = () => {
     setViewMode((prev) => (prev === "days" ? "months" : "days"));
   }, [viewMode, isCategoryMode]);
 
+  // Handlers para vista "months"
+  const handlePrevMonthForView = () => {
+    if (selectedMonthForView === 0) {
+      setSelectedMonthForView(11);
+      setSelectedYearForView(selectedYearForView - 1);
+    } else {
+      setSelectedMonthForView(selectedMonthForView - 1);
+    }
+  };
+
+  const handleNextMonthForView = () => {
+    if (selectedMonthForView === 11) {
+      setSelectedMonthForView(0);
+      setSelectedYearForView(selectedYearForView + 1);
+    } else {
+      setSelectedMonthForView(selectedMonthForView + 1);
+    }
+  };
+
   const renderMonthItem = ({
     item,
   }: {
@@ -232,6 +265,33 @@ const ProductDetail = () => {
       isExpanded={!!expandedDays[item.date]}
       onToggleExpand={toggleDayExpanded}
     />
+  );
+
+  // Render para vista "months" - lista de productos con totales mensuales
+  const renderMonthlyProductItem = ({ item }: { item: ProductMovement }) => (
+    <View className="mb-3">
+      <View className="flex-row justify-between items-center bg-[#272727] p-4">
+        <View className="flex-1">
+          <Text className="text-white text-base font-semibold">
+            {item.productName}
+          </Text>
+        </View>
+        <View className="flex-row items-center gap-6">
+          <View className="items-center min-w-[50px]">
+            <Text className="text-[#2ba640] font-bold text-lg">
+              {item.added}
+            </Text>
+            <Text className="text-[#aaa] text-[10px]">Agregados</Text>
+          </View>
+          <View className="items-center min-w-[50px]">
+            <Text className="text-[#F59E0B] font-bold text-lg">
+              {item.removed}
+            </Text>
+            <Text className="text-[#aaa] text-[10px]">Retirados</Text>
+          </View>
+        </View>
+      </View>
+    </View>
   );
 
   const renderProductMovementItem = ({ item }: { item: ProductMovement }) => {
@@ -431,7 +491,44 @@ const ProductDetail = () => {
               </View>
             </View>
           )
+        ) : isCategoryMode ? (
+          // Vista "months" para categoría: selector de mes/año + lista de productos
+          <View className="flex-1">
+            <View className="mb-4 px-2">
+              {/* Selector de mes y año - abre modal */}
+              <TouchableOpacity
+                onPress={() => setShowMonthYearPicker(true)}
+                className="flex-row items-center justify-center bg-[#272727] py-3 px-4 rounded-lg"
+              >
+                <FontAwesome5 name="calendar-alt" size={16} color="#F59E0B" className="mr-2" />
+                <Text className="text-white font-medium text-base">
+                  {formatMonthYear(selectedMonthForView, String(selectedYearForView))}
+                </Text>
+                <FontAwesome5
+                  name="chevron-down"
+                  size={14}
+                  color="#aaa"
+                  className="ml-2"
+                />
+              </TouchableOpacity>
+            </View>
+            <View className="flex-1 px-2">
+              {isLoadingMonthly ? (
+                <LoadingIndicator />
+              ) : (
+                <FlatList
+                  data={productMovementsByMonth}
+                  renderItem={renderMonthlyProductItem}
+                  keyExtractor={(item) => item.productId}
+                  ListEmptyComponent={renderEmptyComponent}
+                  contentContainerStyle={{ paddingBottom: 120 }}
+                  showsVerticalScrollIndicator={false}
+                />
+              )}
+            </View>
+          </View>
         ) : (
+          // Vista "months" para producto individual: mostrar historial por mes
           <FlatList
             data={monthlySummaries.years}
             keyExtractor={(year) => year.toString()}
@@ -457,6 +554,19 @@ const ProductDetail = () => {
           />
         )}
       </View>
+
+      {/* Month Year Picker Modal */}
+      <MonthYearPicker
+        visible={showMonthYearPicker}
+        onClose={() => setShowMonthYearPicker(false)}
+        onConfirm={(month, year) => {
+          setSelectedMonthForView(month);
+          setSelectedYearForView(year);
+          setShowMonthYearPicker(false);
+        }}
+        initialMonth={selectedMonthForView}
+        initialYear={selectedYearForView}
+      />
     </SafeAreaView>
   );
 };
