@@ -94,16 +94,13 @@ export const useProducts = (categoryId: string) => {
       quantityProduct: number;
       CategoryKey: string;
     }) => registerProduct(ProductName, quantityProduct, CategoryKey),
-    onSuccess: () =>
-      queryClient.invalidateQueries({
-        queryKey: ["getProducts", categoryId],
-        refetchType: "inactive",
-      }),
-
-    onSettled: () => {
+    onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["getProducts", categoryId],
       });
+    },
+    onError: (error) => {
+      console.error("Error adding product:", error);
     },
   });
 

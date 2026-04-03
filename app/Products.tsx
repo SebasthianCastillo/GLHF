@@ -1,6 +1,7 @@
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import CustomField from "@/components/Field";
 import ModalProducts from "@/components/OptionModal";
+import AddProductModal from "@/components/AddProductModal";
 import {
   View,
   ScrollView,
@@ -57,8 +58,10 @@ const Products = () => {
   let CategoryName = categoryObject.name;
 
   const [showFormatPicker, setShowFormatPicker] = useState(false);
+  const [showAddProductModal, setShowAddProductModal] = useState(false);
+  const [addProductSuccess, setAddProductSuccess] = useState("");
 
-  const { getProducts, updateQuantityProduct, modifyProduct, deleteProduct } =
+  const { getProducts, updateQuantityProduct, modifyProduct, deleteProduct, addProduct } =
     useProducts(categoryObject.id);
 
   //hook for selected value format picker and selected product id
@@ -68,6 +71,28 @@ const Products = () => {
 
   // mutation for update quantity product
   const { mutate: mutateQuantity } = updateQuantityProduct;
+  // mutation for add product
+  const { mutate: mutateAddProduct, isPending: isAddProductPending } = addProduct;
+
+  // handler for adding a new product
+  const handleAddProduct = (productName: string, quantity: number) => {
+    mutateAddProduct(
+      {
+        ProductName: productName,
+        quantityProduct: quantity,
+        CategoryKey: categoryObject.id,
+      },
+      {
+        onSuccess: () => {
+          setAddProductSuccess("Producto agregado");
+        },
+        onError: (error: any) => {
+          console.log("Error adding product:", error);
+          setAddProductSuccess("Error al agregar producto");
+        },
+      }
+    );
+  };
 
   // hook to download Product list PDF
   const { downloadProductListPdf, isLoadingPdfDownload } = useFilePdfDownload();
@@ -215,136 +240,141 @@ const Products = () => {
             >
               <FontAwesome6 name="dollar-sign" size={18} color="white" />
             </TouchableOpacity>
-            <View className="pt-2">
+            <View>
               <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
             </View>
           </View>
         </View>
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 0 }}
-        >
-          <View className="pt-4 space-y-4 pb-24">
-            {filteredProducts.map((item: any) => (
-              <View
-                className="flex-row justify-between items-center bg-neutral-900 p-3"
-                key={item.id}
-              >
-                <Pressable
-                  onPress={() => handleLongPressProduct(item.id, item.Name)}
-                  className="flex-1 flex-row items-center mr-2"
+        {isLoading ? (
+          <View className="flex-1 items-center justify-center">
+            <LoadingIndicator />
+          </View>
+        ) : (
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingHorizontal: 0 }}
+          >
+            <View className="pt-4 space-y-4 pb-24">
+              {filteredProducts.map((item: any) => (
+                <View
+                  className="flex-row justify-between items-center bg-neutral-900 p-3"
+                  key={item.id}
                 >
-                  <View className="flex-1">
-                    <View className="flex-row items-center">
-                      <Text className="text-base text-white font-semibold">
-                        {item.name}
-                      </Text>
-                      <FontAwesome6
-                        name="ellipsis-vertical"
-                        size={16}
-                        color="#737373"
-                        className="ml-2"
-                      />
-                    </View>
-                    {item.totalSpent > 0 && (
-                      <Text className="text-xs text-gray-400">
-                        Total gastado: $
-                        {item.totalSpent.toLocaleString("es-CL")}
-                      </Text>
-                    )}
-                  </View>
-                </Pressable>
-
-                <Pressable
-                  onPress={() => {
-                    setSelectedProductId(item.id);
-                    setShowFormatPicker(true);
-                  }}
-                  className="w-9 h-9 bg-neutral-800 rounded-lg justify-center items-center border border-neutral-700"
-                >
-                  <Text className="text-amber-500 text-sm font-semibold">
-                    {selectedValuesFormatPicker?.[item.id] || "P"}
-                  </Text>
-                </Pressable>
-                <FormatPicker
-                  showFormatPicker={showFormatPicker}
-                  setShowFormatPicker={setShowFormatPicker}
-                />
-
-                <Pressable
-                  onPress={() => handlePressMinus(item.id, "single")}
-                  onLongPress={() => toggleSignVisibility(item.id, false)}
-                  className={`w-9 h-9 rounded-lg bg-neutral-800 justify-center items-center mx-2 ${
-                    pressedItemId === item.id ? "opacity-0" : "opacity-100"
-                  }`}
-                >
-                  <FontAwesome6 name="minus" size={18} color="white" />
-                </Pressable>
-
-                {inputVisibility.showCustomCant &&
-                  item.id === selectedItemId && (
-                    <View className="rounded-lg space-y-1 mr-1">
-                      <CustomField
-                        value={CantidadProducto}
-                        onChangeText={(CantidadProducto: any) =>
-                          setCantidadProducto(CantidadProducto)
-                        }
-                        placeholder="0"
-                        keyboardType="numeric"
-                        otherStyles=""
-                      ></CustomField>
-                      <View style={styles.buttonContainer}>
-                        <Button
-                          color="#F59E0B"
-                          title={`${inputVisibility.isOnAdd ? "➕" : "➖"}`}
-                          onPress={() =>
-                            inputVisibility.isOnAdd
-                              ? handlePressAdd(item.id, "multiple")
-                              : handlePressMinus(item.id, "multiple")
-                          }
+                  <Pressable
+                    onPress={() => handleLongPressProduct(item.id, item.Name)}
+                    className="flex-1 flex-row items-center mr-2"
+                  >
+                    <View className="flex-1">
+                      <View className="flex-row items-center">
+                        <Text className="text-base text-white font-semibold">
+                          {item.name}
+                        </Text>
+                        <FontAwesome6
+                          name="ellipsis-vertical"
+                          size={16}
+                          color="#737373"
+                          className="ml-2"
                         />
                       </View>
+                      {item.totalSpent > 0 && (
+                        <Text className="text-xs text-gray-400">
+                          Total gastado: $
+                          {item.totalSpent.toLocaleString("es-CL")}
+                        </Text>
+                      )}
+                    </View>
+                  </Pressable>
+
+                  <Pressable
+                    onPress={() => {
+                      setSelectedProductId(item.id);
+                      setShowFormatPicker(true);
+                    }}
+                    className="w-9 h-9 bg-neutral-800 rounded-lg justify-center items-center border border-neutral-700"
+                  >
+                    <Text className="text-amber-500 text-sm font-semibold">
+                      {selectedValuesFormatPicker?.[item.id] || "P"}
+                    </Text>
+                  </Pressable>
+                  <FormatPicker
+                    showFormatPicker={showFormatPicker}
+                    setShowFormatPicker={setShowFormatPicker}
+                  />
+
+                  <Pressable
+                    onPress={() => handlePressMinus(item.id, "single")}
+                    onLongPress={() => toggleSignVisibility(item.id, false)}
+                    className={`w-9 h-9 rounded-lg bg-neutral-800 justify-center items-center mx-2 ${
+                      pressedItemId === item.id ? "opacity-0" : "opacity-100"
+                    }`}
+                  >
+                    <FontAwesome6 name="minus" size={18} color="white" />
+                  </Pressable>
+
+                  {inputVisibility.showCustomCant &&
+                    item.id === selectedItemId && (
+                      <View className="rounded-lg space-y-1 mr-1">
+                        <CustomField
+                          value={CantidadProducto}
+                          onChangeText={(CantidadProducto: any) =>
+                            setCantidadProducto(CantidadProducto)
+                          }
+                          placeholder="0"
+                          keyboardType="numeric"
+                          otherStyles=""
+                        ></CustomField>
+                        <View style={styles.buttonContainer}>
+                          <Button
+                            color="#F59E0B"
+                            title={`${inputVisibility.isOnAdd ? "➕" : "➖"}`}
+                            onPress={() =>
+                              inputVisibility.isOnAdd
+                                ? handlePressAdd(item.id, "multiple")
+                                : handlePressMinus(item.id, "multiple")
+                            }
+                          />
+                        </View>
+                      </View>
+                    )}
+
+                  {(inputVisibility.showCant ||
+                    inputVisibility.showSecondCant) && (
+                    <View className="w-12 mr-2 items-center">
+                      <Text className="text-white font-bold text-base">
+                        {item.quantity}
+                      </Text>
+                      {item.cost > 0 && (
+                        <Text className="text-amber-500 text-xs font-medium">
+                          ${(item.quantity * item.cost).toLocaleString("es-CL")}
+                        </Text>
+                      )}
                     </View>
                   )}
 
-                {(inputVisibility.showCant ||
-                  inputVisibility.showSecondCant) && (
-                  <View className="w-12 mr-2 items-center">
-                    <Text className="text-white font-bold text-base">
-                      {item.quantity}
-                    </Text>
-                    {item.cost > 0 && (
-                      <Text className="text-amber-500 text-xs font-medium">
-                        ${(item.quantity * item.cost).toLocaleString("es-CL")}
-                      </Text>
-                    )}
-                  </View>
-                )}
-
-                <Pressable
-                  onPress={() => handlePressAdd(item.id, "single")}
-                  onLongPress={() => toggleSignVisibility(item.id, true)}
-                  className={`w-9 h-9 rounded-lg bg-neutral-800 justify-center items-center mr-2 ${
-                    pressedItemId === item.id ? "opacity-0" : "opacity-100"
-                  }`}
-                >
-                  <FontAwesome6 name="add" size={18} color="white" />
-                </Pressable>
-              </View>
-            ))}
-          </View>
-          {showOptionsModal && (
-            <ModalProducts
-              showOptionsModal={showOptionsModal}
-              setShowOptionsModal={setShowOptionsModal}
-              onDelete={confirmDelete}
-              onModify={() => modifyProduct(selectedItemId)}
-              productName={selectedProductName}
-              onNameChange={handleNameChange} //funcion con el nuevo nombre del producto por parametro
-            />
-          )}
-        </ScrollView>
-
+                  <Pressable
+                    onPress={() => handlePressAdd(item.id, "single")}
+                    onLongPress={() => toggleSignVisibility(item.id, true)}
+                    className={`w-9 h-9 rounded-lg bg-neutral-800 justify-center items-center mr-2 ${
+                      pressedItemId === item.id ? "opacity-0" : "opacity-100"
+                    }`}
+                  >
+                    <FontAwesome6 name="add" size={18} color="white" />
+                  </Pressable>
+                </View>
+              ))}
+            </View>
+            {showOptionsModal && (
+              <ModalProducts
+                showOptionsModal={showOptionsModal}
+                setShowOptionsModal={setShowOptionsModal}
+                onDelete={confirmDelete}
+                onModify={() => modifyProduct(selectedItemId)}
+                productName={selectedProductName}
+                onNameChange={handleNameChange}
+              />
+            )}
+          </ScrollView>
+        )}
         <View className="absolute bottom-6 left-6 right-6 flex-row justify-between">
           {isLoadingPdfDownload ? (
             <LoadingIndicator />
@@ -360,19 +390,21 @@ const Products = () => {
           <TouchableOpacity
             className="w-14 h-14 rounded-full bg-amber-500 shadow-lg shadow-amber-500/30 justify-center items-center"
             activeOpacity={0.8}
-            onPress={() =>
-              router.push({
-                pathname: "../AddProduct",
-                params: {
-                  CategoryKey: categoryObject.id,
-                  CategoryName: CategoryName,
-                },
-              })
-            }
+            onPress={() => setShowAddProductModal(true)}
           >
             <FontAwesome6 name="add" size={28} color="white" />
           </TouchableOpacity>
         </View>
+        <AddProductModal
+          visible={showAddProductModal}
+          onClose={() => {
+            setShowAddProductModal(false);
+            setAddProductSuccess("");
+          }}
+          onAdd={handleAddProduct}
+          isPending={isAddProductPending}
+          successMessage={addProductSuccess}
+        />
       </SafeAreaView>
     </TouchableWithoutFeedback>
   );
@@ -429,4 +461,5 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
 });
+
 export default Products;
