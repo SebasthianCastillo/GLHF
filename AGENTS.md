@@ -4,7 +4,7 @@
 
 **Nunca usar bun.** Usar siempre npm para instalar dependencias y ejecutar scripts.
 
-**Siempre usar NativeWind (className) para UI y Interface-design Skill.** No usar StyleSheet ni estilos inline.
+**Siempre usar NativeWind (className) y Interface-design Skill para UI.** No usar StyleSheet ni estilos inline.
 
 ---
 
@@ -14,13 +14,13 @@
 
 ### Cuándo guardar (inmediatamente después de):
 
-| Tipo | Cuándo | type en engram |
-|------|--------|----------------|
-| **UI/UX** | Nuevos componentes, patrones de diseño, cambios visuales | `pattern` |
-| **Bugfix** | Errores corregidos y su solución | `bugfix` |
-| **Arquitectura** | Decisiones técnicas, cambios en estructura | `architecture` |
-| **Config** | Variables de entorno, configuraciones | `config` |
-| **Discovery** | Descubrimientos sobre el codebase | `discovery` |
+| Tipo             | Cuándo                                                   | type en engram |
+| ---------------- | -------------------------------------------------------- | -------------- |
+| **UI/UX**        | Nuevos componentes, patrones de diseño, cambios visuales | `pattern`      |
+| **Bugfix**       | Errores corregidos y su solución                         | `bugfix`       |
+| **Arquitectura** | Decisiones técnicas, cambios en estructura               | `architecture` |
+| **Config**       | Variables de entorno, configuraciones                    | `config`       |
+| **Discovery**    | Descubrimientos sobre el codebase                        | `discovery`    |
 
 ### Cómo guardar:
 
@@ -32,7 +32,7 @@ engram_mem_save({
 **Where**: Archivos afectados
 **Learned**: Gotchas o decisiones importantes`,
   type: "pattern|bugfix|architecture|config|discovery",
-  project: "GLHF"
+  project: "GLHF",
 });
 ```
 
@@ -51,7 +51,7 @@ engram_mem_session_summary({
 
 ## Relevant Files
 - archivo.ts`,
-  project: "GLHF"
+  project: "GLHF",
 });
 ```
 

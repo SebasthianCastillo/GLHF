@@ -30,7 +30,10 @@ import CalendarPicker from "@/components/ProductDetail/CalendarPicker";
 import { type ProductMovement } from "./api/products";
 import { useProductMovements } from "@/hooks/useProductMovements";
 import { useProductMovementsByMonth } from "@/hooks/useProductMovementsByMonth";
+import { useProductMovementsByMonths } from "@/hooks/useProductMovementsByMonths";
 import MonthYearPicker from "@/components/MonthYearPicker/MonthYearPicker";
+import MonthCalendarInline from "@/components/MonthYearPicker/MonthCalendarInline";
+import { useMonthSelectionStore } from "@/store/useMonthSelectionStore";
 
 const ProductDetail = () => {
   const { product, category } = useLocalSearchParams();
@@ -66,6 +69,9 @@ const ProductDetail = () => {
   const [selectedMonthForView, setSelectedMonthForView] = useState<number>(new Date().getMonth());
   const [selectedYearForView, setSelectedYearForView] = useState<number>(new Date().getFullYear());
   const [showMonthYearPicker, setShowMonthYearPicker] = useState(false);
+  
+  // Store para selección de meses
+  const { selectedMonths, getDisplayText } = useMonthSelectionStore();
 
   const productObject = useMemo(() => {
     if (Array.isArray(product)) {
@@ -94,11 +100,10 @@ const ProductDetail = () => {
     dateStr
   );
 
-  // React Query para movimientos de productos por mes
-  const { data: productMovementsByMonth = [], isLoading: isLoadingMonthly, refetch: refetchMovementsByMonth } = useProductMovementsByMonth(
+  // React Query para movimientos de productos por meses seleccionados
+  const { data: productMovementsByMonth = [], isLoading: isLoadingMonthly, refetch: refetchMovementsByMonth } = useProductMovementsByMonths(
     categoryObject.id || "",
-    selectedMonthForView,
-    selectedYearForView
+    selectedMonths
   );
 
   const handlePrevMonth = () => {
@@ -408,24 +413,28 @@ const ProductDetail = () => {
           isCategoryMode ? (
             <View className="flex-1">
               <View className="mb-4">
-                {/* Botón de fecha */}
+                {/* Date Selector - Modern Card Style */}
                 <TouchableOpacity
                   onPress={() => setShowCalendar(!showCalendar)}
-                  className="flex-row items-center justify-center bg-[#272727] py-3 px-4 rounded-lg"
+                  activeOpacity={0.7}
+                  className="flex-row items-center bg-[#1c1c1e] py-[14px] px-4 rounded-[12px] border border-[#38383a]"
                 >
-                  <FontAwesome5 name="calendar-alt" size={16} color="#F59E0B" className="mr-2" />
-                  <Text className="text-white font-medium text-base">
-                    {selectedDate.toLocaleDateString("es-ES", {
-                      weekday: "short",
-                      day: "numeric",
-                      month: "short",
-                    })}
-                  </Text>
+                  <View className="flex-row items-center flex-1">
+                    <View className="w-9 h-9 rounded-[8px] bg-[#ff9500]/15 flex items-center justify-center">
+                      <FontAwesome5 name="calendar-day" size={16} color="#ff9500" />
+                    </View>
+                    <Text className="text-white text-[17px] font-medium ml-3">
+                      {selectedDate.toLocaleDateString("es-ES", {
+                        weekday: "long",
+                        day: "numeric",
+                        month: "short",
+                      })}
+                    </Text>
+                  </View>
                   <FontAwesome5
                     name={showCalendar ? "chevron-up" : "chevron-down"}
                     size={14}
-                    color="#aaa"
-                    className="ml-2"
+                    color="#636366"
                   />
                 </TouchableOpacity>
                 
@@ -495,22 +504,36 @@ const ProductDetail = () => {
           // Vista "months" para categoría: selector de mes/año + lista de productos
           <View className="flex-1">
             <View className="mb-4 px-2">
-              {/* Selector de mes y año - abre modal */}
-              <TouchableOpacity
-                onPress={() => setShowMonthYearPicker(true)}
-                className="flex-row items-center justify-center bg-[#272727] py-3 px-4 rounded-lg"
-              >
-                <FontAwesome5 name="calendar-alt" size={16} color="#F59E0B" className="mr-2" />
-                <Text className="text-white font-medium text-base">
-                  {formatMonthYear(selectedMonthForView, String(selectedYearForView))}
-                </Text>
-                <FontAwesome5
-                  name="chevron-down"
-                  size={14}
-                  color="#aaa"
-                  className="ml-2"
-                />
-              </TouchableOpacity>
+              {/* Month/Year Selector - Expandable */}
+              <View>
+                {/* Button to toggle */}
+                <TouchableOpacity
+                  onPress={() => setShowMonthYearPicker(!showMonthYearPicker)}
+                  activeOpacity={0.7}
+                  className="flex-row items-center bg-[#1c1c1e] py-[14px] px-4 rounded-[12px] border border-[#38383a]"
+                >
+                  <View className="flex-row items-center flex-1">
+                    <View className="w-9 h-9 rounded-[8px] bg-[#ff9500]/15 flex items-center justify-center">
+                      <FontAwesome5 name="calendar-day" size={16} color="#ff9500" />
+                    </View>
+                    <Text className="text-white text-[17px] font-medium ml-3">
+                      {getDisplayText()}
+                    </Text>
+                  </View>
+                  <FontAwesome5
+                    name={showMonthYearPicker ? "chevron-up" : "chevron-down"}
+                    size={14}
+                    color="#636366"
+                  />
+                </TouchableOpacity>
+
+                {/* Inline Calendar Grid */}
+                {showMonthYearPicker && (
+                  <View className="mt-2">
+                    <MonthCalendarInline />
+                  </View>
+                )}
+              </View>
             </View>
             <View className="flex-1 px-2">
               {isLoadingMonthly ? (
@@ -555,17 +578,11 @@ const ProductDetail = () => {
         )}
       </View>
 
-      {/* Month Year Picker Modal */}
+      {/* Month Year Picker Modal (hidden, using inline instead) */}
       <MonthYearPicker
-        visible={showMonthYearPicker}
+        visible={false}
         onClose={() => setShowMonthYearPicker(false)}
-        onConfirm={(month, year) => {
-          setSelectedMonthForView(month);
-          setSelectedYearForView(year);
-          setShowMonthYearPicker(false);
-        }}
-        initialMonth={selectedMonthForView}
-        initialYear={selectedYearForView}
+        onConfirm={() => setShowMonthYearPicker(false)}
       />
     </SafeAreaView>
   );

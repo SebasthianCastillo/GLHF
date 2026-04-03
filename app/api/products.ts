@@ -17,28 +17,21 @@ export const registerProduct = async (
   quantityProduct: number,
   CategoryKey: string,
 ) => {
-  try {
-    const ProductData = {
-      Name: ProductName,
-      quantity: quantityProduct,
-      CategoryID: CategoryKey,
-    };
-    return axios.post(`${API_URL}/addProduct`, ProductData);
-  } catch (error) {
-    console.log("Error adding product", error);
-  }
+  const ProductData = {
+    Name: ProductName,
+    quantity: quantityProduct,
+    CategoryID: CategoryKey,
+  };
+  const { data } = await axios.post(`${API_URL}/addProduct`, ProductData);
+  return data;
 };
 
 export const fetchProducts = async (categoryId: string) => {
-  try {
-    const { data } = await axios.get(`${API_URL}/productsByIDCategory`, {
-      params: { CategoryKey: categoryId },
-    });
-    console.log("products render");
-    return data;
-  } catch (e) {
-    console.log("❌ Error fetching products:", e);
-  }
+  const { data } = await axios.get(`${API_URL}/productsByIDCategory`, {
+    params: { CategoryKey: categoryId },
+  });
+  console.log("📡 fetchProducts called for category:", categoryId);
+  return data;
 };
 
 export const updateQuantity = async (
@@ -280,10 +273,74 @@ export const fetchProductsMovementsByMonth = async (
       }),
     );
 
-    // Filtrar solo productos con movimientos (opcional)
-    return movementsByProduct.filter(m => m.added > 0 || m.removed > 0);
+    // NO filtrar - retornar todos los productos con sus movimientos
+    return movementsByProduct;
   } catch (error) {
     console.log("❌ Error fetching products movements by month:", error);
+    return [];
+  }
+};
+
+// Nueva función para traer TODOS los movimientos de una categoría
+export const fetchAllProductsMovements = async (
+  categoryId: string,
+): Promise<ProductMovement[]> => {
+  try {
+    const products = await fetchProducts(categoryId);
+    
+    if (!products || !Array.isArray(products)) {
+      return [];
+    }
+
+    const movementsByProduct = await Promise.all(
+      products.map(async (product: any) => {
+        const details = await fetchProductDetailsById(product.id);
+        
+        const productName = product.Name || product.name || product.ProductName || "Sin nombre";
+        const productId = product.id || product.ProductID;
+        
+        if (!details || !Array.isArray(details)) {
+          return {
+            productId,
+            productName,
+            added: 0,
+            removed: 0,
+            movements: [],
+          };
+        }
+
+        // NO filtrar por mes - traer todos los movimientos
+        let added = 0;
+        let removed = 0;
+        const movements = details.map((m: any) => {
+          if (m.operation === "add") {
+            added += m.quantity;
+          } else {
+            removed += m.quantity;
+          }
+          return {
+            id: m.id,
+            quantity: m.quantity,
+            format: m.format,
+            operation: m.operation,
+            date: new Date(m.date).toISOString(),
+          };
+        });
+
+        return {
+          productId,
+          productName,
+          added,
+          removed,
+          movements,
+        };
+      }),
+    );
+
+    // NO filtrar - retornar todos los productos con sus movimientos
+    return movementsByProduct;
+  } catch (error) {
+    console.log("❌ Error fetching all products movements:", error);
     return [];
   }
 };
