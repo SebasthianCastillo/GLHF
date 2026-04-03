@@ -58,3 +58,15 @@ coverage/
 # Temporary
 *.tmp
 *.temp
+
+# Project specific (sensitive)
+api/.env
+google-services.json
+
+# Lock files
+skills-lock.json
+bun.lock
+package-lock.json
+api/bun.lock
+api/pnpm-lock.yaml
+api/yarn.lock
