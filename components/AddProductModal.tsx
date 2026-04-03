@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-import CustomField from "@/components/Field";
-import CustomButton from "@/components/Button";
 import {
   View,
   Text,
@@ -9,9 +7,14 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
+  TextInput,
+  Animated,
+  Dimensions,
 } from "react-native";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import LoadingIndicator from "@/components/LoadingIndicator";
+
+const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 interface AddProductModalProps {
   visible: boolean;
@@ -29,8 +32,39 @@ export default function AddProductModal({
   successMessage,
 }: AddProductModalProps) {
   const [productName, setProductName] = useState("");
-  const [quantityProduct, setQuantityProduct] = useState(0);
   const [localSuccessMessage, setLocalSuccessMessage] = useState("");
+  const slideAnim = React.useRef(new Animated.Value(SCREEN_HEIGHT)).current;
+  const backdropOpacity = React.useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (visible) {
+      Animated.parallel([
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: 350,
+          useNativeDriver: true,
+        }),
+        Animated.timing(backdropOpacity, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      Animated.parallel([
+        Animated.timing(slideAnim, {
+          toValue: SCREEN_HEIGHT,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(backdropOpacity, {
+          toValue: 0,
+          duration: 250,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [visible]);
 
   useEffect(() => {
     if (successMessage) {
@@ -44,14 +78,12 @@ export default function AddProductModal({
 
   const handleAdd = () => {
     if (!productName.trim()) return;
-    onAdd(productName, quantityProduct);
+    onAdd(productName, 0);
     setProductName("");
-    setQuantityProduct(0);
   };
 
   const handleClose = () => {
     setProductName("");
-    setQuantityProduct(0);
     setLocalSuccessMessage("");
     onClose();
   };
@@ -59,55 +91,98 @@ export default function AddProductModal({
   if (!visible) return null;
 
   return (
-    <View style={StyleSheet.absoluteFillObject} className="z-50 bg-black/50 justify-center items-center">
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        className="w-full h-full justify-center items-center"
+    <View style={StyleSheet.absoluteFillObject} className="z-50">
+      <Animated.View 
+        className="absolute inset-0 bg-black/60"
+        style={{ opacity: backdropOpacity }}
       >
         <TouchableWithoutFeedback onPress={handleClose}>
-          <View className="bg-neutral-800 p-6 rounded-xl mx-8 w-80">
-            <View className="flex-row justify-between items-center mb-4">
-              <Text className="text-white text-xl font-bold">
-                Agregar Producto
-              </Text>
-              <TouchableOpacity onPress={handleClose} className="p-2">
-                <FontAwesome6 name="times" size={20} color="#737373" />
-              </TouchableOpacity>
-            </View>
+          <View className="flex-1" />
+        </TouchableWithoutFeedback>
+      </Animated.View>
 
-            <CustomField
-              title="Nombre Producto"
-              value={productName}
-              onChangeText={setProductName}
-              otherStyles="mb-4"
-              placeholder="Nombre Producto"
-            />
+      <Animated.View
+        className="absolute bottom-0 left-0 right-0"
+        style={{ transform: [{ translateY: slideAnim }] }}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          className="w-full"
+        >
+          <TouchableWithoutFeedback onPress={() => {}}>
+            <View className="bg-neutral-900 rounded-t-[28px] px-6 pb-8 pt-4 shadow-2xl border-t border-white/10">
+              {/* Drag Indicator */}
+              <View className="items-center mb-6">
+                <View className="w-12 h-1.5 bg-neutral-700 rounded-full" />
+              </View>
 
-            <View className="flex justify-center items-center p-2">
-              {localSuccessMessage ? (
-                <Text className="text-green-600 font-extrabold text-sm">
-                  {localSuccessMessage}
+              {/* Header */}
+              <View className="flex-row justify-between items-center mb-6">
+                <Text className="text-white text-2xl font-bold tracking-tight">
+                  Nuevo Producto
                 </Text>
+                <TouchableOpacity 
+                  onPress={handleClose} 
+                  className="w-10 h-10 rounded-full bg-neutral-800 justify-center items-center"
+                >
+                  <FontAwesome6 name="xmark" size={16} color="#A3A3A3" />
+                </TouchableOpacity>
+              </View>
+
+              {/* Product Name Input */}
+              <View className="mb-6">
+                <Text className="text-neutral-400 text-sm font-medium mb-2 ml-1">
+                  Nombre del producto
+                </Text>
+                <View className="bg-neutral-800/50 rounded-2xl border border-neutral-700/50">
+                  <TextInput
+                    className="text-white text-lg px-4 py-4 font-medium"
+                    value={productName}
+                    onChangeText={setProductName}
+                    placeholder="Ej: Harina, Azúcar, etc."
+                    placeholderTextColor="#525252"
+                    autoCapitalize="words"
+                    autoFocus
+                  />
+                </View>
+              </View>
+
+              {/* Success Message */}
+              {localSuccessMessage && (
+                <View className="mb-4 py-3 px-4 bg-green-500/10 rounded-xl border border-green-500/20">
+                  <Text className="text-green-400 text-center font-medium">
+                    {localSuccessMessage}
+                  </Text>
+                </View>
+              )}
+
+              {/* Add Button */}
+              {isPending ? (
+                <View className="py-4">
+                  <LoadingIndicator />
+                </View>
               ) : (
-                <Text className="">{}</Text>
+                <TouchableOpacity
+                  className={`py-4 rounded-2xl items-center ${
+                    productName.trim() 
+                      ? "bg-amber-500 shadow-lg shadow-amber-500/30" 
+                      : "bg-neutral-700"
+                  }`}
+                  onPress={handleAdd}
+                  disabled={!productName.trim()}
+                  activeOpacity={0.8}
+                >
+                  <Text className={`text-lg font-semibold ${
+                    productName.trim() ? "text-white" : "text-neutral-400"
+                  }`}>
+                    Agregar Producto
+                  </Text>
+                </TouchableOpacity>
               )}
             </View>
-
-            {isPending ? (
-              <View className="py-3">
-                <LoadingIndicator />
-              </View>
-            ) : (
-              <CustomButton
-                containerStyles="w-full"
-                text="Agregar"
-                HandlePress={handleAdd}
-                size="text-base"
-              />
-            )}
-          </View>
-        </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
+      </Animated.View>
     </View>
   );
 }
