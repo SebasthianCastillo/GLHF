@@ -319,7 +319,7 @@ export default function HomeScreen() {
         )}
       </ScrollView>
       {user ? (
-        <View className="flex-1 justify-end items-end p-6">
+        <View className="h-20 justify-end items-end pb-6 pr-6">
           <View className="items-center">
             <TouchableOpacity
               className="w-14 h-14 rounded-full bg-amber-500 shadow-lg shadow-amber-500/30 justify-center items-center"
@@ -334,7 +334,6 @@ export default function HomeScreen() {
           </View>
         </View>
       ) : null}
-      <View className="" />
       <ProfileModal
         showProfileModal={showProfileModal}
         setShowProfileModal={setShowProfileModal}
