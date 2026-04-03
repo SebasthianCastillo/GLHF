@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "889333325797",
+    "project_id": "expocaptainnotification",
+    "storage_bucket": "expocaptainnotification.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:889333325797:android:2045d6bdbc8a1e29f5990c",
+        "android_client_info": {
+          "package_name": "com.sebb21glhf"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "305169218247-e4k2trrdb30kqfmgil2h6gggas0i6sbr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA3xilOhnVevT6MhGyrOfNsJaXRtvu-kFk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "305169218247-e4k2trrdb30kqfmgil2h6gggas0i6sbr.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
