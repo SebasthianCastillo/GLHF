@@ -58,3 +58,7 @@ coverage/
 # Temporary
 *.tmp
 *.temp
+
+# Project specific (sensitive)
+api/.env
+google-services.json
