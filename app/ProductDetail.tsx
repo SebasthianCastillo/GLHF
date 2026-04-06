@@ -29,7 +29,7 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import CalendarPicker from "@/components/ProductDetail/CalendarPicker";
 import { type ProductMovement } from "./api/products";
 import { useProductMovements } from "@/hooks/useProductMovements";
-import { useProductMovementsByMonth } from "@/hooks/useProductMovementsByMonth";
+
 import { useProductMovementsByMonths } from "@/hooks/useProductMovementsByMonths";
 import MonthYearPicker from "@/components/MonthYearPicker/MonthYearPicker";
 import MonthCalendarInline from "@/components/MonthYearPicker/MonthCalendarInline";
@@ -62,14 +62,20 @@ const ProductDetail = () => {
   });
 
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [expandedProducts, setExpandedProducts] = useState<Record<string, boolean>>({});
+  const [expandedProducts, setExpandedProducts] = useState<
+    Record<string, boolean>
+  >({});
   const [showCalendar, setShowCalendar] = useState(false);
-  
+
   // Estados para modo "months" (vista por mes)
-  const [selectedMonthForView, setSelectedMonthForView] = useState<number>(new Date().getMonth());
-  const [selectedYearForView, setSelectedYearForView] = useState<number>(new Date().getFullYear());
+  const [selectedMonthForView, setSelectedMonthForView] = useState<number>(
+    new Date().getMonth(),
+  );
+  const [selectedYearForView, setSelectedYearForView] = useState<number>(
+    new Date().getFullYear(),
+  );
   const [showMonthYearPicker, setShowMonthYearPicker] = useState(false);
-  
+
   // Store para selección de meses
   const { selectedMonths, getDisplayText } = useMonthSelectionStore();
 
@@ -95,16 +101,18 @@ const ProductDetail = () => {
   const month = String(selectedDate.getMonth() + 1).padStart(2, "0");
   const day = String(selectedDate.getDate()).padStart(2, "0");
   const dateStr = `${year}-${month}-${day}`;
-  const { data: productMovements = [], isLoading, refetch: refetchMovements } = useProductMovements(
-    categoryObject.id || "",
-    dateStr
-  );
+  const {
+    data: productMovements = [],
+    isLoading,
+    refetch: refetchMovements,
+  } = useProductMovements(categoryObject.id || "", dateStr);
 
   // React Query para movimientos de productos por meses seleccionados
-  const { data: productMovementsByMonth = [], isLoading: isLoadingMonthly, refetch: refetchMovementsByMonth } = useProductMovementsByMonths(
-    categoryObject.id || "",
-    selectedMonths
-  );
+  const {
+    data: productMovementsByMonth = [],
+    isLoading: isLoadingMonthly,
+    refetch: refetchMovementsByMonth,
+  } = useProductMovementsByMonths(categoryObject.id || "", selectedMonths);
 
   const handlePrevMonth = () => {
     const { month, year } = getPreviousMonth(currentMonth, currentYear);
@@ -338,7 +346,7 @@ const ProductDetail = () => {
             )}
           </View>
         </TouchableOpacity>
-        
+
         {isExpanded && hasMovements && (
           <View className="bg-[#1a1a1a] px-4 pb-4">
             {item.movements.map((movement) => (
@@ -349,7 +357,9 @@ const ProductDetail = () => {
                 <View className="flex-row items-center gap-3">
                   <View
                     className={`w-2 h-2 rounded-full ${
-                      movement.operation === "add" ? "bg-[#2ba640]" : "bg-[#F59E0B]"
+                      movement.operation === "add"
+                        ? "bg-[#2ba640]"
+                        : "bg-[#F59E0B]"
                     }`}
                   />
                   <Text className="text-white text-sm">
@@ -421,7 +431,11 @@ const ProductDetail = () => {
                 >
                   <View className="flex-row items-center flex-1">
                     <View className="w-9 h-9 rounded-[8px] bg-[#ff9500]/15 flex items-center justify-center">
-                      <FontAwesome5 name="calendar-day" size={16} color="#ff9500" />
+                      <FontAwesome5
+                        name="calendar-day"
+                        size={16}
+                        color="#ff9500"
+                      />
                     </View>
                     <Text className="text-white text-[17px] font-medium ml-3">
                       {selectedDate.toLocaleDateString("es-ES", {
@@ -437,7 +451,7 @@ const ProductDetail = () => {
                     color="#636366"
                   />
                 </TouchableOpacity>
-                
+
                 {/* Calendario */}
                 {showCalendar && (
                   <View className="mt-2">
@@ -514,7 +528,11 @@ const ProductDetail = () => {
                 >
                   <View className="flex-row items-center flex-1">
                     <View className="w-9 h-9 rounded-[8px] bg-[#ff9500]/15 flex items-center justify-center">
-                      <FontAwesome5 name="calendar-day" size={16} color="#ff9500" />
+                      <FontAwesome5
+                        name="calendar-day"
+                        size={16}
+                        color="#ff9500"
+                      />
                     </View>
                     <Text className="text-white text-[17px] font-medium ml-3">
                       {getDisplayText()}
