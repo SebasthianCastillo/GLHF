@@ -22,6 +22,7 @@ export interface ExpenseFilters {
   fromDate?: string | null;
   toDate?: string | null;
   categoryId?: string | number | null;
+  expenseCategoryId?: string | number | null;
   status?: "PENDING" | "PAID" | "OVERDUE" | "PARTIAL" | null;
 }
 
@@ -50,7 +51,8 @@ export const createExpense = async (expenseData: {
   amount: number;
   date: string;
   dueDate: string;
-  categoryId: number;
+  categoryId?: number;
+  expenseCategoryId?: number;
   description?: string;
 }) => {
   const token = await AsyncStorage.getItem("token");

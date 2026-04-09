@@ -17,10 +17,11 @@ model User {
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
 
-  authProviders AuthProvider[]
-  settings      UserSettings?
-  categories    Category[]
-  expenses      Expense[]
+  authProviders    AuthProvider[]
+  settings         UserSettings?
+  categories       Category[]
+  expenseCategories ExpenseCategory[]
+  expenses         Expense[]
 }
 
 model AuthProvider {
@@ -95,24 +96,44 @@ model ProductDetail {
   @@index([date])
 }
 
-model Expense {
-  id          Int           @id @default(autoincrement())
-  amount      Float
-  date        DateTime
-  dueDate     DateTime
-  status      ExpenseStatus @default(PENDING)
-  categoryId  Int
-  userId      Int
-  description String?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+model ExpenseCategory {
+  id        Int      @id @default(autoincrement())
+  name      String
+  parentId  Int?
+  userId    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  category    Category  @relation(fields: [categoryId], references: [id])
-  user        User      @relation(fields: [userId], references: [id])
-  payments    Payment[]
+  parent      ExpenseCategory?  @relation("ExpenseCategoryHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children    ExpenseCategory[] @relation("ExpenseCategoryHierarchy")
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expenses    Expense[]
+
+  @@index([userId])
+  @@index([parentId])
+}
+
+model Expense {
+  id                Int            @id @default(autoincrement())
+  amount            Float
+  date              DateTime
+  dueDate           DateTime
+  status            ExpenseStatus  @default(PENDING)
+  categoryId        Int?           // Deprecated: usar expenseCategoryId
+  expenseCategoryId Int?           // Nueva relación a categorías de gastos
+  userId            Int
+  description       String?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  category          Category?        @relation(fields: [categoryId], references: [id])
+  expenseCategory   ExpenseCategory? @relation(fields: [expenseCategoryId], references: [id])
+  user              User              @relation(fields: [userId], references: [id])
+  payments          Payment[]
 
   @@index([userId])
   @@index([categoryId])
+  @@index([expenseCategoryId])
   @@index([status])
   @@index([date])
 }

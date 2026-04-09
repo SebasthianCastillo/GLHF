@@ -17,7 +17,7 @@ router.get(
   requireAuth,
   asyncHandler(async (req, res) => {
     const userId = req.res.user.id;
-    const { fromDate, toDate, categoryId, status } = req.query;
+    const { fromDate, toDate, categoryId, status, expenseCategoryId } = req.query;
 
     const expenses = await prisma.$queryRaw`
       SELECT 
@@ -27,17 +27,20 @@ router.get(
         e."dueDate",
         e.status,
         e."categoryId",
+        e."expenseCategoryId",
         e."userId",
         e.description,
         e."createdAt",
         e."updatedAt",
-        c.name as "categoryName"
+        COALESCE(c.name, ec.name) as "categoryName"
       FROM "Expense" e
       LEFT JOIN "Category" c ON c.id = e."categoryId"
+      LEFT JOIN "ExpenseCategory" ec ON ec.id = e."expenseCategoryId"
       WHERE e."userId" = ${userId}
         AND (${fromDate || null}::TEXT IS NULL OR e.date >= ${fromDate || null}::DATE)
         AND (${toDate || null}::TEXT IS NULL OR e.date <= ${toDate || null}::DATE)
         AND (${categoryId || null}::INTEGER IS NULL OR e."categoryId" = ${categoryId || null}::INTEGER)
+        AND (${expenseCategoryId || null}::INTEGER IS NULL OR e."expenseCategoryId" = ${expenseCategoryId || null}::INTEGER)
         AND (${status || null}::TEXT IS NULL OR e.status = ${status || null}::"ExpenseStatus")
       ORDER BY e.date DESC
     `;
@@ -51,7 +54,7 @@ router.post(
   requireAuth,
   validate(createExpenseSchema),
   asyncHandler(async (req, res) => {
-    const { amount, date, dueDate, categoryId, description, email } = req.body;
+    const { amount, date, dueDate, categoryId, expenseCategoryId, description, email } = req.body;
 
     let userId;
 
@@ -73,7 +76,8 @@ router.post(
       amount,
       date,
       dueDate,
-      categoryId,
+      categoryId: categoryId ? parseInt(categoryId) : null,
+      expenseCategoryId: expenseCategoryId ? parseInt(expenseCategoryId) : null,
       description,
       userId,
     });

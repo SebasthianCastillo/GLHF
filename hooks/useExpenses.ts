@@ -27,7 +27,8 @@ export const useExpenses = () => {
       amount: number;
       date: string;
       dueDate: string;
-      categoryId: number;
+      categoryId?: number;
+      expenseCategoryId?: number;
       description?: string;
     }) => createExpense(data),
     onSuccess: () => {

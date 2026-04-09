@@ -41,6 +41,7 @@ export default function RootLayout() {
         />
         <Stack.Screen name="ExpenseList" options={{ headerShown: false }} />
         <Stack.Screen name="AddExpense" options={{ headerShown: false }} />
+        <Stack.Screen name="ExpenseCategories" options={{ headerShown: false }} />
       </Stack>
     </QueryClientProvider>
   );

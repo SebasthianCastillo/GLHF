@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useExpenses } from "../hooks/useExpenses";
-import { useCategories } from "../hooks/useCategories";
+import { useExpenseCategories } from "../hooks/useExpenseCategories";
 import { Picker } from "@react-native-picker/picker";
 import { Ionicons } from "@expo/vector-icons";
 import RouterBackArrow from "@/components/RouterBackArrow";
@@ -27,15 +27,14 @@ export default function AddExpense() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const { createExpenseAsync, isCreating } = useExpenses();
-  const { getCategory } = useCategories();
+  const { getCategory, categories } = useExpenseCategories();
 
-  const categories = getCategory.data || [];
   const isEditing = !!params.id;
 
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(formatDateForInput(new Date()));
   const [dueDate, setDueDate] = useState(formatDateForInput(new Date()));
-  const [categoryId, setCategoryId] = useState<string>("");
+  const [expenseCategoryId, setExpenseCategoryId] = useState<string>("");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -44,8 +43,8 @@ export default function AddExpense() {
   const [dueDatePickerOpen, setDueDatePickerOpen] = useState(false);
 
   useEffect(() => {
-    if (!categoryId && categories.length > 0) {
-      setCategoryId(String(categories[0].id));
+    if (!expenseCategoryId && categories.length > 0) {
+      setExpenseCategoryId(String(categories[0].id));
     }
   }, [categories]);
 
@@ -55,7 +54,7 @@ export default function AddExpense() {
       return;
     }
 
-    if (!categoryId) {
+    if (!expenseCategoryId) {
       Alert.alert("Error", "Por favor selecciona una categoría");
       return;
     }
@@ -76,7 +75,7 @@ export default function AddExpense() {
         amount: parseFloat(amount),
         date: new Date(date).toISOString(),
         dueDate: new Date(dueDate).toISOString(),
-        categoryId: parseInt(categoryId),
+        expenseCategoryId: parseInt(expenseCategoryId),
         description: description.trim() || undefined,
       });
 
@@ -162,8 +161,8 @@ export default function AddExpense() {
             </Text>
             <View className="bg-[#272727] rounded-xl border border-[#3f3f3f] overflow-hidden">
               <Picker
-                selectedValue={categoryId}
-                onValueChange={(value) => setCategoryId(value)}
+                selectedValue={expenseCategoryId}
+                onValueChange={(value) => setExpenseCategoryId(value)}
                 itemStyle={{ color: "#ffffff" }}
                 style={{ color: "#ffffff", backgroundColor: "transparent" }}
               >

@@ -5,6 +5,7 @@ import productRoutes from './product.routes.mjs';
 import detailRoutes from './detail.routes.mjs';
 import pdfRoutes from './pdf.routes.mjs';
 import expenseRoutes from './expense.routes.mjs';
+import expenseCategoryRoutes from './expense-category.routes.mjs';
 
 export const registerRoutes = (app) => {
   app.use(authRoutes);
@@ -14,4 +15,5 @@ export const registerRoutes = (app) => {
   app.use(detailRoutes);
   app.use(pdfRoutes);
   app.use(expenseRoutes);
+  app.use('/expense-categories', expenseCategoryRoutes);
 };

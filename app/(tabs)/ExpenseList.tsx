@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useExpenses } from "../../hooks/useExpenses";
+import { useExpenseCategories } from "../../hooks/useExpenseCategories";
 import { useExpenseStore } from "../../store/useExpenseStore";
 import { Expense } from "../api/expenses";
 import { Ionicons } from "@expo/vector-icons";
@@ -20,6 +21,7 @@ import { ExpenseFilterModal } from "../../components/ExpenseFilterModal";
 import PayExpenseModal from "../../components/PayExpenseModal";
 import RouterBackArrow from "../../components/RouterBackArrow";
 import InfoModal from "../../components/InfoModal";
+import SearchBar from "../../components/SearchBar";
 
 const STATUS_COLORS = {
   PENDING: "#FFA500",
@@ -52,12 +54,26 @@ export default function ExpenseList() {
     payExpenseAsync,
     isPaying,
   } = useExpenses();
+  const { categories } = useExpenseCategories();
   const { filters, setFilters } = useExpenseStore();
   const [showFilters, setShowFilters] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [showPayModal, setShowPayModal] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
+
+  // Search/filter state
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Filtered expenses based on search query
+  const filteredExpenses = (expenses ?? []).filter((expense: Expense) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      (expense.categoryName || "").toLowerCase().includes(query) ||
+      (expense.description || "").toLowerCase().includes(query) ||
+      expense.amount.toString().includes(query)
+    );
+  });
 
   const handlePayExpense = (expense: Expense) => {
     setSelectedExpense(expense);
@@ -163,11 +179,12 @@ export default function ExpenseList() {
             <Text className="text-white text-xl font-bold">Gastos</Text>
           </View>
           <View className="flex-row items-center gap-3">
+            <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
             <TouchableOpacity
               className="p-2 bg-[#272727] rounded-lg"
-              onPress={() => setShowInfo(true)}
+              onPress={() => router.push("/ExpenseCategories" as any)}
             >
-              <Ionicons name="help-circle-outline" size={20} color="#aaaaaa" />
+              <Ionicons name="folder-outline" size={20} color="#aaaaaa" />
             </TouchableOpacity>
             <TouchableOpacity
               className="p-2 bg-[#272727] rounded-lg"
@@ -194,9 +211,9 @@ export default function ExpenseList() {
         </View>
       )}
 
-      {expenses && expenses.length > 0 ? (
+      {filteredExpenses && filteredExpenses.length > 0 ? (
         <FlatList
-          data={expenses}
+          data={filteredExpenses}
           renderItem={renderExpenseItem}
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={{ paddingVertical: 0 }}
@@ -232,6 +249,7 @@ export default function ExpenseList() {
         filters={filters}
         setFilters={setFilters}
         onClose={() => setShowFilters(false)}
+        categories={categories}
       />
 
       <PayExpenseModal
